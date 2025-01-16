@@ -8,4 +8,5 @@ Key features include:
 - **High Performance**: Optimized for resource-intensive scenarios without compromising speed.  
 - **Extensibility**: Easily adaptable to fit diverse project needs.  
 
-By eliminating macros and focusing on modern design principles, the **Core Testament Framework** delivers a robust testing solution that integrates seamlessly into any development workflow.  
+By eliminating macros and focusing on modern design principles, the **Core Testament Framework** delivers a robust testing solution that integrates seamlessly into any development workflow.
+ 
