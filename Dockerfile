@@ -83,9 +83,9 @@ RUN apt-get update && \
         texinfo \
         && \
     cd /tmp && \
-    wget https://gcc.gnu.org/pub/gcc/snapshots/LATEST-15/gcc-15-20250112.tar.xz && \
-    tar -xf gcc-15-20250112.tar.xz && \
-    cd gcc-15-20250112 && \
+    wget https://gcc.gnu.org/pub/gcc/snapshots/LATEST-15/gcc-15-20250126.tar.xz && \
+    tar -xf gcc-15-20250126.tar.xz && \
+    cd gcc-15-20250126 && \
     ./contrib/download_prerequisites && \
     mkdir build && \
     cd build && \

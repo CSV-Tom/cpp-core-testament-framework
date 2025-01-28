@@ -7,30 +7,23 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 
-add_library(CoreTestamentFramework STATIC)
+add_library(${PROJECT_NAME} STATIC)
 
-#target_include_directories(CoreTestamentFramework PUBLIC include)
-
-target_sources(CoreTestamentFramework
-  PUBLIC FILE_SET CXX_MODULES FILES
-
-    BASE_DIRS
-      ${PROJECT_SOURCE_DIR}
-    FILES
-      src/core/Core.ixx
-      src/core/ExecutionTimer.ixx
-      src/core/ExecutionTimer:Impl.cxx
-	    src/core/TestStatistics.ixx
-	    src/core/SmallTest.ixx
-  PRIVATE
-   	#src/core/ExecutionTimer.cxx
-    src/core/ExecutionTimer.impl.cxx
-	  src/core/TestStatistics.cxx
+target_sources(
+        ${PROJECT_NAME}
+    PRIVATE
+        src/core/Registry.cpp
+        src/core/Runner.cpp
+        src/core/Suite.cpp
+        src/core/Test.cpp
+    PUBLIC
+FILE_SET HEADERS
+        BASE_DIRS include
 )
 
 
 
-target_compile_options(CoreTestamentFramework PRIVATE
+target_compile_options(${PROJECT_NAME} PRIVATE
     -Wall
     -Wextra
     -Wpedantic

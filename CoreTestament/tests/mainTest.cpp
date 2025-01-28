@@ -1,53 +1,8 @@
-//#include <iostream>
-//#include <string>
-//import <string>;
+#include "Testament/Testament.hpp"
 
-//import foo;
-/*
-int main(int argc, char** argv)
-{
-  foo f;
-  f.helloworld();
-  return 0;
-}*/
+int main(int argc, char** argv) {
 
-
-#include <iostream>
-#include <thread>
-
-// Importiere das Modul
-import TestFramework.ExecutionTimer;
-
-int main() {
-
-
-    try {
-        // Erstelle eine Instanz von ExecutionTimer
-        ExecutionTimer timer;
-
-        // Starte den Timer
-        timer.start();
-        std::cout << "Timer gestartet..." << std::endl;
-
-        // Simulierte Arbeit
-        std::this_thread::sleep_for(std::chrono::seconds(2));
-
-        // Stoppe den Timer
-        timer.stop();
-        std::cout << "Timer gestoppt." << std::endl;
-
-        // Dauer ausgeben
-        auto duration = timer.getDuration();
-        std::cout << "Verstrichene Zeit: " << duration.count() << " Sekunden." << std::endl;
-
-        // Timer zurücksetzen
-        timer.reset();
-        std::cout << "Timer zurückgesetzt." << std::endl;
-    } catch (const std::exception& ex) {
-        std::cerr << "Fehler: " << ex.what() << std::endl;
-    }
-
-    return 0;
+    return Testament::Runner::run(argc, argv);
 }
 
 
