@@ -12,10 +12,14 @@ add_library(${PROJECT_NAME} STATIC)
 target_sources(
         ${PROJECT_NAME}
     PRIVATE
-        src/core/Registry.cpp
+        src/core/Internal/InternalTest.cpp
+        src/core/Internal/InternalSuite.cpp
+        src/core/Internal/InternalRegistry.cpp        
         src/core/Runner.cpp
         src/core/Suite.cpp
         src/core/Test.cpp
+
+        
     PUBLIC
 FILE_SET HEADERS
         BASE_DIRS include

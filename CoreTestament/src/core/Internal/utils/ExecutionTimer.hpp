@@ -1,0 +1,57 @@
+#ifndef TESTFRAMEWORK_TESTAMENT_EXECUTIONTIMER_HPP
+#define TESTFRAMEWORK_TESTAMENT_EXECUTIONTIMER_HPP
+
+#include <chrono>
+#include <stdexcept>
+
+namespace Testament {
+
+class ExecutionTimer {
+private:
+    std::chrono::high_resolution_clock::time_point startTime;
+    std::chrono::high_resolution_clock::time_point endTime;
+    std::chrono::duration<double> accumulatedDuration{0};
+
+public:
+    void start() {
+        startTime = std::chrono::high_resolution_clock::now();
+    }
+
+    void stop() {
+        endTime = std::chrono::high_resolution_clock::now();
+        accumulatedDuration += (endTime - startTime);
+    }
+
+    std::chrono::duration<double> getDuration() const {
+        if (startTime == std::chrono::high_resolution_clock::time_point{}) {
+            throw std::logic_error("Timer was not started before querying elapsed time!");
+        }
+        if (endTime == std::chrono::high_resolution_clock::time_point{}) {
+            return accumulatedDuration + (std::chrono::high_resolution_clock::now() - startTime);
+        }
+        return accumulatedDuration;
+    }
+
+    void reset() {
+        startTime = std::chrono::high_resolution_clock::time_point{};
+        endTime = std::chrono::high_resolution_clock::time_point{};
+        accumulatedDuration = std::chrono::duration<double>::zero();
+    }
+
+    // Operator+, um zwei Timer-Zeiten zu addieren
+    ExecutionTimer operator+(const ExecutionTimer& other) const {
+        ExecutionTimer result;
+        result.accumulatedDuration = this->accumulatedDuration + other.accumulatedDuration;
+        return result;
+    }
+
+    // Operator+= für einfaches Akkumulieren von Zeiten
+    ExecutionTimer& operator+=(const ExecutionTimer& other) {
+        this->accumulatedDuration += other.accumulatedDuration;
+        return *this;
+    }
+};
+
+}
+
+#endif

@@ -1,7 +1,6 @@
 #ifndef TESTFRAMEWORK_TESTAMENT_HPP
 #define TESTFRAMEWORK_TESTAMENT_HPP
 
-#include "Testament/Registry.hpp"
 #include "Testament/Runner.hpp"
 #include "Testament/Suite.hpp"
 #include "Testament/Test.hpp"
@@ -13,23 +12,33 @@ namespace Testament {
 template <typename Callable>
 requires std::invocable<Callable>
 std::shared_ptr<Test> makeTest(const std::string& name, Callable&& testFunction) {
-    return Registry::registerTest(name, FunctionVariant{std::function<void()>(std::forward<Callable>(testFunction))});
+    return Test::create(name, FunctionVariant{std::function<void()>(std::forward<Callable>(testFunction))});
+}
+
+template <typename SuiteType, typename Callable>
+requires std::derived_from<SuiteType, Suite> && std::invocable<Callable, SuiteType&>
+std::shared_ptr<Test> makeTest(const std::string& name, Callable&& testFunction) {
+    return Test::create(name, FunctionVariant{
+        [testFunction = std::forward<Callable>(testFunction)](Suite& suite) {
+            testFunction(static_cast<SuiteType&>(suite)); // Explizite Umwandlung zu Suite
+        }
+    });
 }
 
 template <typename... Tests>
 requires (std::same_as<std::remove_cvref_t<Tests>, std::shared_ptr<Test>> && ...)
-std::shared_ptr<Suite> makeSuite(const std::string& name, Tests&&... cases) {
-    auto suite = std::make_shared<Suite>(name);
+std::shared_ptr<Suite> makeSuite(const std::string& name, Tests&&... cases) {    
+    auto suite = Suite::create(name);
     (suite->addTest(std::forward<Tests>(cases)), ...);    
-    return Registry::registerSuite(suite);
+    return suite;
 }
 
 template <typename T, typename... Tests>
-requires (std::derived_from<T, Suite> && (std::same_as<std::remove_cvref_t<Tests>, std::shared_ptr<Test>> && ...))
+requires (std::derived_from<T, LifecycleSuite> && (std::same_as<std::remove_cvref_t<Tests>, std::shared_ptr<Test>> && ...))
 std::shared_ptr<T> makeSuite(const std::string& name, Tests&&... cases) {
-    auto suite = std::make_shared<T>(name);
+    auto suite = LifecycleSuite::create(name, std::make_shared<T>());    
     (suite->addTest(std::forward<Tests>(cases)), ...);
-    return Registry::registerSuite(suite);
+    return std::static_pointer_cast<T>(suite);    
 }
 
 }

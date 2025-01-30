@@ -86,5 +86,5 @@ private:
     std::vector<std::shared_ptr<TestEventHandler>> globalEventHandlers;
     TestStatistics<unsigned int> statistics;
    //EventDispatcher dispatcher;
-   FilterEventDispatcher dispatcher;
+    FilterEventDispatcher dispatcher;
 };

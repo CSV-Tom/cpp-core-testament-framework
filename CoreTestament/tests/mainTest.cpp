@@ -1,6 +1,46 @@
 #include "Testament/Testament.hpp"
 
+#include <iostream>
+
+class MyCustomSuite : public Testament::LifecycleSuite {
+public:
+    void beforeAll() override {
+        std::cout << "Setup before all tests (counter: " << ++counter << ")" << std::endl;
+    }
+
+    void beforeEach() override {
+        std::cout << "Setup before each test (counter: " << ++counter << ")" << std::endl;
+    }
+
+    void afterEach() override {
+        std::cout << "Cleanup after each test (counter: " << ++counter << ")" << std::endl;
+    }
+
+    void afterAll() override {
+        std::cout << "Cleanup after all tests (counter: " << ++counter << ")" << std::endl;
+    }
+private:
+    int counter = 0;    
+};
+
+
 int main(int argc, char** argv) {
+    
+    auto test1 = Testament::makeTest<MyCustomSuite>("Test 1", [] (MyCustomSuite& suite) { std::cout << "Running Test 1\n"; });
+    auto test2 = Testament::makeTest<MyCustomSuite>("Test 2", [] (MyCustomSuite& suite) { std::cout << "Running Test 2\n"; });
+
+    auto suite1 = Testament::makeSuite<MyCustomSuite>("My Custom Suite", test1, test2);
+
+    auto suite2 = Testament::makeSuite("My Custom Suite", 
+        Testament::makeTest("Test 3", [] () -> void { std::cout << "Running Test 3\n"; }), 
+        Testament::makeTest("Test 4", [] () { std::cout << "Running Test 4\n"; })
+    );
+
+    /*struct NotASuite {}; 
+    auto suite3 = Testament::makeSuite<NotASuite>("My Custom Suite", 
+        Testament::makeTest("Test 3", [] (NotASuite& notSuite) -> void { std::cout << "Running Test 3\n"; })
+    );*/
+
 
     return Testament::Runner::run(argc, argv);
 }

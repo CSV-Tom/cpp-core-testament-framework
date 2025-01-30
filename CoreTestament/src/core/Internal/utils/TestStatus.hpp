@@ -1,3 +1,8 @@
+#ifndef TESTFRAMEWORK_TESTAMENT_TESTSTATUS_HPP
+#define TESTFRAMEWORK_TESTAMENT_TESTSTATUS_HPP
+
+namespace Testament {
+
 class TestStatus {
 public:
     enum class Status {
@@ -53,3 +58,7 @@ public:
         return currentStatus == Status::Failed;
     }
 };
+
+}
+
+#endif

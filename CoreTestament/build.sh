@@ -11,6 +11,8 @@ pushd "$dir" > /dev/null || exit 2
 
 rm -rf build/ && mkdir -p build/ && cd build && cmake -GNinja -DCMAKE_TOOLCHAIN_FILE=../toolchains/clang19-toolchain-modules.cmake .. && ninja -v -j $(nproc)
 
+./TestRunner
+#find . -name "TestRunner"
 # Work g++-15
 #rm -rf build/ && mkdir -p build/ && cd build && cmake -GNinja -DCMAKE_TOOLCHAIN_FILE=../toolchains/gcc15-toolchain-modules.cmake .. && ninja -v -j $(nproc)
 

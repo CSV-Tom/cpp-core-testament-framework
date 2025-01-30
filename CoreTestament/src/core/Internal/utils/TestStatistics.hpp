@@ -1,3 +1,8 @@
+#ifndef TESTFRAMEWORK_TESTAMENT_TESTSTATISTICS_HPP
+#define TESTFRAMEWORK_TESTAMENT_TESTSTATISTICS_HPP
+
+namespace Testament {
+
 template <typename CounterType = unsigned int>
 class TestStatistics {
 public:
@@ -62,3 +67,7 @@ private:
     CounterType failedTests;
     CounterType successfulTests;
 };
+
+}
+
+#endif

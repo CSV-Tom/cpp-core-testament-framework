@@ -1,8 +1,16 @@
-#include "TestImpl.hpp"
+#include "Testament/Test.hpp"
+
+#include "Internal/InternalTest.hpp"
 
 namespace Testament {
 
-Test::Test(const std::string& name, FunctionVariant function) : pImpl(std::make_unique<Impl>(name, std::move(function))) {}
+std::shared_ptr<Test> Test::create(const std::string& name, FunctionVariant function) {    
+    return std::make_shared<InternalTest>(name, std::move(function));
+}
+
 Test::~Test() = default;
+Test::Test(Test&&) noexcept = default;
+Test& Test::operator=(Test&&) noexcept = default;
+Test::Test() = default;
 
 }
