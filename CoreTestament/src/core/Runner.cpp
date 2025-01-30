@@ -3,7 +3,8 @@
 #include "Internal/InternalRegistry.hpp"
 namespace Testament {
 
-int Runner::run(int argc, char** argv) {
+int Runner::run(int argc, char** argv)
+{
 
     auto& registry = InternalRegistry::getInstance();
     for (auto& suite : registry.getAllSuites()) {

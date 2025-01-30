@@ -4,7 +4,8 @@
 
 namespace Testament {
 
-std::shared_ptr<Test> Test::create(const std::string& name, FunctionVariant function) {    
+std::shared_ptr<Test> Test::create(const std::string& name, FunctionVariant function)
+{
     return std::make_shared<InternalTest>(name, std::move(function));
 }
 
