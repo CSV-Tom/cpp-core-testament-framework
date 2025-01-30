@@ -2,6 +2,7 @@
 #include <sstream>
 #include <source_location>
 
+namespace Testament {
 namespace Asserts {
     void assertTrue(bool condition, const std::string_view& message,
                     const std::source_location location = std::source_location::current()) {
@@ -57,4 +58,5 @@ namespace Asserts {
             throw std::logic_error(oss.str());
         }
     }
+}
 }

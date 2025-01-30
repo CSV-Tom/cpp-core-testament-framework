@@ -3,11 +3,32 @@
 
 #include "Testament/Runner.hpp"
 #include "Testament/Suite.hpp"
+#include "Testament/LifecyleSuite.hpp"
 #include "Testament/Test.hpp"
+#include "Testament/Asserts.hpp"
 
 #include <concepts>
 
 namespace Testament {
+
+
+template <typename... Tests>
+requires (std::same_as<std::remove_cvref_t<Tests>, std::shared_ptr<Test>> && ...)
+std::shared_ptr<Suite> makeSuite(const std::string& name, Tests&&... cases) {    
+    auto suite = Suite::create(name);
+    (suite->addTest(std::forward<Tests>(cases)), ...);    
+    return suite;
+}
+
+
+template <typename T, typename... Tests>
+requires (std::derived_from<T, LifecycleSuite> && (std::same_as<std::remove_cvref_t<Tests>, std::shared_ptr<Test>> && ...))
+std::shared_ptr<T> makeSuite(const std::string& name, Tests&&... cases) {
+    auto suite = LifecycleSuite::create(name, std::make_shared<T>());    
+    (suite->addTest(std::forward<Tests>(cases)), ...);
+    return std::static_pointer_cast<T>(suite);    
+}
+
 
 template <typename Callable>
 requires std::invocable<Callable>
@@ -25,20 +46,28 @@ std::shared_ptr<Test> makeTest(const std::string& name, Callable&& testFunction)
     });
 }
 
-template <typename... Tests>
-requires (std::same_as<std::remove_cvref_t<Tests>, std::shared_ptr<Test>> && ...)
-std::shared_ptr<Suite> makeSuite(const std::string& name, Tests&&... cases) {    
-    auto suite = Suite::create(name);
-    (suite->addTest(std::forward<Tests>(cases)), ...);    
-    return suite;
+template <typename Callable, typename... Args>
+requires std::invocable<Callable, Args...>
+std::shared_ptr<Test> makeParameterizedTest(const std::string& name, Callable&& testFunction, std::vector<std::tuple<Args...>> parameters) {
+    return Test::create(name, FunctionVariant{[testFunction = std::forward<Callable>(testFunction), parameters]() {
+        for (const auto& params : parameters) {
+            std::apply(testFunction, params); 
+        }
+    }});
 }
 
-template <typename T, typename... Tests>
-requires (std::derived_from<T, LifecycleSuite> && (std::same_as<std::remove_cvref_t<Tests>, std::shared_ptr<Test>> && ...))
-std::shared_ptr<T> makeSuite(const std::string& name, Tests&&... cases) {
-    auto suite = LifecycleSuite::create(name, std::make_shared<T>());    
-    (suite->addTest(std::forward<Tests>(cases)), ...);
-    return std::static_pointer_cast<T>(suite);    
+template <typename Suite, typename Callable, typename... Args>
+requires std::invocable<Callable, Suite&, Args...>
+std::shared_ptr<Test> makeParameterizedTest(const std::string& name, Callable&& testFunction, std::vector<std::tuple<Args...>> parameters) {
+    return Test::create(name, FunctionVariant{
+        [testFunction = std::forward<Callable>(testFunction), parameters](Suite& suite) {
+            for (const auto& params : parameters) {
+                std::apply([&suite, &testFunction](Args... args) {
+                    testFunction(suite, args...); // Parameter entpacken und Funktion ausführen
+                }, params);
+            }
+        }
+    });
 }
 
 }

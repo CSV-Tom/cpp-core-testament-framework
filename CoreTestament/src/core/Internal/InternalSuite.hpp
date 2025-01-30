@@ -24,6 +24,7 @@ public:
     using TestFilter = std::function<bool(const std::string&)>;
     
     explicit InternalSuite(const std::string& name);
+    explicit InternalSuite(const std::string& name, std::shared_ptr<Suite> suite);
     ~InternalSuite();
 
     void addTest(const std::shared_ptr<Test>& test) override;
@@ -40,7 +41,7 @@ public:
     
 
     const std::string& getName() const;
-    const TestStatistics<unsigned int>& getTestStatistics() const;
+    const TestStatistics<unsigned int>& getStatistics() const;
     const ExecutionTimer& getTotalTimer() const;
 private:
     TestStatistics<unsigned int> statistic;
@@ -55,6 +56,8 @@ private:
     HookManager hookManager;
     TestManager testManager;
     TestFilter testFilter = nullptr;
+
+    std::shared_ptr<Suite> suite = nullptr;
 };
 
 }

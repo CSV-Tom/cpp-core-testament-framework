@@ -18,7 +18,7 @@ namespace Testament {
 class TestManager {
 public:
 
-    TestManager(ExecutionTimer& timer) : testTimer(timer) {}
+    TestManager(ExecutionTimer& timer, TestStatistics<unsigned int>& statistic) : testTimer(timer), statistic(statistic) {}
 
     void executeTest(Suite& suite, std::shared_ptr<InternalTest>& test) {
         testTimer.start();
@@ -30,7 +30,7 @@ public:
 
 private:
     ExecutionTimer& testTimer;
-    TestStatistics<unsigned int> statistic;
+    TestStatistics<unsigned int>& statistic;
 
     void processResult(std::shared_ptr<InternalTest>& test, const std::variant<std::monostate, std::exception_ptr>& result) {
         

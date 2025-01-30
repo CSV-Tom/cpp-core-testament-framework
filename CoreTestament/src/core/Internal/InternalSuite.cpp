@@ -7,17 +7,18 @@
 
 namespace Testament {
 
-InternalSuite::InternalSuite(const std::string& name) : name(name), hookManager(hookTimer), testManager(testTimer) {
+InternalSuite::InternalSuite(const std::string& name) : name(name), hookManager(hookTimer), testManager(testTimer, statistic) {
     if (name.empty()) {
         throw std::logic_error("Suite name cannot be empty!");
     }                
 }
 
+InternalSuite::InternalSuite(const std::string& name, std::shared_ptr<Suite> suite) : name(name), hookManager(hookTimer), testManager(testTimer, statistic) , suite(std::move(suite)) {}
 InternalSuite::~InternalSuite() = default;
 
 
 void InternalSuite::addTest(const std::shared_ptr<Test>& test) {
-    std::cout << "Adding test of type: " << typeid(test.get()).name() << std::endl;
+    //std::cout << "Adding test of type: " << typeid(test.get()).name() << std::endl;
     auto internalTest = std::dynamic_pointer_cast<InternalTest>(test);
     if (!internalTest) {
         throw std::logic_error("The provided test is not of type InternalTest");
@@ -40,7 +41,7 @@ void InternalSuite::run() {
         return !testFilter || testFilter(test->getName()); // Falls kein Filter gesetzt ist, alle Tests ausführen
     })) {
         hookManager.invokeBeforeEachHook();
-        testManager.executeTest(*this, test);        
+        testManager.executeTest(*suite, test);        
         hookManager.invokeAfterEachHook();
     }
 
@@ -55,7 +56,7 @@ const std::string& InternalSuite::getName() const {
     return name;
 }
 
-const TestStatistics<unsigned int>& InternalSuite::getTestStatistics() const {
+const TestStatistics<unsigned int>& InternalSuite::getStatistics() const {
     return statistic;
 }
 

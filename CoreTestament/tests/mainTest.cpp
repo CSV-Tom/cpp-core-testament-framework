@@ -19,14 +19,13 @@ public:
     void afterAll() override {
         std::cout << "Cleanup after all tests (counter: " << ++counter << ")" << std::endl;
     }
-private:
     int counter = 0;    
 };
 
 
 int main(int argc, char** argv) {
     
-    auto test1 = Testament::makeTest<MyCustomSuite>("Test 1", [] (MyCustomSuite& suite) { std::cout << "Running Test 1\n"; });
+    auto test1 = Testament::makeTest<MyCustomSuite>("Test 1", [] (MyCustomSuite& suite) { std::cout << "Running Test 1\n"; suite.counter+=10; });
     auto test2 = Testament::makeTest<MyCustomSuite>("Test 2", [] (MyCustomSuite& suite) { std::cout << "Running Test 2\n"; });
 
     auto suite1 = Testament::makeSuite<MyCustomSuite>("My Custom Suite", test1, test2);
@@ -41,6 +40,12 @@ int main(int argc, char** argv) {
         Testament::makeTest("Test 3", [] (NotASuite& notSuite) -> void { std::cout << "Running Test 3\n"; })
     );*/
 
+    // ❌ Compiler-Fehler: Typ ist keine LifecycleSuite
+    //struct NotASuite {}; 
+    // auto invalidSuite = makeSuite<NotASuite>("Invalid Suite", test1, test2);
+
+    // ❌ Compiler-Fehler: Test ist kein `std::shared_ptr<Test>`
+    // auto invalidSuite2 = Testament::makeSuite<MyCustomSuite>("Invalid Suite", 42, test2);
 
     return Testament::Runner::run(argc, argv);
 }
