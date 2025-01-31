@@ -45,6 +45,9 @@ add_executable(TestRunner)
 
 target_sources(TestRunner
     PRIVATE
+        tests/Tests/LifecycleSuiteValidation.cpp
+        tests/Tests/ParameterizedSuiteValidation.cpp
+        tests/Tests/SuiteValidation.cpp
         tests/mainTest.cpp
 )
 

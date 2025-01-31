@@ -1,3 +1,7 @@
+#ifndef TESTFRAMEWORK_TESTAMENT_ASSERTS_HPP
+#define TESTFRAMEWORK_TESTAMENT_ASSERTS_HPP
+/*
+#include <string_view>	
 #include <stdexcept>
 #include <sstream>
 #include <source_location>
@@ -58,5 +62,8 @@ namespace Asserts {
             throw std::logic_error(oss.str());
         }
     }
+    
 }
 }
+*/
+#endif

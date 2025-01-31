@@ -25,7 +25,7 @@ public:
     
     explicit InternalSuite(const std::string& name);
     explicit InternalSuite(const std::string& name, std::shared_ptr<Suite> suite);
-    ~InternalSuite();
+    ~InternalSuite() override;
 
     void addTest(const std::shared_ptr<Test>& test) override;
 

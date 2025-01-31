@@ -1,11 +1,11 @@
 #ifndef TESTFRAMEWORK_TESTAMENT_HPP
 #define TESTFRAMEWORK_TESTAMENT_HPP
 
+#include "Testament/Asserts.hpp"
 #include "Testament/Runner.hpp"
 #include "Testament/Suite.hpp"
 #include "Testament/LifecyleSuite.hpp"
 #include "Testament/Test.hpp"
-#include "Testament/Asserts.hpp"
 
 #include <concepts>
 
