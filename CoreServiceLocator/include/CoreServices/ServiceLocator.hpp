@@ -1,13 +1,8 @@
 #ifndef CORE_SERVICELOCATOR_HPP
 #define CORE_SERVICELOCATOR_HPP
 
-#include <unordered_map>
 #include <memory>
-#include <mutex>
-#include <stdexcept>
 #include <typeindex>
-#include <type_traits>
-
 /**
  * @brief Base interface for all services.
  */
@@ -40,12 +35,12 @@ public:
  */
 class ServiceLocator {
 private:
-    std::unordered_map<std::type_index, std::shared_ptr<IService>> services;
-    mutable std::mutex mutex;
+    class Impl; 
+    std::unique_ptr<Impl> pImpl;
 
     void registerServiceImpl(std::type_index typeIndex, std::shared_ptr<IService> service);
     void unregisterServiceImpl(std::type_index typeIndex);
-    [[nodiscard]] std::shared_ptr<IService> getServiceImpl(std::type_index typeIndex) const;
+   [[nodiscard]] std::shared_ptr<IService> getServiceImpl(std::type_index typeIndex) const;
 
 public:
     ServiceLocator();
