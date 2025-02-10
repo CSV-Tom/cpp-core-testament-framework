@@ -15,11 +15,11 @@ add_library(${PROJECT_NAME})
 
 
 target_sources(${PROJECT_NAME}
-    PRIVATE 
+    PRIVATE
         src/ServiceLocator.cpp
     PUBLIC FILE_SET HEADERS
         BASE_DIRS include
-        PATTERN *.hpp 
+        PATTERN *.hpp
 )
 
 
@@ -28,7 +28,7 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>    # Use source directory during build
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>  # Use install directory when installed
-    PRIVATE 
+    PRIVATE
         src
 )
 
