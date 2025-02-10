@@ -3,10 +3,12 @@
 
 #include "CoreServices/ServiceLocator.hpp"
 
+namespace Core::Services {
+
 template<typename T>
 void ServiceLocator::registerService(std::shared_ptr<T> service) {
     static_assert(std::is_base_of_v<IService, T>, "T must inherit from IService");
-    registerServiceImpl(service->getTypeIndex(), std::move(service));
+    registerServiceImpl(std::type_index(typeid(T)), std::move(service));
 }
 
 template<typename T>
@@ -19,4 +21,6 @@ template<typename T>
     return std::static_pointer_cast<T>(getServiceImpl(std::type_index(typeid(T))));
 }
 
-#endif 
+}
+
+#endif

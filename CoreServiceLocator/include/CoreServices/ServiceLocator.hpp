@@ -2,8 +2,10 @@
 #define CORE_SERVICELOCATOR_HPP
 
 #include <memory>
-#include <stdexcept>
 #include <typeindex>
+
+namespace Core::Services {
+
 
 class IService {
 public:
@@ -33,11 +35,11 @@ public:
     ServiceLocator();
     ~ServiceLocator();
 
-    ServiceLocator(const ServiceLocator&) = delete;
-    ServiceLocator& operator=(const ServiceLocator&) = delete;
-
     ServiceLocator(ServiceLocator&& other) noexcept;
     ServiceLocator& operator=(ServiceLocator&& other) noexcept;    
+
+    ServiceLocator(const ServiceLocator&) = delete;
+    ServiceLocator& operator=(const ServiceLocator&) = delete;
 
 private:
     void registerServiceImpl(std::type_index typeIndex, std::shared_ptr<IService> service);
@@ -46,8 +48,9 @@ private:
 
     class Impl;
     std::unique_ptr<Impl> pImpl;
-
 };
+
+}
 
 #include "ServiceLocator.tpp"
 

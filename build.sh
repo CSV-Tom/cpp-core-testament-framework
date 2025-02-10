@@ -9,7 +9,7 @@ pushd "$dir" > /dev/null || exit 2
 #mkdir -p build/ && cd build && cmake .. && make -j
 
 
-rm -rf build/ && mkdir -p build/ && cd build && cmake -GNinja -DBUILD_TESTING=ON -DCMAKE_INSTALL_PREFIX=deploy -DCMAKE_TOOLCHAIN_FILE=toolchains/clang-toolchain.cmake .. && ninja -v -j $(nproc) install && ctest --output-on-failure -j $(nproc)
+rm -rf build/ && mkdir -p build/ && cd build && cmake -GNinja -DBUILD_TESTING=ON -DCMAKE_INSTALL_PREFIX=deploy -DCMAKE_TOOLCHAIN_FILE=toolchains/clang-toolchain.cmake .. && ninja -v -j $(nproc) install && ctest --verbose --output-on-failure -j $(nproc)
 
 # MODULES DO NOT WORK CORRECTLY WITH g++-14 
 #rm -rf build/ && mkdir -p build/ && cd build && cmake -GNinja -DCMAKE_TOOLCHAIN_FILE=toolchains/gcc14-toolchain.cmake .. && ninja -v -j $(nproc)

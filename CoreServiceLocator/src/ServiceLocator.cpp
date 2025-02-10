@@ -3,31 +3,33 @@
 #include <unordered_map>
 #include <memory>
 #include <mutex>
+#include <shared_mutex>
+
+namespace Core::Services {
 
 class ServiceLocator::Impl {
 private:
     std::unordered_map<std::type_index, std::shared_ptr<IService>> services;
-    mutable std::mutex mutex;
+    mutable std::shared_mutex mutex; // Ermöglicht paralleles Lesen
 
 public:
     void registerServiceImpl(std::type_index typeIndex, std::shared_ptr<IService> service) {
-        std::scoped_lock lock(mutex);
-        if (services.contains(typeIndex)) {
+        std::unique_lock lock(mutex); // Exklusive Sperre für Schreibzugriff
+        auto [it, inserted] = services.try_emplace(typeIndex, service);
+        if (!inserted) {
             throw std::runtime_error("Service already registered");
         }
-        services[typeIndex] = std::move(service);
     }
 
     void unregisterServiceImpl(std::type_index typeIndex) {
-        std::scoped_lock lock(mutex);
-        if (!services.contains(typeIndex)) {
+        std::unique_lock lock(mutex); // Exklusive Sperre für Schreibzugriff
+        if (services.erase(typeIndex) == 0) {
             throw std::runtime_error("Service not registered");
         }
-        services.erase(typeIndex);
     }
 
     [[nodiscard]] std::shared_ptr<IService> getServiceImpl(std::type_index typeIndex) const {
-        std::scoped_lock lock(mutex);
+        std::shared_lock lock(mutex); // Shared Lock: Ermöglicht paralleles Lesen
         auto it = services.find(typeIndex);
         if (it == services.end()) {
             throw std::runtime_error("Service not found");
@@ -35,6 +37,7 @@ public:
         return it->second;
     }
 };
+
 
 void ServiceLocator::registerServiceImpl(std::type_index typeIndex, std::shared_ptr<IService> service) {
     pImpl->registerServiceImpl(typeIndex, std::move(service));
@@ -48,12 +51,10 @@ void ServiceLocator::unregisterServiceImpl(std::type_index typeIndex) {
     return pImpl->getServiceImpl(typeIndex);
 }
 
+
+ServiceLocator::ServiceLocator(ServiceLocator&& other) noexcept = default;
+ServiceLocator& ServiceLocator::operator=(ServiceLocator&& other) noexcept = default;
 ServiceLocator::ServiceLocator() : pImpl(std::make_unique<Impl>()) {}
 ServiceLocator::~ServiceLocator() = default;
-ServiceLocator::ServiceLocator(ServiceLocator&& other) noexcept : pImpl(std::move(other.pImpl)) {}
-ServiceLocator& ServiceLocator::operator=(ServiceLocator&& other) noexcept {
-    if (this != &other) {
-        pImpl = std::move(other.pImpl);
-    }
-    return *this;
+
 }
