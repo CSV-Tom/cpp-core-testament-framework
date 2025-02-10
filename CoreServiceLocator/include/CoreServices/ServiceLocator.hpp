@@ -1,5 +1,5 @@
-#ifndef SERVICE_LOCATOR_HPP
-#define SERVICE_LOCATOR_HPP
+#ifndef CORE_SERVICELOCATOR_HPP
+#define CORE_SERVICELOCATOR_HPP
 
 #include <unordered_map>
 #include <memory>
@@ -8,15 +8,12 @@
 #include <typeindex>
 #include <type_traits>
 
-/// Base class for all services.
 class IService {
 public:
     virtual ~IService() = default;
-    /// Returns the base type index of the service.
     virtual std::type_index getTypeIndex() const noexcept = 0;
 };
 
-/// Specific service base class.
 template<typename T>
 class ServiceBase : public T {
 public:
@@ -25,14 +22,12 @@ public:
     }
 };
 
-/// Service Locator class.
 class ServiceLocator {
 private:
     std::unordered_map<std::type_index, std::shared_ptr<IService>> services;
     mutable std::mutex mutex;
 
 public:
-    /// Registers a service with the service locator.
     template<typename T>
     void registerService(std::shared_ptr<T> service) {
         static_assert(std::is_base_of_v<IService, T>, "T must inherit from IService");
@@ -44,7 +39,6 @@ public:
         services[typeIndex] = std::move(service);
     }
 
-    /// Unregisters a service from the service locator.
     template<typename T>
     void unregisterService() {
         std::scoped_lock lock(mutex);
@@ -55,7 +49,6 @@ public:
         services.erase(typeIndex);
     }
 
-    /// Gets a service from the service locator.
     template<typename T>
     [[nodiscard]] std::shared_ptr<T> getService() const {
         std::scoped_lock lock(mutex);
@@ -68,30 +61,4 @@ public:
     }
 };
 
-#endif // SERVICE_LOCATOR_HPP
-
-
-/*#ifndef EVENTSYSTEM_SERVICELOCATOR_HPP
-#define EVENTSYSTEM_SERVICELOCATOR_HPP
-
-
-#include "EventSystem/EventManager.hpp"
-
-class ServiceLocator {
-public:
-    static void provide(EventManager* manager) {
-        eventManager = manager;
-    }
-
-    static EventManager& getEventManager() {
-        if (!eventManager) {
-            throw std::runtime_error("EventManager not provided!");
-        }
-        return *eventManager;
-    }
-
-private:
-    static inline EventManager* eventManager = nullptr;
-};
-
-#endif*/
+#endif

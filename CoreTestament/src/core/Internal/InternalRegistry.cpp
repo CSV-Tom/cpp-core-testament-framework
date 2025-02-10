@@ -1,6 +1,9 @@
 #include "InternalRegistry.hpp"
 
+#include <mutex>
+
 #include "InternalSuite.hpp"
+
 
 namespace Testament {
 
