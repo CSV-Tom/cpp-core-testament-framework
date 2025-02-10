@@ -1,3 +1,6 @@
+#ifndef EVENTFRAMEWORK_EVENTDISPATCHER_HPP
+#define EVENTFRAMEWORK_EVENTDISPATCHER_HPP
+
 #include <functional>
 #include <unordered_map>
 #include <vector>
@@ -29,3 +32,5 @@ public:
 private:
     std::unordered_map<std::type_index, std::vector<std::function<void(const BaseEvent&)>>> handlers;
 };
+
+#endif
