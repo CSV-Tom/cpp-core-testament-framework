@@ -8,12 +8,25 @@
 #include <typeindex>
 #include <type_traits>
 
+/**
+ * @brief Base interface for all services.
+ */
 class IService {
 public:
     virtual ~IService() = default;
+
+    /**
+     * @brief Retrieves the type index of the service.
+     * @return The std::type_index of the derived service.
+     */
     virtual std::type_index getTypeIndex() const noexcept = 0;
 };
 
+/**
+ * @brief A helper template that provides type-safe service registration.
+ * 
+ * @tparam T The derived service type.
+ */
 template<typename T>
 class ServiceBase : public T {
 public:
@@ -22,43 +35,54 @@ public:
     }
 };
 
+/**
+ * @brief A thread-safe Service Locator implementation.
+ */
 class ServiceLocator {
 private:
     std::unordered_map<std::type_index, std::shared_ptr<IService>> services;
     mutable std::mutex mutex;
 
+    void registerServiceImpl(std::type_index typeIndex, std::shared_ptr<IService> service);
+    void unregisterServiceImpl(std::type_index typeIndex);
+    [[nodiscard]] std::shared_ptr<IService> getServiceImpl(std::type_index typeIndex) const;
+
 public:
-    template<typename T>
-    void registerService(std::shared_ptr<T> service) {
-        static_assert(std::is_base_of_v<IService, T>, "T must inherit from IService");
-        std::scoped_lock lock(mutex);
-        std::type_index typeIndex = service->getTypeIndex();
-        if (services.contains(typeIndex)) {
-            throw std::runtime_error("Service already registered");
-        }
-        services[typeIndex] = std::move(service);
-    }
+    ServiceLocator();
+    ~ServiceLocator();
 
+    /**
+     * @brief Registers a service instance.
+     * 
+     * @tparam T The service type.
+     * @param service The shared pointer to the service instance.
+     * @throws std::runtime_error If the service is already registered.
+     */
     template<typename T>
-    void unregisterService() {
-        std::scoped_lock lock(mutex);
-        std::type_index typeIndex = std::type_index(typeid(T));
-        if (!services.contains(typeIndex)) {
-            throw std::runtime_error("Service not registered");
-        }
-        services.erase(typeIndex);
-    }
+    void registerService(std::shared_ptr<T> service);
 
+    /**
+     * @brief Unregisters a service instance.
+     * 
+     * @tparam T The service type.
+     * @throws std::runtime_error If the service is not found.
+     */
     template<typename T>
-    [[nodiscard]] std::shared_ptr<T> getService() const {
-        std::scoped_lock lock(mutex);
-        std::type_index typeIndex = std::type_index(typeid(T));
-        auto it = services.find(typeIndex);
-        if (it == services.end()) {
-            throw std::runtime_error("Service not found");
-        }
-        return std::static_pointer_cast<T>(it->second);
-    }
+    void unregisterService();
+
+    /**
+     * @brief Retrieves a service instance.
+     * 
+     * @tparam T The service type.
+     * @return A shared pointer to the requested service.
+     * @throws std::runtime_error If the service is not found.
+     */
+    template<typename T>
+    [[nodiscard]] std::shared_ptr<T> getService() const;
+
+
 };
+
+#include "ServiceLocator.tpp"
 
 #endif

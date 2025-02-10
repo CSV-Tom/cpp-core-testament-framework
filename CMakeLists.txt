@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.31)
 
+option(BUILD_TESTING "Enable tests" ON)
+if(BUILD_TESTING)
+    enable_testing()
+endif()
+
 project(TestFramework)
 
 #add_subdirectory(CoreTestament)
