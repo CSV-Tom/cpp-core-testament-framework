@@ -1,7 +1,7 @@
 #ifndef CORE_SERVICELOCATOR_TPP
 #define CORE_SERVICELOCATOR_TPP
 
-#include "ServiceLocator.hpp"
+#include "CoreServices/ServiceLocator.hpp"
 
 template<typename T>
 void ServiceLocator::registerService(std::shared_ptr<T> service) {
@@ -19,4 +19,4 @@ template<typename T>
     return std::static_pointer_cast<T>(getServiceImpl(std::type_index(typeid(T))));
 }
 
-#endif
+#endif 
