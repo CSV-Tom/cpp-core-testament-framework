@@ -23,10 +23,10 @@ std::shared_ptr<Suite> makeSuite(const std::string& name, Tests&&... cases) {
 
 template <typename T, typename... Tests>
 requires (std::derived_from<T, LifecycleSuite> && (std::same_as<std::remove_cvref_t<Tests>, std::shared_ptr<Test>> && ...))
-std::shared_ptr<T> makeSuite(const std::string& name, Tests&&... cases) {
+std::shared_ptr<Suite> makeSuite(const std::string& name, Tests&&... cases) {
     auto suite = LifecycleSuite::create(name, std::make_shared<T>());
     (suite->addTest(std::forward<Tests>(cases)), ...);
-    return std::static_pointer_cast<T>(suite);
+    return suite;
 }
 
 
