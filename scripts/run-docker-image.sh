@@ -7,4 +7,4 @@ docker run --rm -it \
 	--volume="/etc/shadow:/etc/shadow:ro" \
 	--volume "$(pwd)":"$(pwd)" \
 	--workdir "$(pwd)" \
-        cxx23-core-testament-framework $*
+        core-testament-framework "$@"
