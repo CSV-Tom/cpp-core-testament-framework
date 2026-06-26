@@ -1,38 +1,34 @@
 #include "Testament/Runner.hpp"
 
 #include "Internal/InternalRegistry.hpp"
-
-#include <iostream>
-
-
-
-
-#include "EventSystem/EventManager.hpp"
-#include "EventSystem/ServiceLocator.hpp"
-#include "EventHandlers/LogEventHandler.hpp"
-
-
+#include "EventHandlers/ConsoleTestEventHandler.hpp"
+#include "Internal/utils/TestStatistics.hpp"
 
 namespace Testament {
 
-int Runner::run(int argc, char** argv)
-{
-
-    EventManager eventManager;
-    ServiceLocator::provide(&eventManager); // Bereitstellen der Instanz
-    LogEventHandler handler(ServiceLocator::getEventManager().getDispatcher());
-    ServiceLocator::getEventManager().getDispatcher().dispatch(LogEvent("Hello from ServiceLocator!"));
-
+int Runner::run(int /*argc*/, char** /*argv*/) {
+    ConsoleTestEventHandler handler;
 
     auto& registry = InternalRegistry::getInstance();
-    for (auto& suite : registry.getAllSuites()) {
-        std::cout << suite->getName() << std::endl;
+    auto suites = registry.getAllSuites();
+
+    handler.onStartReport(static_cast<unsigned int>(suites.size()));
+
+    TestStatistics<unsigned int> total;
+    for (auto& suite : suites) {
+        suite->setHandler(&handler);
         suite->run();
+        total += suite->getStatistics();
     }
-    //TODO:
-    //
-    // TestRegistry::instance().run(argc, argv);
-    return argc > 0 && argv != nullptr;
+
+    handler.onFinalReport(
+        static_cast<unsigned int>(suites.size()),
+        total.getPassedTests(),
+        total.getFailedTests(),
+        total.getSkippedTests()
+    );
+
+    return total.getFailedTests() == 0 ? 0 : 1;
 }
 
 }

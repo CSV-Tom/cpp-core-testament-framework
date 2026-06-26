@@ -19,5 +19,7 @@ rm -rf build/ && mkdir -p build/ && cd build && cmake -GNinja -DCMAKE_TOOLCHAIN_
 
 ./CoreServiceLocator/TestCoreServices
 
+./CoreTestament/TestRunner
+
 
 popd > /dev/null || exit 3

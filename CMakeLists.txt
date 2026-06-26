@@ -7,5 +7,5 @@ endif()
 
 project(TestFramework)
 
-#add_subdirectory(CoreTestament)
+add_subdirectory(CoreTestament)
 add_subdirectory(CoreServiceLocator)

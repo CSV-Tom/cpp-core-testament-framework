@@ -17,7 +17,7 @@ target_sources(
         src/core/Internal/InternalRegistry.cpp        
         src/core/Runner.cpp
         src/core/Suite.cpp
-        src/core/LifecyleSuite.cpp
+        src/core/LifecycleSuite.cpp
         src/core/Test.cpp
 
         

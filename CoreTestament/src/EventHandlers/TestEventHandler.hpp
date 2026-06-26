@@ -1,26 +1,31 @@
+#pragma once
 #include <string>
-#include <vector>
-#include <memory>
-
-class TestCase;
-class TestSuite;
+#include <chrono>
+#include <exception>
 
 class TestEventHandler {
 public:
+    struct TestInfo {
+        std::string name;
+        std::chrono::duration<double> duration;
+        std::exception_ptr exception;
+    };
+    struct SuiteInfo {
+        std::string name;
+        unsigned int passed{};
+        unsigned int failed{};
+        unsigned int skipped{};
+    };
+
     virtual ~TestEventHandler() = default;
 
-    virtual void onStartReport(const std::vector<std::shared_ptr<TestSuite>>& suites) {}
-    virtual void onFinalReport(const std::vector<std::shared_ptr<TestSuite>>& suites) {}
-
-    virtual void onSuiteStart(const TestSuite& suite) {}
-    virtual void onSuiteEnd(const TestSuite& suite) {}
-    virtual void onSuiteAbort(const std::string& message) {}
-    virtual void onSuiteSummary(const TestSuite& suite, const std::vector<std::shared_ptr<TestCase>>& testCases) {}
-
-    virtual void onLogEvent(const std::string message) {}
-
-    virtual void onTestPassed(const TestSuite& suite, const TestCase& testCase) {}
-    virtual void onTestSkipped(const TestSuite& suite, const TestCase& testCase) {}
-    virtual void onTestFailed(const TestSuite& suite, const TestCase& testCase, std::exception_ptr exception) {}
-
+    virtual void onStartReport(unsigned int) {}
+    virtual void onSuiteStart(const SuiteInfo&) {}
+    virtual void onSuiteEnd(const SuiteInfo&) {}
+    virtual void onSuiteAbort(const std::string&) {}
+    virtual void onTestPassed(const SuiteInfo&, const TestInfo&) {}
+    virtual void onTestFailed(const SuiteInfo&, const TestInfo&) {}
+    virtual void onTestSkipped(const SuiteInfo&, const TestInfo&) {}
+    virtual void onLogEvent(const std::string&) {}
+    virtual void onFinalReport(unsigned int, unsigned int, unsigned int, unsigned int) {}
 };

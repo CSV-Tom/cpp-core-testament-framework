@@ -3,53 +3,53 @@
 
 #include "ExecutionTimer.hpp"
 #include "TestStatistics.hpp"
-#include <vector>
 #include <memory>
 #include <variant>
 #include <exception>
 
 #include "Testament/Suite.hpp"
-
 #include "../InternalTest.hpp"
+#include "EventHandlers/TestEventHandler.hpp"
 
 namespace Testament {
 
-
 class TestManager {
 public:
+    TestManager(ExecutionTimer& timer, TestStatistics<unsigned int>& statistic_)
+        : testTimer(timer), statistic(statistic_) {}
 
-    TestManager(ExecutionTimer& timer, TestStatistics<unsigned int>& statistic) : testTimer(timer), statistic(statistic) {}
-
-    void executeTest(Suite& suite, std::shared_ptr<InternalTest>& test) {
+    void executeTest(Suite& suite, std::shared_ptr<InternalTest>& test,
+                     const std::string& suiteName, TestEventHandler* handler = nullptr) {
         testTimer.start();
         auto result = test->execute(&suite);
         testTimer.stop();
-
-        processResult(test, result);
+        processResult(suiteName, test, result, handler);
     }
 
 private:
     ExecutionTimer& testTimer;
     TestStatistics<unsigned int>& statistic;
 
-    void processResult(std::shared_ptr<InternalTest>& test, const std::variant<std::monostate, std::exception_ptr>& result) {
-        
+    void processResult(const std::string& suiteName, std::shared_ptr<InternalTest>& test,
+                       const std::variant<std::monostate, std::exception_ptr>& result,
+                       TestEventHandler* handler) {
+        TestEventHandler::SuiteInfo suiteInfo{suiteName};
+        TestEventHandler::TestInfo testInfo{test->getName(), test->getExecutionTimer().getDuration(), {}};
+
         if (std::holds_alternative<std::monostate>(result)) {
             if (test->getStatus().isPassed()) {
                 statistic.incrementPassedTests();
+                if (handler) handler->onTestPassed(suiteInfo, testInfo);
             } else if (test->getStatus().isSkipped()) {
                 statistic.incrementSkippedTests();
+                if (handler) handler->onTestSkipped(suiteInfo, testInfo);
             }
-        } else if (std::holds_alternative<std::exception_ptr>(result)) {
-            std::exception_ptr exception = std::get<std::exception_ptr>(result);
-            try {
-                std::rethrow_exception(exception);
-            } catch (...) {
-                statistic.incrementFailedTests();
-            }
+        } else {
+            testInfo.exception = std::get<std::exception_ptr>(result);
+            statistic.incrementFailedTests();
+            if (handler) handler->onTestFailed(suiteInfo, testInfo);
         }
     }
-
 };
 
 }

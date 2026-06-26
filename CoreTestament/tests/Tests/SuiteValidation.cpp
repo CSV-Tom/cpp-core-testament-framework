@@ -1,7 +1,6 @@
 #include "Testament/Testament.hpp"
 
-//#include <memory>
-#include <cassert>
+#include <stdexcept>
 #include <vector>
 #include <string>
 
@@ -18,7 +17,8 @@ public:
     /// Validates all recorded test results and asserts failures.
     static void verifyResults() {
         for (const auto& [testName, passed] : testResults) {
-            assert(passed && (testName + " failed").c_str());
+            if (!passed)
+                throw std::logic_error(testName + " failed");
         }
     }
 

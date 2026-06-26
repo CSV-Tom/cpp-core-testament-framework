@@ -7,9 +7,8 @@
 namespace Testament {
 
 
-InternalTest::InternalTest(const std::string& name, FunctionVariant function) : name(name), function(std::move(function)) {
-
-}
+InternalTest::InternalTest(const std::string& name_, FunctionVariant function_)
+    : name(name_), function(std::move(function_)) {}
 
 InternalTest::~InternalTest() = default;
 
