@@ -44,8 +44,8 @@ public:
         }
     }
 
-    void incrementTestCounter() { 
-        executedTests++; 
+    void incrementTestCounter() {
+        executedTests++;
     }
 
     int executedTests = 0;
@@ -55,12 +55,12 @@ private:
 };
 
 static auto suite = makeSuite<LifecycleSuiteValidation>("Lifecycle Validation Suite",
-    makeTest<LifecycleSuiteValidation>("Basic Test", [](LifecycleSuiteValidation& s) {
-        s.incrementTestCounter();
-    }),
-    makeTest<LifecycleSuiteValidation>("Additional Test", [](LifecycleSuiteValidation& s) {
-        s.incrementTestCounter();
-    })
-);
+makeTest<LifecycleSuiteValidation>("Basic Test", [](LifecycleSuiteValidation& s) {
+    s.incrementTestCounter();
+}),
+makeTest<LifecycleSuiteValidation>("Additional Test", [](LifecycleSuiteValidation& s) {
+    s.incrementTestCounter();
+})
+                                                       );
 
 }

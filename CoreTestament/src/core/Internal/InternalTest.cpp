@@ -13,9 +13,9 @@ InternalTest::InternalTest(const std::string& name_, FunctionVariant function_)
 InternalTest::~InternalTest() = default;
 
 std::variant<std::monostate, std::exception_ptr> InternalTest::execute(const Suite* suite) {
-  //  if (!suite) {
- //       return std::monostate{}; // No exception, as Suite is nullptr
- //   }
+    //  if (!suite) {
+//       return std::monostate{}; // No exception, as Suite is nullptr
+//   }
 
     if (status == TestStatus::Status::Skipped) {
         return std::monostate{}; // Neither success nor exception

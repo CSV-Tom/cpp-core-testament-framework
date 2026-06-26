@@ -11,7 +11,7 @@ public:
     static TestRegistry& instance();
 
     void addSuite(const std::shared_ptr<TestSuite>& suite);
-    
+
     void addGlobalEventHandler(const std::shared_ptr<TestEventHandler>& handler);
 
     int run(int argc, char** argv);

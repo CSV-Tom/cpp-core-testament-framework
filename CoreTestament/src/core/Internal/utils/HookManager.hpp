@@ -7,7 +7,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
-#include <sstream> 
+#include <sstream>
 
 namespace Testament {
 
@@ -17,15 +17,31 @@ public:
 
     explicit HookManager(ExecutionTimer& timer) : hookTimer(timer) {}
 
-    void setBeforeSuite(Callback callback) { beforeSuiteHook = std::move(callback); }
-    void setBeforeEach(Callback callback) { beforeEachHook = std::move(callback); }
-    void setAfterEach(Callback callback) { afterEachHook = std::move(callback); }
-    void setAfterSuite(Callback callback) { afterSuiteHook = std::move(callback); }
+    void setBeforeSuite(Callback callback) {
+        beforeSuiteHook = std::move(callback);
+    }
+    void setBeforeEach(Callback callback) {
+        beforeEachHook = std::move(callback);
+    }
+    void setAfterEach(Callback callback) {
+        afterEachHook = std::move(callback);
+    }
+    void setAfterSuite(Callback callback) {
+        afterSuiteHook = std::move(callback);
+    }
 
-    void invokeBeforeSuiteHook() { invokeHook(beforeSuiteHook, "beforeSuite"); }
-    void invokeBeforeEachHook() { invokeHook(beforeEachHook, "beforeEach"); }
-    void invokeAfterEachHook() { invokeHook(afterEachHook, "afterEach"); }
-    void invokeAfterSuiteHook() { invokeHook(afterSuiteHook, "afterSuite"); }
+    void invokeBeforeSuiteHook() {
+        invokeHook(beforeSuiteHook, "beforeSuite");
+    }
+    void invokeBeforeEachHook() {
+        invokeHook(beforeEachHook, "beforeEach");
+    }
+    void invokeAfterEachHook() {
+        invokeHook(afterEachHook, "afterEach");
+    }
+    void invokeAfterSuiteHook() {
+        invokeHook(afterSuiteHook, "afterSuite");
+    }
 
     void reportErrors() const {
         if (!errors.empty()) {
@@ -68,4 +84,4 @@ private:
 
 }
 
-#endif 
+#endif

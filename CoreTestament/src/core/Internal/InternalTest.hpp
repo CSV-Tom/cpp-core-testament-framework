@@ -25,7 +25,7 @@ public:
     ~InternalTest() override;
 
     std::variant<std::monostate, std::exception_ptr> execute(const Suite* suite = nullptr);
-        
+
     const std::string& getName() const;
 
     const ExecutionTimer& getExecutionTimer() const;
@@ -34,10 +34,10 @@ public:
 
 private:
     std::string name;
-    FunctionVariant function;    
-    TestStatus status{TestStatus::Status::NotRun}; 
+    FunctionVariant function;
+    TestStatus status{TestStatus::Status::NotRun};
     std::exception_ptr exception;
-    ExecutionTimer executionTimer;    
+    ExecutionTimer executionTimer;
 };
 
 }

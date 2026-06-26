@@ -12,8 +12,8 @@ class Suite {
 public:
 
     static std::shared_ptr<Suite> create(const std::string& name);
-    virtual void addTest(const std::shared_ptr<Test>& test);  
-      
+    virtual void addTest(const std::shared_ptr<Test>& test);
+
 protected:
     Suite();
     virtual ~Suite();
@@ -22,7 +22,7 @@ protected:
     Suite& operator=(Suite&&) noexcept;
 
     Suite(const Suite&) = delete;
-    Suite& operator=(const Suite&) = delete;        
+    Suite& operator=(const Suite&) = delete;
 };
 
 }

@@ -8,9 +8,9 @@ namespace Testament {
 class Test;
 
 class LifecycleSuite : public Suite {
-public:    
+public:
     static std::shared_ptr<Suite> create(const std::string& name, std::shared_ptr<LifecycleSuite> lifecycleSuite);
-    
+
     LifecycleSuite();
     ~LifecycleSuite() override;
 
@@ -19,8 +19,8 @@ public:
 
     LifecycleSuite(const LifecycleSuite&) = delete;
     LifecycleSuite& operator=(const LifecycleSuite&) = delete;
-    
-protected:    
+
+protected:
     virtual void beforeAll();
     virtual void beforeEach();
     virtual void afterEach();

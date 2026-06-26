@@ -52,8 +52,8 @@ private:
 
     ExecutionTimer totalTimer;
     ExecutionTimer hookTimer;
-    ExecutionTimer testTimer; 
-    
+    ExecutionTimer testTimer;
+
     HookManager hookManager;
     TestManager testManager;
     TestFilter testFilter = nullptr;

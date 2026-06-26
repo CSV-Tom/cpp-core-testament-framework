@@ -10,7 +10,7 @@ namespace Testament {
 namespace Asserts {
 
 inline void assertTrue(bool condition, std::string_view message,
-                const std::source_location location = std::source_location::current()) {
+                       const std::source_location location = std::source_location::current()) {
     if (!condition) {
         std::ostringstream oss;
         oss << "assertTrue failed: " << message << "\n"
@@ -21,7 +21,7 @@ inline void assertTrue(bool condition, std::string_view message,
 }
 
 inline void assertFalse(bool condition, std::string_view message,
-                 const std::source_location location = std::source_location::current()) {
+                        const std::source_location location = std::source_location::current()) {
     if (condition) {
         std::ostringstream oss;
         oss << "assertFalse failed: " << message << "\n"

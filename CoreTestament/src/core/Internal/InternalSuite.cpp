@@ -27,12 +27,22 @@ void InternalSuite::addTest(const std::shared_ptr<Test>& test) {
     tests.push_back(std::move(internalTest));
 }
 
-void InternalSuite::setBeforeSuite(Callback callback) { hookManager.setBeforeSuite(std::move(callback)); }
-void InternalSuite::setBeforeEach(Callback callback)  { hookManager.setBeforeEach(std::move(callback)); }
-void InternalSuite::setAfterEach(Callback callback)   { hookManager.setAfterEach(std::move(callback)); }
-void InternalSuite::setAfterSuite(Callback callback)  { hookManager.setAfterSuite(std::move(callback)); }
+void InternalSuite::setBeforeSuite(Callback callback) {
+    hookManager.setBeforeSuite(std::move(callback));
+}
+void InternalSuite::setBeforeEach(Callback callback)  {
+    hookManager.setBeforeEach(std::move(callback));
+}
+void InternalSuite::setAfterEach(Callback callback)   {
+    hookManager.setAfterEach(std::move(callback));
+}
+void InternalSuite::setAfterSuite(Callback callback)  {
+    hookManager.setAfterSuite(std::move(callback));
+}
 
-void InternalSuite::setHandler(TestEventHandler* h) { handler = h; }
+void InternalSuite::setHandler(TestEventHandler* h) {
+    handler = h;
+}
 
 
 void InternalSuite::run() {
@@ -46,7 +56,7 @@ void InternalSuite::run() {
 
     Suite& suiteRef = suite ? *suite : static_cast<Suite&>(*this);
     for (auto& test : tests | std::views::filter([this](const auto& t) {
-        return !testFilter || testFilter(t->getName());
+    return !testFilter || testFilter(t->getName());
     })) {
         hookManager.invokeBeforeEachHook();
         testManager.executeTest(suiteRef, test, name, handler);
@@ -63,11 +73,17 @@ void InternalSuite::run() {
     }
 }
 
-const std::string& InternalSuite::getName() const { return name; }
+const std::string& InternalSuite::getName() const {
+    return name;
+}
 
-const TestStatistics<unsigned int>& InternalSuite::getStatistics() const { return statistic; }
+const TestStatistics<unsigned int>& InternalSuite::getStatistics() const {
+    return statistic;
+}
 
-const ExecutionTimer& InternalSuite::getTotalTimer() const { return totalTimer; }
+const ExecutionTimer& InternalSuite::getTotalTimer() const {
+    return totalTimer;
+}
 
 void InternalSuite::setTestFilter(std::variant<std::string, std::regex> filter) {
     if (std::holds_alternative<std::string>(filter)) {

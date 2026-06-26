@@ -29,16 +29,16 @@ private:
 
 /// Suite for validating fundamental test logic.
 static auto suite = makeSuite("Fundamental Test Suite",
-    makeTest("Equality Test", []() {
-        int expectedValue = 42;
-        int computedValue = 42;
-        TestResultValidator::recordResult("Equality Test", computedValue == expectedValue);
-    }),
-    makeTest("Boolean Condition Test", []() {
-        bool conditionMet = true;
-        TestResultValidator::recordResult("Boolean Condition Test", conditionMet);
-    })
-);
+makeTest("Equality Test", []() {
+    int expectedValue = 42;
+    int computedValue = 42;
+    TestResultValidator::recordResult("Equality Test", computedValue == expectedValue);
+}),
+makeTest("Boolean Condition Test", []() {
+    bool conditionMet = true;
+    TestResultValidator::recordResult("Boolean Condition Test", conditionMet);
+})
+                             );
 
 /// Test case to validate the recorded test results.
 static auto testResultValidation = makeTest("Test Result Validation", []() {

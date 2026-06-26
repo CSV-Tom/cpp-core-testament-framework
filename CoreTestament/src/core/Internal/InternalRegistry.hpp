@@ -26,21 +26,21 @@ public:
         return registeredSuites | std::views::filter(std::forward<Predicate>(filter));
     }
 
-/*
-[[nodiscard]] auto getSuitesByFilter(const std::vector<std::function<bool(const std::shared_ptr<InternalSuite>&)>>& filters) const {
-    std::shared_lock lock(registryMutex);
+    /*
+    [[nodiscard]] auto getSuitesByFilter(const std::vector<std::function<bool(const std::shared_ptr<InternalSuite>&)>>& filters) const {
+        std::shared_lock lock(registryMutex);
 
-    // Initiale Range-View über alle registrierten Suiten
-    auto filteredSuites = registeredSuites | std::views::all;
+        // Initiale Range-View über alle registrierten Suiten
+        auto filteredSuites = registeredSuites | std::views::all;
 
-    // Anwenden aller Filter durch Verkettung
-    for (const auto& filter : filters) {            
-        filteredSuites = filteredSuites | std::views::filter(filter); // ✅ Jetzt korrekt
+        // Anwenden aller Filter durch Verkettung
+        for (const auto& filter : filters) {
+            filteredSuites = filteredSuites | std::views::filter(filter); // ✅ Jetzt korrekt
+        }
+
+        return filteredSuites; // Gibt eine View zurück
     }
-
-    return filteredSuites; // Gibt eine View zurück
-}
-*/
+    */
 
 
 
@@ -59,7 +59,7 @@ private:
 
 }
 
-#endif 
+#endif
 
 
 /*

@@ -9,7 +9,7 @@ namespace Testament {
 class Suite;
 
 using FunctionVariant = std::variant<std::function<void()>, std::function<void(Suite&)>>;
-  
+
 }
 
 #endif

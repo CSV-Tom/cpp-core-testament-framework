@@ -11,18 +11,18 @@ namespace Testament {
 class Test {
 public:
 
-    static std::shared_ptr<Test> create(const std::string& name, FunctionVariant function);    
+    static std::shared_ptr<Test> create(const std::string& name, FunctionVariant function);
 
 protected:
 
     Test();
-    virtual ~Test();   
+    virtual ~Test();
 
     Test(Test&&) noexcept;
     Test& operator=(Test&&) noexcept;
-    
+
     Test(const Test&) = delete;
-    Test& operator=(const Test&) = delete;    
+    Test& operator=(const Test&) = delete;
 };
 
 }

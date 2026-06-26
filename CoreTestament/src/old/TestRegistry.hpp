@@ -75,7 +75,7 @@ public:
             << "Skiped: " << statistics.getSkippedTests() << std::endl;
             */
 
-            dispatcher.dispatch(LogEvent("All systems operational")); // TODO: Besser als EventHandler
+        dispatcher.dispatch(LogEvent("All systems operational")); // TODO: Besser als EventHandler
 
         return statistics.getFailedTests() == 0 ? 0 : 1;
     }
@@ -85,6 +85,6 @@ private:
     std::vector<std::shared_ptr<TestSuite>> suites;
     std::vector<std::shared_ptr<TestEventHandler>> globalEventHandlers;
     TestStatistics<unsigned int> statistics;
-   //EventDispatcher dispatcher;
+    //EventDispatcher dispatcher;
     FilterEventDispatcher dispatcher;
 };

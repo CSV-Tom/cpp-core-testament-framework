@@ -9,9 +9,9 @@ class LogEventHandler {
 public:
     explicit LogEventHandler(FilterEventDispatcher& dispatcher) {
         dispatcher.registerHandler<LogEvent>(
-            [](const LogEvent& event) {
-                std::cout << "[LogEvent] Received: " << event.message << std::endl;
-            }
+        [](const LogEvent& event) {
+            std::cout << "[LogEvent] Received: " << event.message << std::endl;
+        }
         );
     }
 
