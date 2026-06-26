@@ -29,11 +29,7 @@ std::vector<std::shared_ptr<InternalSuite>> InternalRegistry::getAllSuites() con
 }
 
 std::function<bool(const std::shared_ptr<InternalSuite>&)> InternalRegistry::createFilter(const std::string& type, const std::string& value) {
-    /* if (type == "test_count") {
-         return [](const std::shared_ptr<Suite>& suite) {
-             return suite->getTestCount() > 5;
-         };
-     } else*/ if (type == "name") {
+    if (type == "name") {
         return [value](const std::shared_ptr<InternalSuite>& suite) {
             return suite->getName() == value;
         };
