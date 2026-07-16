@@ -71,6 +71,11 @@ if(BUILD_TESTING)
             tests/mainTest.cpp
     )
 
+    add_testament_test(
+        LifecycleSuiteNameValidation LifecycleSuiteName
+        tests/Tests/LifecycleSuiteNameValidation.cpp
+    )
+
     add_testament_internal_test(
         InternalSuiteRepeatRunValidation InternalSuiteRepeatRun
         tests/Tests/InternalSuiteRepeatRunValidation.cpp

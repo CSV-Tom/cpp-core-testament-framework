@@ -14,7 +14,9 @@ InternalSuite::InternalSuite(const std::string& name_)
 }
 
 InternalSuite::InternalSuite(const std::string& name_, std::shared_ptr<Suite> suite_)
-    : name(name_), hookManager(hookTimer), testManager(testTimer, statistic), suite(std::move(suite_)) {}
+    : InternalSuite(name_) {
+    suite = std::move(suite_);
+}
 
 InternalSuite::~InternalSuite() = default;
 
