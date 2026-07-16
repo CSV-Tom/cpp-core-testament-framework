@@ -29,9 +29,6 @@ public:
     void onTestSkipped(const SuiteInfo& suite, const TestInfo& test) override {
         for (auto* h : handlers) h->onTestSkipped(suite, test);
     }
-    void onLogEvent(const std::string& message) override {
-        for (auto* h : handlers) h->onLogEvent(message);
-    }
     void onFinalReport(unsigned int suites, unsigned int passed, unsigned int failed, unsigned int skipped) override {
         for (auto* h : handlers) h->onFinalReport(suites, passed, failed, skipped);
     }

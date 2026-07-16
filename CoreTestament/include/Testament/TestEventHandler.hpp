@@ -31,7 +31,6 @@ public:
     virtual void onTestPassed(const SuiteInfo&, const TestInfo&) {}
     virtual void onTestFailed(const SuiteInfo&, const TestInfo&) {}
     virtual void onTestSkipped(const SuiteInfo&, const TestInfo&) {}
-    virtual void onLogEvent(const std::string&) {}
     virtual void onFinalReport(unsigned int, unsigned int, unsigned int, unsigned int) {}
 
     [[nodiscard]] virtual std::string errorMessage() const { return {}; }

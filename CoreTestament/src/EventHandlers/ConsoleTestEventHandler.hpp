@@ -54,10 +54,6 @@ public:
         std::cout << "⏩ SKIPPED: " << test.name << formatDuration(test.duration) << std::endl;
     }
 
-    void onLogEvent(const std::string& message) override {
-        std::cout << "--> " << message << std::endl;
-    }
-
     void onFinalReport(unsigned int suites, unsigned int passed, unsigned int failed, unsigned int skipped) override {
         std::cout << "\n📊 [FINAL REPORT]\n"
                   << "    Suites Executed: " << suites << ", "
