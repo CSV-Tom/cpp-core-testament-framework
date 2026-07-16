@@ -30,7 +30,7 @@ target_sources(${PROJECT_NAME}
 # Set correct include paths for both build and install
 target_include_directories(${PROJECT_NAME}
     PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>    # Use source directory during build
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>    # Use source directory during build
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>  # Use install directory when installed
     PRIVATE
         src
