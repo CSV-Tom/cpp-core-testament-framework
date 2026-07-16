@@ -5,7 +5,6 @@
 #include <shared_mutex>  // Für std::shared_mutex
 #include <vector>
 #include <functional>
-#include <ranges>
 
 #include "InternalSuite.hpp"
 namespace Testament {
@@ -20,9 +19,16 @@ public:
     [[nodiscard]] std::vector<std::shared_ptr<InternalSuite>> getAllSuites() const;
 
     template <typename Predicate>
-    [[nodiscard]] auto getSuitesByFilter(Predicate&& filter) const {
+    [[nodiscard]] std::vector<std::shared_ptr<InternalSuite>> getSuitesByFilter(Predicate&& filter) const {
         std::shared_lock lock(registryMutex);
-        return registeredSuites | std::views::filter(std::forward<Predicate>(filter));
+        std::vector<std::shared_ptr<InternalSuite>> matchingSuites;
+        matchingSuites.reserve(registeredSuites.size());
+        for (const auto& suite : registeredSuites) {
+            if (std::invoke(filter, suite)) {
+                matchingSuites.push_back(suite);
+            }
+        }
+        return matchingSuites;
     }
 
 
