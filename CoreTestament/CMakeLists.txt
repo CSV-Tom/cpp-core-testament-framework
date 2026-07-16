@@ -127,6 +127,11 @@ if(BUILD_TESTING)
         tests/Tests/FixtureTypeValidation.cpp
     )
 
+    add_testament_test(
+        AssertsValidation Asserts
+        tests/Tests/AssertsValidation.cpp
+    )
+
     add_testament_internal_test(
         InternalSuiteRepeatRunValidation InternalSuiteRepeatRun
         tests/Tests/InternalSuiteRepeatRunValidation.cpp
