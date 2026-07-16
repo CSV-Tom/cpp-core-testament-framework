@@ -20,10 +20,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Switched the container tooling from Docker to Podman; renamed `Dockerfile` to `Containerfile` and `scripts/build-docker-image.sh`/`scripts/run-docker-image.sh` to `scripts/build-image.sh`/`scripts/run-container.sh`.
 - Upgraded the build container to g++-16, the latest compiler available in Ubuntu 26.04 LTS.
 - Restructured `README.md` with concrete, code-grounded feature descriptions.
+- Lowered the minimum required CMake version to 3.23, matching the `FILE_SET HEADERS` feature already in use.
+- `CoreTestament`'s test runner and CTest registration now respect the `BUILD_TESTING` option instead of always building.
+- Selected compiler warning flags per compiler (GNU/Clang vs. MSVC) instead of hardcoding GCC-specific flags.
+- Simplified `build.sh` to use `cmake --build`/`ctest` without deleting the build directory on every run.
 
 ### Fixed
 
 - Undefined behavior in `makeSuite<T>`.
+- `CoreServices` public headers are now installed via an explicit `FILE_SET HEADERS` file list, so the exported package includes every header.
+- `CoreServices`' build-time include path now resolves relative to the component directory instead of the repository root.
+- `CoreTestament` suites now reset their statistics, timers, and hook errors between repeated runs instead of accumulating stale state.
+- Test execution timers are now stopped when a test throws, so reported durations stop increasing.
+- A failing `beforeAll` lifecycle hook now aborts the suite and propagates as a runner failure instead of being silently ignored.
+- `CoreServiceLocator` now rejects null service registrations with `invalid_argument` instead of allowing them into the registry.
 
 ### Removed
 
