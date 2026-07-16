@@ -1,5 +1,6 @@
 #include "CoreServices/ServiceLocator.hpp"
 #include <iostream>
+#include <stdexcept>
 
 
 // StandardOutService: Writes messages to std::cout
@@ -29,6 +30,8 @@ public:
 
 int main() {
     Core::Services::ServiceLocator locator;
+    bool missingServiceRejected = false;
+    bool nullServiceRejected = false;
 
     // Register services
     locator.registerService(std::make_shared<StandardOutService>());
@@ -50,8 +53,16 @@ int main() {
         auto missingService = locator.getService<StandardOutService>();
         missingService->logMessage("This should not print.");
     } catch (const std::runtime_error& e) {
+        missingServiceRejected = true;
         std::cerr << "[Exception Caught] " << e.what() << std::endl;
     }
 
-    return 0;
+    try {
+        locator.registerService(std::shared_ptr<StandardOutService>{});
+    } catch (const std::invalid_argument& e) {
+        nullServiceRejected = true;
+        std::cerr << "[Exception Caught] " << e.what() << std::endl;
+    }
+
+    return missingServiceRejected && nullServiceRejected ? 0 : 1;
 }

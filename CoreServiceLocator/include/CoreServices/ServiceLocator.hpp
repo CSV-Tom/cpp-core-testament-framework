@@ -52,6 +52,7 @@ public:
      *
      * @tparam T The service type, which must inherit from `IService`.
      * @param service A shared pointer to the service instance.
+     * @throws std::invalid_argument If the service pointer is null.
      * @throws std::runtime_error If the service is already registered.
      */
     template<typename T>
@@ -137,4 +138,3 @@ private:
 #include "ServiceLocator.tpp"
 
 #endif
-

@@ -4,6 +4,7 @@
 #include <memory>
 #include <mutex>
 #include <shared_mutex>
+#include <stdexcept>
 
 namespace Core::Services {
 
@@ -14,6 +15,10 @@ private:
 
 public:
     void registerServiceImpl(std::type_index typeIndex, std::shared_ptr<IService> service) {
+        if (!service) {
+            throw std::invalid_argument("Cannot register a null service");
+        }
+
         std::unique_lock lock(mutex); // Exklusive Sperre für Schreibzugriff
         auto [it, inserted] = services.try_emplace(typeIndex, service);
         if (!inserted) {
