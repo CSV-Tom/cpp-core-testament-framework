@@ -41,27 +41,26 @@ target_compile_options(${PROJECT_NAME} PRIVATE
 	-O3
 )
 
-#add_subdirectory(tests)
+if(BUILD_TESTING)
+    add_executable(TestRunner)
 
-add_executable(TestRunner)
+    target_sources(TestRunner
+        PRIVATE
+            tests/Tests/LifecycleSuiteValidation.cpp
+            tests/Tests/ParameterizedSuiteValidation.cpp
+            tests/Tests/SuiteValidation.cpp
+            tests/mainTest.cpp
+    )
 
-target_sources(TestRunner
-    PRIVATE
-        tests/Tests/LifecycleSuiteValidation.cpp
-        tests/Tests/ParameterizedSuiteValidation.cpp
-        tests/Tests/SuiteValidation.cpp
-        tests/mainTest.cpp
-)
+    target_compile_options(TestRunner PRIVATE
+        -Wall
+       # -fmodules-ts
+    )
 
+    target_link_libraries(TestRunner PRIVATE CoreTestamentFramework)
 
-target_compile_options(TestRunner PRIVATE
-    -Wall
-   # -fmodules-ts
-)
-
-target_link_libraries(TestRunner PRIVATE CoreTestamentFramework)
-
-add_test(NAME AllTests COMMAND TestRunner)
+    add_test(NAME AllTests COMMAND TestRunner)
+endif()
 
 
 # MyLibrary/
