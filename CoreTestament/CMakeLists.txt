@@ -6,6 +6,9 @@ if(PROJECT_IS_TOP_LEVEL)
     include(CTest)
 endif()
 
+include(CMakePackageConfigHelpers)
+include(GNUInstallDirs)
+
 add_library(${PROJECT_NAME} STATIC)
 add_library(CoreTestament::CoreTestament ALIAS ${PROJECT_NAME})
 
@@ -48,6 +51,41 @@ target_compile_options(${PROJECT_NAME} PRIVATE
         -Wshadow
     >
     $<$<CXX_COMPILER_ID:MSVC>:/W4>
+)
+
+install(
+    TARGETS ${PROJECT_NAME}
+    EXPORT CoreTestamentTargets
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(
+    EXPORT CoreTestamentTargets
+    FILE CoreTestamentTargets.cmake
+    NAMESPACE CoreTestament::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/CoreTestament
+)
+
+configure_package_config_file(
+    cmake/CoreTestamentConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/CoreTestamentConfig.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/CoreTestament
+)
+
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/CoreTestamentConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+install(
+    FILES
+        ${CMAKE_CURRENT_BINARY_DIR}/CoreTestamentConfig.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/CoreTestamentConfigVersion.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/CoreTestament
 )
 
 if(BUILD_TESTING)
