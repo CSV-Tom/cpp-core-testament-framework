@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.23)
 
 project(CoreTestamentFramework LANGUAGES CXX VERSION 1.0.0)
 
+if(PROJECT_IS_TOP_LEVEL)
+    include(CTest)
+endif()
+
 add_library(${PROJECT_NAME} STATIC)
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_23)

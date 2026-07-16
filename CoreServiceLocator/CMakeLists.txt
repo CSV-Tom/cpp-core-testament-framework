@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.23)
 
 project(CoreServices LANGUAGES CXX VERSION 1.0.0)
 
+if(PROJECT_IS_TOP_LEVEL)
+    include(CTest)
+endif()
+
 include(GNUInstallDirs)
 
 # Allow user to build as SHARED or STATIC
@@ -66,11 +70,7 @@ install(
 )
 
 
-# Enable Testing
-option(BUILD_TESTING "Enable tests" ON)
-
 if(BUILD_TESTING)
-    include(CTest)
     add_executable(Test${PROJECT_NAME})
     target_sources(Test${PROJECT_NAME} PRIVATE tests/main.cpp)
     target_link_libraries(Test${PROJECT_NAME} PRIVATE ${PROJECT_NAME})
