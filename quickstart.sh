@@ -6,6 +6,6 @@ dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 pushd "$dir" > /dev/null || exit 2
 
-./scripts/run-container.sh ./build.sh
+./scripts/run-container.sh ./scripts/build.sh
 
 popd > /dev/null || exit 2
