@@ -153,28 +153,3 @@ if(BUILD_TESTING)
     )
     set_tests_properties(CoreTestamentInstallConsumer PROPERTIES LABELS integration)
 endif()
-
-
-# MyLibrary/
-# ├── CMakeLists.txt           # Haupt-CMake-Konfigurationsdatei
-# ├── include/                 # Öffentliche Header für die Bibliothek
-# │   ├── MyLibrary/           # Namespace-Struktur
-# │   │   ├── PublicHeader1.h  # Beispiel für einen öffentlichen Header
-# │   │   ├── PublicHeader2.h  # Beispiel für einen öffentlichen Header
-# │   │   └── Config.h         # Öffentliche Konfigurationsdatei
-# ├── src/                     # Quellcode der Bibliothek
-# │   ├── CMakeLists.txt       # CMake-Konfiguration für die Bibliothek
-# │   ├── InternalModule1.cpp  # Interne Implementierung
-# │   ├── InternalModule2.cpp  # Interne Implementierung
-# │   └── SharedImplementation.cpp # Gemeinsame Implementierung
-# ├── modules/                 # C++20/23-Module (optional)
-# │   ├── PublicModule.ixx     # Exportiertes Modul
-# │   ├── InternalModule.ixx   # Nicht exportiertes Modul
-# ├── tests/                   # Testcode
-# │   ├── CMakeLists.txt       # CMake-Konfiguration für Tests
-# │   ├── UnitTest1.cpp        # Beispiel für einen Unit-Test
-# │   └── UnitTest2.cpp        # Beispiel für einen weiteren Test
-# └── examples/                # Beispielanwendungen
-#     ├── Example1.cpp         # Erste Beispielanwendung
-#     ├── Example2.cpp         # Zweite Beispielanwendung
-#     └── CMakeLists.txt       # CMake-Konfiguration für Beispiele
