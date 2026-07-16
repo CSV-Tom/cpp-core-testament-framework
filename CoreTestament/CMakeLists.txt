@@ -72,6 +72,14 @@ if(BUILD_TESTING)
     target_link_libraries(InternalSuiteRepeatRunValidation PRIVATE CoreTestamentFramework)
 
     add_test(NAME InternalSuiteRepeatRun COMMAND InternalSuiteRepeatRunValidation)
+
+    add_executable(InternalTestTimerValidation
+        tests/Tests/InternalTestTimerValidation.cpp
+    )
+    target_include_directories(InternalTestTimerValidation PRIVATE src)
+    target_link_libraries(InternalTestTimerValidation PRIVATE CoreTestamentFramework)
+
+    add_test(NAME InternalTestTimer COMMAND InternalTestTimerValidation)
 endif()
 
 

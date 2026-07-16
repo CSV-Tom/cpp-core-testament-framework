@@ -21,8 +21,10 @@ std::variant<std::monostate, std::exception_ptr> InternalTest::execute(const Sui
         return std::monostate{}; // Neither success nor exception
     }
 
+    executionTimer.reset();
+    executionTimer.start();
+
     try {
-        executionTimer.start();
         std::visit([suite](auto&& func) {
             using T = std::decay_t<decltype(func)>;
             if constexpr (std::is_same_v<T, std::function<void()>>) {
@@ -37,6 +39,7 @@ std::variant<std::monostate, std::exception_ptr> InternalTest::execute(const Sui
         status = TestStatus::Status::Passed;
         return std::monostate{}; // Successful execution
     } catch (...) {
+        executionTimer.stop();
         status = TestStatus::Status::Failed;
         exception = std::current_exception();
         return exception; // Return the exception
