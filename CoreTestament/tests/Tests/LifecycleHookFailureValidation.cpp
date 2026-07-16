@@ -6,6 +6,22 @@
 
 #include <memory>
 #include <stdexcept>
+#include <string>
+
+namespace {
+
+class RecordingHandler : public TestEventHandler {
+public:
+    void onSuiteAbort(const SuiteInfo& suite, const std::string& message) override {
+        suiteName = suite.name;
+        error = message;
+    }
+
+    std::string suiteName;
+    std::string error;
+};
+
+}
 
 int main() {
     auto suite = Testament::InternalRegistry::getInstance().registerSuite(
@@ -20,8 +36,16 @@ int main() {
         testExecuted = true;
     }));
 
+    RecordingHandler handler;
+    suite->setHandler(&handler);
+    const bool suiteSucceeded = suite->run();
     const int exitCode = Testament::Runner::run(0, nullptr);
-    return exitCode == 1 && !testExecuted && suite->getStatistics().getTotalTests() == 0
+    return !suiteSucceeded
+        && exitCode == 1
+        && !testExecuted
+        && suite->getStatistics().getTotalTests() == 0
+        && handler.suiteName == "failing lifecycle hook"
+        && handler.error == "Error in beforeSuite: expected hook failure"
         ? 0
         : 1;
 }

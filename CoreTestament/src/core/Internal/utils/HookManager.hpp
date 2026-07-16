@@ -6,7 +6,6 @@
 #include <functional>
 #include <vector>
 #include <string>
-#include <iostream>
 #include <sstream>
 
 namespace Testament {
@@ -43,13 +42,8 @@ public:
         return invokeHook(afterSuiteHook, "afterSuite");
     }
 
-    void reportErrors() const {
-        if (!errors.empty()) {
-            std::cerr << "=== Hook Errors ===\n";
-            for (const auto& error : errors) {
-                std::cerr << error << std::endl;
-            }
-        }
+    [[nodiscard]] const std::vector<std::string>& getErrors() const noexcept {
+        return errors;
     }
 
     void resetErrors() {

@@ -30,8 +30,8 @@ public:
                   << "Skipped: " << suite.skipped << "\n" << std::endl;
     }
 
-    void onSuiteAbort(const std::string& message) override {
-        std::cout << "[ABORT] Suite aborted: " << message << std::endl;
+    void onSuiteAbort(const SuiteInfo& suite, const std::string& message) override {
+        std::cout << "[ABORT] Suite '" << suite.name << "' aborted: " << message << std::endl;
     }
 
     void onTestPassed(const SuiteInfo&, const TestInfo& test) override {

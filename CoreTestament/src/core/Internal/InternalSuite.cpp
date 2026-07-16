@@ -60,12 +60,24 @@ bool InternalSuite::run() {
         handler->onSuiteStart({name});
     }
 
+    const auto reportHookErrors = [this] {
+        if (!handler) {
+            return;
+        }
+        const TestEventHandler::SuiteInfo suiteInfo{
+            name,
+            statistic.getPassedTests(),
+            statistic.getFailedTests(),
+            statistic.getSkippedTests()
+        };
+        for (const auto& error : hookManager.getErrors()) {
+            handler->onSuiteAbort(suiteInfo, error);
+        }
+    };
+
     if (!hookManager.invokeBeforeSuiteHook()) {
         totalTimer.stop();
-        hookManager.reportErrors();
-        if (handler) {
-            handler->onSuiteAbort("beforeAll hook failed");
-        }
+        reportHookErrors();
         return false;
     }
 
@@ -85,13 +97,10 @@ bool InternalSuite::run() {
     hooksSucceeded = hookManager.invokeAfterSuiteHook() && hooksSucceeded;
 
     totalTimer.stop();
-    hookManager.reportErrors();
+    reportHookErrors();
 
     if (handler) {
         handler->onSuiteEnd({name, statistic.getPassedTests(), statistic.getFailedTests(), statistic.getSkippedTests()});
-        if (!hooksSucceeded) {
-            handler->onSuiteAbort("lifecycle hook failed");
-        }
     }
 
     return hooksSucceeded;

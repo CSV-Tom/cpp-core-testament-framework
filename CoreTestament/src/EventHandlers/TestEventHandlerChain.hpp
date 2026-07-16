@@ -17,8 +17,8 @@ public:
     void onSuiteEnd(const SuiteInfo& suite) override {
         for (auto* h : handlers) h->onSuiteEnd(suite);
     }
-    void onSuiteAbort(const std::string& message) override {
-        for (auto* h : handlers) h->onSuiteAbort(message);
+    void onSuiteAbort(const SuiteInfo& suite, const std::string& message) override {
+        for (auto* h : handlers) h->onSuiteAbort(suite, message);
     }
     void onTestPassed(const SuiteInfo& suite, const TestInfo& test) override {
         for (auto* h : handlers) h->onTestPassed(suite, test);
