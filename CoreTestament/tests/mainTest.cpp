@@ -3,5 +3,5 @@
 #include <iostream>
 
 int main(int argc, char** argv) {
-    return Testament::Runner::run(argc, argv);
+    return Testament::run(argc, argv);
 }

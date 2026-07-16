@@ -27,7 +27,7 @@ int main() {
     std::string executable = "JUnitReporterValidation";
     std::string option = "--junit=" + reportPath.string();
     char* arguments[]{executable.data(), option.data()};
-    const int exitCode = Testament::Runner::run(2, arguments);
+    const int exitCode = Testament::run(2, arguments);
 
     std::ifstream report(reportPath);
     const std::string xml{std::istreambuf_iterator<char>{report}, {}};

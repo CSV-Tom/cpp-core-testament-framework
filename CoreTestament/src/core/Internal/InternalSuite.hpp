@@ -12,7 +12,7 @@
 #include "utils/TestStatistics.hpp"
 #include "utils/HookManager.hpp"
 #include "utils/TestManager.hpp"
-#include "EventHandlers/TestEventHandler.hpp"
+#include "Testament/TestEventHandler.hpp"
 
 
 namespace Testament {

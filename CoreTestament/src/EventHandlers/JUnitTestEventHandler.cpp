@@ -50,7 +50,7 @@ std::string exceptionMessage(const std::exception_ptr& exception) {
     }
 }
 
-double durationSeconds(const TestEventHandler::TestInfo& test) {
+double durationSeconds(const Testament::TestEventHandler::TestInfo& test) {
     return test.duration.count();
 }
 
@@ -94,7 +94,7 @@ bool JUnitTestEventHandler::writeSucceeded() const noexcept {
     return reportWritten;
 }
 
-const std::string& JUnitTestEventHandler::errorMessage() const noexcept {
+std::string JUnitTestEventHandler::errorMessage() const {
     return writeError;
 }
 

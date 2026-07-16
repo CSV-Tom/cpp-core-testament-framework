@@ -35,8 +35,10 @@ target_sources(${PROJECT_NAME}
             include/Testament/FunctionVariant.hpp
             include/Testament/LifecycleSuite.hpp
             include/Testament/Runner.hpp
+            include/Testament/Reporters.hpp
             include/Testament/Suite.hpp
             include/Testament/Test.hpp
+            include/Testament/TestEventHandler.hpp
             include/Testament/Testament.hpp
 )
 

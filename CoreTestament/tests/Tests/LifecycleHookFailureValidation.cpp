@@ -10,7 +10,7 @@
 
 namespace {
 
-class RecordingHandler : public TestEventHandler {
+class RecordingHandler : public Testament::TestEventHandler {
 public:
     void onSuiteAbort(const SuiteInfo& suite, const std::string& message) override {
         suiteName = suite.name;
@@ -39,7 +39,7 @@ int main() {
     RecordingHandler handler;
     suite->setHandler(&handler);
     const bool suiteSucceeded = suite->run();
-    const int exitCode = Testament::Runner::run(0, nullptr);
+    const int exitCode = Testament::run(0, nullptr);
     return !suiteSucceeded
         && exitCode == 1
         && !testExecuted

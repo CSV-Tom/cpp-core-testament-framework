@@ -52,7 +52,7 @@ int main() {
         mismatchedParameterizedTest
     ));
 
-    const int runnerResult = Testament::Runner::run(0, nullptr);
+    const int runnerResult = Testament::run(0, nullptr);
     return runnerResult == 1
         && !testBodyEntered
         && !parameterizedBodyEntered

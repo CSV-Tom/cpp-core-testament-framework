@@ -1,12 +1,12 @@
 #pragma once
 
-#include "TestEventHandler.hpp"
+#include "Testament/TestEventHandler.hpp"
 
 #include <filesystem>
 #include <string>
 #include <vector>
 
-class JUnitTestEventHandler final : public TestEventHandler {
+class JUnitTestEventHandler final : public Testament::TestEventHandler {
 public:
     explicit JUnitTestEventHandler(std::filesystem::path outputPath);
 
@@ -20,7 +20,7 @@ public:
                        unsigned int failed, unsigned int skipped) override;
 
     [[nodiscard]] bool writeSucceeded() const noexcept;
-    [[nodiscard]] const std::string& errorMessage() const noexcept;
+    [[nodiscard]] std::string errorMessage() const override;
 
 private:
     enum class Status {

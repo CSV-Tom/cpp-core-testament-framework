@@ -2,9 +2,9 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
-#include "TestEventHandler.hpp"
+#include "Testament/TestEventHandler.hpp"
 
-class ConsoleTestEventHandler : public TestEventHandler {
+class ConsoleTestEventHandler : public Testament::TestEventHandler {
 public:
     static std::string formatDuration(std::chrono::duration<double> d) {
         std::ostringstream os;

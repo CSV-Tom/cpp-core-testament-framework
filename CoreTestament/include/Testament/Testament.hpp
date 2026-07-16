@@ -3,6 +3,7 @@
 
 #include "Testament/Asserts.hpp"
 #include "Testament/Runner.hpp"
+#include "Testament/Reporters.hpp"
 #include "Testament/Suite.hpp"
 #include "Testament/LifecycleSuite.hpp"
 #include "Testament/Test.hpp"

@@ -9,7 +9,7 @@
 
 #include "Testament/Suite.hpp"
 #include "../InternalTest.hpp"
-#include "EventHandlers/TestEventHandler.hpp"
+#include "Testament/TestEventHandler.hpp"
 
 namespace Testament {
 

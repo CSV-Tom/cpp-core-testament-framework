@@ -1,8 +1,8 @@
 #pragma once
-#include "TestEventHandler.hpp"
+#include "Testament/TestEventHandler.hpp"
 #include <vector>
 
-class TestEventHandlerChain : public TestEventHandler {
+class TestEventHandlerChain : public Testament::TestEventHandler {
 public:
     void add(TestEventHandler* handler) {
         if (handler) handlers.push_back(handler);

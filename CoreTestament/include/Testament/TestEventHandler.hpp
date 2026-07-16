@@ -1,7 +1,11 @@
-#pragma once
-#include <string>
+#ifndef TESTAMENT_TESTEVENTHANDLER_HPP
+#define TESTAMENT_TESTEVENTHANDLER_HPP
+
 #include <chrono>
 #include <exception>
+#include <string>
+
+namespace Testament {
 
 class TestEventHandler {
 public:
@@ -10,6 +14,7 @@ public:
         std::chrono::duration<double> duration;
         std::exception_ptr exception;
     };
+
     struct SuiteInfo {
         std::string name;
         unsigned int passed{};
@@ -28,4 +33,10 @@ public:
     virtual void onTestSkipped(const SuiteInfo&, const TestInfo&) {}
     virtual void onLogEvent(const std::string&) {}
     virtual void onFinalReport(unsigned int, unsigned int, unsigned int, unsigned int) {}
+
+    [[nodiscard]] virtual std::string errorMessage() const { return {}; }
 };
+
+}
+
+#endif
