@@ -2,12 +2,14 @@ cmake_minimum_required(VERSION 3.23)
 
 project(CoreTestamentFramework LANGUAGES CXX VERSION 1.0.0)
 
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
+if(PROJECT_IS_TOP_LEVEL)
+    include(CTest)
+endif()
 
 add_library(${PROJECT_NAME} STATIC)
+
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_23)
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_EXTENSIONS OFF)
 
 target_sources(
         ${PROJECT_NAME}
@@ -41,53 +43,53 @@ target_compile_options(${PROJECT_NAME} PRIVATE
 )
 
 if(BUILD_TESTING)
-    add_executable(TestRunner)
+    function(add_testament_test target test_name)
+        add_executable(${target} ${ARGN})
+        target_link_libraries(${target} PRIVATE CoreTestamentFramework)
+        set_target_properties(${target} PROPERTIES CXX_EXTENSIONS OFF)
+        target_compile_options(${target} PRIVATE
+            $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:
+                -Wall
+                -Wextra
+                -Wpedantic
+                -Wshadow
+            >
+            $<$<CXX_COMPILER_ID:MSVC>:/W4>
+        )
+        add_test(NAME ${test_name} COMMAND ${target})
+    endfunction()
 
-    target_sources(TestRunner
-        PRIVATE
+    function(add_testament_internal_test target test_name source)
+        add_testament_test(${target} ${test_name} ${source})
+        target_include_directories(${target} PRIVATE src)
+    endfunction()
+
+    add_testament_test(TestRunner AllTests
             tests/Tests/LifecycleSuiteValidation.cpp
             tests/Tests/ParameterizedSuiteValidation.cpp
             tests/Tests/SuiteValidation.cpp
             tests/mainTest.cpp
     )
 
-    target_compile_options(TestRunner PRIVATE
-        $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:
-            -Wall
-            -Wextra
-            -Wpedantic
-            -Wshadow
-        >
-        $<$<CXX_COMPILER_ID:MSVC>:/W4>
+    add_testament_test(
+        LifecycleSuiteNameValidation LifecycleSuiteName
+        tests/Tests/LifecycleSuiteNameValidation.cpp
     )
 
-    target_link_libraries(TestRunner PRIVATE CoreTestamentFramework)
-
-    add_test(NAME AllTests COMMAND TestRunner)
-
-    add_executable(InternalSuiteRepeatRunValidation
+    add_testament_internal_test(
+        InternalSuiteRepeatRunValidation InternalSuiteRepeatRun
         tests/Tests/InternalSuiteRepeatRunValidation.cpp
     )
-    target_include_directories(InternalSuiteRepeatRunValidation PRIVATE src)
-    target_link_libraries(InternalSuiteRepeatRunValidation PRIVATE CoreTestamentFramework)
 
-    add_test(NAME InternalSuiteRepeatRun COMMAND InternalSuiteRepeatRunValidation)
-
-    add_executable(InternalTestTimerValidation
+    add_testament_internal_test(
+        InternalTestTimerValidation InternalTestTimer
         tests/Tests/InternalTestTimerValidation.cpp
     )
-    target_include_directories(InternalTestTimerValidation PRIVATE src)
-    target_link_libraries(InternalTestTimerValidation PRIVATE CoreTestamentFramework)
 
-    add_test(NAME InternalTestTimer COMMAND InternalTestTimerValidation)
-
-    add_executable(LifecycleHookFailureValidation
+    add_testament_internal_test(
+        LifecycleHookFailureValidation LifecycleHookFailure
         tests/Tests/LifecycleHookFailureValidation.cpp
     )
-    target_include_directories(LifecycleHookFailureValidation PRIVATE src)
-    target_link_libraries(LifecycleHookFailureValidation PRIVATE CoreTestamentFramework)
-
-    add_test(NAME LifecycleHookFailure COMMAND LifecycleHookFailureValidation)
 endif()
 
 
