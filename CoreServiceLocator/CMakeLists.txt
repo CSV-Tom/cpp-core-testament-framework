@@ -4,17 +4,14 @@ project(CoreServices LANGUAGES CXX VERSION 1.0.0)
 
 include(GNUInstallDirs)
 
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
-
 # Allow user to build as SHARED or STATIC
 option(BUILD_SHARED_LIBS "Build CoreServices as a shared library" OFF)
 
 
 add_library(${PROJECT_NAME})
 
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_23)
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_EXTENSIONS OFF)
 
 target_sources(${PROJECT_NAME}
     PRIVATE
