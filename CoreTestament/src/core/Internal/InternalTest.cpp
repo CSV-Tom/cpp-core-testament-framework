@@ -21,6 +21,7 @@ std::variant<std::monostate, std::exception_ptr> InternalTest::execute(const Sui
         return std::monostate{}; // Neither success nor exception
     }
 
+    exception = nullptr;
     executionTimer.reset();
     executionTimer.start();
 
