@@ -27,6 +27,7 @@ target_sources(${PROJECT_NAME}
         src/core/Suite.cpp
         src/core/LifecycleSuite.cpp
         src/core/Test.cpp
+        src/EventHandlers/JUnitTestEventHandler.cpp
     PUBLIC FILE_SET HEADERS
         BASE_DIRS include
         FILES
@@ -160,6 +161,11 @@ if(BUILD_TESTING)
     add_testament_internal_test(
         LifecycleHookFailureValidation LifecycleHookFailure
         tests/Tests/LifecycleHookFailureValidation.cpp
+    )
+
+    add_testament_internal_test(
+        JUnitReporterValidation JUnitReporter
+        tests/Tests/JUnitReporterValidation.cpp
     )
 
     add_test(
