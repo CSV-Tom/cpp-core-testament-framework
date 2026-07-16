@@ -1,6 +1,7 @@
 #include "CoreServices/ServiceLocator.hpp"
 #include <iostream>
 #include <stdexcept>
+#include <utility>
 
 
 // StandardOutService: Writes messages to std::cout
@@ -30,7 +31,9 @@ public:
 
 int main() {
     Core::Services::ServiceLocator locator;
+    bool duplicateServiceRejected = false;
     bool missingServiceRejected = false;
+    bool unknownUnregistrationRejected = false;
     bool nullServiceRejected = false;
 
     // Register services
@@ -45,6 +48,13 @@ int main() {
     auto errService = locator.getService<StandardErrorService>();
     errService->logError("This is a test error.");
 
+    try {
+        locator.registerService(std::make_shared<StandardErrorService>());
+    } catch (const std::runtime_error& e) {
+        duplicateServiceRejected = true;
+        std::cerr << "[Exception Caught] " << e.what() << std::endl;
+    }
+
     // Unregister StandardOutService
     locator.unregisterService<StandardOutService>();
 
@@ -58,11 +68,28 @@ int main() {
     }
 
     try {
-        locator.registerService(std::shared_ptr<StandardOutService>{});
+        locator.unregisterService<StandardOutService>();
+    } catch (const std::runtime_error& e) {
+        unknownUnregistrationRejected = true;
+        std::cerr << "[Exception Caught] " << e.what() << std::endl;
+    }
+
+    Core::Services::ServiceLocator movedLocator(std::move(locator));
+    const bool movePreservedService =
+        movedLocator.getService<StandardErrorService>() == errService;
+
+    try {
+        movedLocator.registerService(std::shared_ptr<StandardOutService>{});
     } catch (const std::invalid_argument& e) {
         nullServiceRejected = true;
         std::cerr << "[Exception Caught] " << e.what() << std::endl;
     }
 
-    return missingServiceRejected && nullServiceRejected ? 0 : 1;
+    return duplicateServiceRejected
+        && missingServiceRejected
+        && unknownUnregistrationRejected
+        && movePreservedService
+        && nullServiceRejected
+        ? 0
+        : 1;
 }
