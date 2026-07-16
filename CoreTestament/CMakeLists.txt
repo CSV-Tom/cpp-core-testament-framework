@@ -11,21 +11,25 @@ add_library(${PROJECT_NAME} STATIC)
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_23)
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_EXTENSIONS OFF)
 
-target_sources(
-        ${PROJECT_NAME}
+target_sources(${PROJECT_NAME}
     PRIVATE
         src/core/Internal/InternalTest.cpp
         src/core/Internal/InternalSuite.cpp
-        src/core/Internal/InternalRegistry.cpp        
+        src/core/Internal/InternalRegistry.cpp
         src/core/Runner.cpp
         src/core/Suite.cpp
         src/core/LifecycleSuite.cpp
         src/core/Test.cpp
-
-        
-    PUBLIC
-FILE_SET HEADERS
+    PUBLIC FILE_SET HEADERS
         BASE_DIRS include
+        FILES
+            include/Testament/Asserts.hpp
+            include/Testament/FunctionVariant.hpp
+            include/Testament/LifecycleSuite.hpp
+            include/Testament/Runner.hpp
+            include/Testament/Suite.hpp
+            include/Testament/Test.hpp
+            include/Testament/Testament.hpp
 )
 
 
