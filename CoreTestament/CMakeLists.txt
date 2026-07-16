@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.31.2)
+cmake_minimum_required(VERSION 3.23)
 
 project(CoreTestamentFramework LANGUAGES CXX VERSION 1.0.0)
 

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.31)
+cmake_minimum_required(VERSION 3.23)
 
 option(BUILD_TESTING "Enable tests" ON)
 if(BUILD_TESTING)
