@@ -8,33 +8,35 @@ namespace Testament {
 
 class ExecutionTimer {
 private:
-    std::chrono::high_resolution_clock::time_point startTime;
-    std::chrono::high_resolution_clock::time_point endTime;
+    using Clock = std::chrono::steady_clock;
+
+    Clock::time_point startTime;
+    Clock::time_point endTime;
     std::chrono::duration<double> accumulatedDuration{0};
 
 public:
     void start() {
-        startTime = std::chrono::high_resolution_clock::now();
+        startTime = Clock::now();
     }
 
     void stop() {
-        endTime = std::chrono::high_resolution_clock::now();
+        endTime = Clock::now();
         accumulatedDuration += (endTime - startTime);
     }
 
     std::chrono::duration<double> getDuration() const {
-        if (startTime == std::chrono::high_resolution_clock::time_point{}) {
+        if (startTime == Clock::time_point{}) {
             throw std::logic_error("Timer was not started before querying elapsed time!");
         }
-        if (endTime == std::chrono::high_resolution_clock::time_point{}) {
-            return accumulatedDuration + (std::chrono::high_resolution_clock::now() - startTime);
+        if (endTime == Clock::time_point{}) {
+            return accumulatedDuration + (Clock::now() - startTime);
         }
         return accumulatedDuration;
     }
 
     void reset() {
-        startTime = std::chrono::high_resolution_clock::time_point{};
-        endTime = std::chrono::high_resolution_clock::time_point{};
+        startTime = Clock::time_point{};
+        endTime = Clock::time_point{};
         accumulatedDuration = std::chrono::duration<double>::zero();
     }
 
