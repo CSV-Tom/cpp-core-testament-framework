@@ -46,6 +46,12 @@ void InternalSuite::setHandler(TestEventHandler* h) {
 
 
 void InternalSuite::run() {
+    statistic.reset();
+    totalTimer.reset();
+    hookTimer.reset();
+    testTimer.reset();
+    hookManager.resetErrors();
+
     totalTimer.start();
 
     if (handler) {

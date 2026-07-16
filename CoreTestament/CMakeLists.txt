@@ -64,6 +64,14 @@ if(BUILD_TESTING)
     target_link_libraries(TestRunner PRIVATE CoreTestamentFramework)
 
     add_test(NAME AllTests COMMAND TestRunner)
+
+    add_executable(InternalSuiteRepeatRunValidation
+        tests/Tests/InternalSuiteRepeatRunValidation.cpp
+    )
+    target_include_directories(InternalSuiteRepeatRunValidation PRIVATE src)
+    target_link_libraries(InternalSuiteRepeatRunValidation PRIVATE CoreTestamentFramework)
+
+    add_test(NAME InternalSuiteRepeatRun COMMAND InternalSuiteRepeatRunValidation)
 endif()
 
 

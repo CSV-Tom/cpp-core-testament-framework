@@ -52,6 +52,10 @@ public:
         }
     }
 
+    void resetErrors() {
+        errors.clear();
+    }
+
 private:
     ExecutionTimer& hookTimer;
     std::vector<std::string> errors;
