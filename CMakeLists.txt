@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.23)
 
-project(TestFramework)
+project(TestFramework LANGUAGES CXX)
 
 include(CTest)
 
