@@ -12,11 +12,7 @@ InternalTest::InternalTest(const std::string& name_, FunctionVariant function_)
 
 InternalTest::~InternalTest() = default;
 
-std::variant<std::monostate, std::exception_ptr> InternalTest::execute(const Suite* suite) {
-    //  if (!suite) {
-//       return std::monostate{}; // No exception, as Suite is nullptr
-//   }
-
+std::variant<std::monostate, std::exception_ptr> InternalTest::execute(Suite* suite) {
     if (status == TestStatus::Status::Skipped) {
         return std::monostate{}; // Neither success nor exception
     }
@@ -31,7 +27,10 @@ std::variant<std::monostate, std::exception_ptr> InternalTest::execute(const Sui
             if constexpr (std::is_same_v<T, std::function<void()>>) {
                 func();
             } else if constexpr (std::is_same_v<T, std::function<void(Suite&)>>) {
-                func(const_cast<Suite&>(*suite));
+                if (!suite) {
+                    throw std::logic_error("Suite context is required for this test");
+                }
+                func(*suite);
             } else {
                 throw std::runtime_error("Invalid FunctionVariant type");
             }

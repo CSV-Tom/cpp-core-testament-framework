@@ -24,7 +24,7 @@ public:
     InternalTest& operator=(InternalTest&&) noexcept = default;
     ~InternalTest() override;
 
-    std::variant<std::monostate, std::exception_ptr> execute(const Suite* suite = nullptr);
+    std::variant<std::monostate, std::exception_ptr> execute(Suite* suite = nullptr);
 
     const std::string& getName() const;
 

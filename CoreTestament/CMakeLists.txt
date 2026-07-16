@@ -138,6 +138,11 @@ if(BUILD_TESTING)
     )
 
     add_testament_internal_test(
+        InternalTestContextValidation InternalTestContext
+        tests/Tests/InternalTestContextValidation.cpp
+    )
+
+    add_testament_internal_test(
         LifecycleHookFailureValidation LifecycleHookFailure
         tests/Tests/LifecycleHookFailureValidation.cpp
     )
