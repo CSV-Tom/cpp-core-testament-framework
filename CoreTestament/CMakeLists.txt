@@ -31,14 +31,13 @@ target_include_directories(
     ${PROJECT_NAME} PRIVATE src
 )
 target_compile_options(${PROJECT_NAME} PRIVATE
-    -Wall
-    -Wextra
-    -Wpedantic
-    -Werror
-    -Wshadow
-	#-H
-	#-s
-	-O3
+    $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:
+        -Wall
+        -Wextra
+        -Wpedantic
+        -Wshadow
+    >
+    $<$<CXX_COMPILER_ID:MSVC>:/W4>
 )
 
 if(BUILD_TESTING)
@@ -53,8 +52,13 @@ if(BUILD_TESTING)
     )
 
     target_compile_options(TestRunner PRIVATE
-        -Wall
-       # -fmodules-ts
+        $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:
+            -Wall
+            -Wextra
+            -Wpedantic
+            -Wshadow
+        >
+        $<$<CXX_COMPILER_ID:MSVC>:/W4>
     )
 
     target_link_libraries(TestRunner PRIVATE CoreTestamentFramework)
