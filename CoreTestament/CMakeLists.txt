@@ -7,9 +7,13 @@ if(PROJECT_IS_TOP_LEVEL)
 endif()
 
 add_library(${PROJECT_NAME} STATIC)
+add_library(CoreTestament::CoreTestament ALIAS ${PROJECT_NAME})
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_23)
-set_target_properties(${PROJECT_NAME} PROPERTIES CXX_EXTENSIONS OFF)
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    CXX_EXTENSIONS OFF
+    EXPORT_NAME CoreTestament
+)
 
 target_sources(${PROJECT_NAME}
     PRIVATE
@@ -49,7 +53,7 @@ target_compile_options(${PROJECT_NAME} PRIVATE
 if(BUILD_TESTING)
     function(add_testament_test target test_name)
         add_executable(${target} ${ARGN})
-        target_link_libraries(${target} PRIVATE CoreTestamentFramework)
+        target_link_libraries(${target} PRIVATE CoreTestament::CoreTestament)
         set_target_properties(${target} PROPERTIES CXX_EXTENSIONS OFF)
         target_compile_options(${target} PRIVATE
             $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:
