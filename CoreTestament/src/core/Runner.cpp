@@ -19,9 +19,10 @@ int Runner::run(int /*argc*/, char** /*argv*/) {
     chain.onStartReport(static_cast<unsigned int>(suites.size()));
 
     TestStatistics<unsigned int> total;
+    bool hooksSucceeded = true;
     for (auto& suite : suites) {
         suite->setHandler(&chain);
-        suite->run();
+        hooksSucceeded = suite->run() && hooksSucceeded;
         total += suite->getStatistics();
     }
 
@@ -32,7 +33,7 @@ int Runner::run(int /*argc*/, char** /*argv*/) {
         total.getSkippedTests()
     );
 
-    return total.getFailedTests() == 0 ? 0 : 1;
+    return total.getFailedTests() == 0 && hooksSucceeded ? 0 : 1;
 }
 
 }

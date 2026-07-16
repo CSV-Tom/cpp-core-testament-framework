@@ -6,11 +6,12 @@ int main() {
     Testament::InternalSuite suite("repeat-run validation");
     suite.addTest(Testament::Test::create("passing test", [] {}));
 
-    suite.run();
-    suite.run();
+    const bool firstRunSucceeded = suite.run();
+    const bool secondRunSucceeded = suite.run();
 
     const auto& statistics = suite.getStatistics();
-    return statistics.getTotalTests() == 1 && statistics.getPassedTests() == 1
+    return firstRunSucceeded && secondRunSucceeded
+        && statistics.getTotalTests() == 1 && statistics.getPassedTests() == 1
         ? 0
         : 1;
 }

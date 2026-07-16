@@ -38,7 +38,7 @@ public:
     void setTestFilter(std::variant<std::string, std::regex> filter);
     void setHandler(TestEventHandler* handler);
 
-    void run();
+    [[nodiscard]] bool run();
 
     const std::string& getName() const;
     const TestStatistics<unsigned int>& getStatistics() const;

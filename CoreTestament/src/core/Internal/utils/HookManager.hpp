@@ -30,17 +30,17 @@ public:
         afterSuiteHook = std::move(callback);
     }
 
-    void invokeBeforeSuiteHook() {
-        invokeHook(beforeSuiteHook, "beforeSuite");
+    bool invokeBeforeSuiteHook() {
+        return invokeHook(beforeSuiteHook, "beforeSuite");
     }
-    void invokeBeforeEachHook() {
-        invokeHook(beforeEachHook, "beforeEach");
+    bool invokeBeforeEachHook() {
+        return invokeHook(beforeEachHook, "beforeEach");
     }
-    void invokeAfterEachHook() {
-        invokeHook(afterEachHook, "afterEach");
+    bool invokeAfterEachHook() {
+        return invokeHook(afterEachHook, "afterEach");
     }
-    void invokeAfterSuiteHook() {
-        invokeHook(afterSuiteHook, "afterSuite");
+    bool invokeAfterSuiteHook() {
+        return invokeHook(afterSuiteHook, "afterSuite");
     }
 
     void reportErrors() const {
@@ -65,24 +65,28 @@ private:
     Callback afterEachHook;
     Callback afterSuiteHook;
 
-    void invokeHook(const Callback& hook, const std::string& hookName) {
+    bool invokeHook(const Callback& hook, const std::string& hookName) {
         if (hook) {
             try {
                 hookTimer.start();
                 hook();
                 hookTimer.stop();
+                return true;
             } catch (const std::exception& e) {
                 hookTimer.stop();
                 std::ostringstream oss;
                 oss << "Error in " << hookName << ": " << e.what();
                 errors.push_back(oss.str());
+                return false;
             } catch (...) {
                 hookTimer.stop();
                 std::ostringstream oss;
                 oss << "Unknown error in " << hookName;
                 errors.push_back(oss.str());
+                return false;
             }
         }
+        return true;
     }
 };
 

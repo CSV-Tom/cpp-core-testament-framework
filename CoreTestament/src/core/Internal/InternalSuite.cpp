@@ -45,7 +45,7 @@ void InternalSuite::setHandler(TestEventHandler* h) {
 }
 
 
-void InternalSuite::run() {
+bool InternalSuite::run() {
     statistic.reset();
     totalTimer.reset();
     hookTimer.reset();
@@ -58,25 +58,41 @@ void InternalSuite::run() {
         handler->onSuiteStart({name});
     }
 
-    hookManager.invokeBeforeSuiteHook();
+    if (!hookManager.invokeBeforeSuiteHook()) {
+        totalTimer.stop();
+        hookManager.reportErrors();
+        if (handler) {
+            handler->onSuiteAbort("beforeAll hook failed");
+        }
+        return false;
+    }
 
+    bool hooksSucceeded = true;
     Suite& suiteRef = suite ? *suite : static_cast<Suite&>(*this);
     for (auto& test : tests | std::views::filter([this](const auto& t) {
     return !testFilter || testFilter(t->getName());
     })) {
-        hookManager.invokeBeforeEachHook();
+        if (!hookManager.invokeBeforeEachHook()) {
+            hooksSucceeded = false;
+            continue;
+        }
         testManager.executeTest(suiteRef, test, name, handler);
-        hookManager.invokeAfterEachHook();
+        hooksSucceeded = hookManager.invokeAfterEachHook() && hooksSucceeded;
     }
 
-    hookManager.invokeAfterSuiteHook();
+    hooksSucceeded = hookManager.invokeAfterSuiteHook() && hooksSucceeded;
 
     totalTimer.stop();
     hookManager.reportErrors();
 
     if (handler) {
         handler->onSuiteEnd({name, statistic.getPassedTests(), statistic.getFailedTests(), statistic.getSkippedTests()});
+        if (!hooksSucceeded) {
+            handler->onSuiteAbort("lifecycle hook failed");
+        }
     }
+
+    return hooksSucceeded;
 }
 
 const std::string& InternalSuite::getName() const {

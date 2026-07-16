@@ -80,6 +80,14 @@ if(BUILD_TESTING)
     target_link_libraries(InternalTestTimerValidation PRIVATE CoreTestamentFramework)
 
     add_test(NAME InternalTestTimer COMMAND InternalTestTimerValidation)
+
+    add_executable(LifecycleHookFailureValidation
+        tests/Tests/LifecycleHookFailureValidation.cpp
+    )
+    target_include_directories(LifecycleHookFailureValidation PRIVATE src)
+    target_link_libraries(LifecycleHookFailureValidation PRIVATE CoreTestamentFramework)
+
+    add_test(NAME LifecycleHookFailure COMMAND LifecycleHookFailureValidation)
 endif()
 
 
