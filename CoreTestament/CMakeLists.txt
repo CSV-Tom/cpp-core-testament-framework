@@ -153,6 +153,11 @@ if(BUILD_TESTING)
     )
 
     add_testament_internal_test(
+        InternalSuiteFilterValidation InternalSuiteFilter
+        tests/Tests/InternalSuiteFilterValidation.cpp
+    )
+
+    add_testament_internal_test(
         LifecycleHookFailureValidation LifecycleHookFailure
         tests/Tests/LifecycleHookFailureValidation.cpp
     )
