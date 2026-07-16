@@ -8,6 +8,12 @@
 #include "Testament/Test.hpp"
 
 #include <concepts>
+#include <functional>
+#include <memory>
+#include <stdexcept>
+#include <tuple>
+#include <utility>
+#include <vector>
 
 namespace Testament {
 
@@ -41,7 +47,11 @@ requires std::derived_from<SuiteType, Suite> && std::invocable<Callable, SuiteTy
 std::shared_ptr<Test> makeTest(const std::string& name, Callable&& testFunction) {
     return Test::create(name, FunctionVariant{
         [testFunction = std::forward<Callable>(testFunction)](Suite& suite) {
-            testFunction(static_cast<SuiteType&>(suite)); // Explizite Umwandlung zu Suite
+            auto* typedSuite = dynamic_cast<SuiteType*>(&suite);
+            if (!typedSuite) {
+                throw std::logic_error("Test fixture type does not match suite fixture type");
+            }
+            std::invoke(testFunction, *typedSuite);
         }
     });
 }
@@ -56,14 +66,18 @@ std::shared_ptr<Test> makeParameterizedTest(const std::string& name, Callable&& 
     }});
 }
 
-template <typename Suite, typename Callable, typename... Args>
-requires std::invocable<Callable, Suite&, Args...>
+template <typename SuiteType, typename Callable, typename... Args>
+requires std::derived_from<SuiteType, Suite> && std::invocable<Callable, SuiteType&, Args...>
 std::shared_ptr<Test> makeParameterizedTest(const std::string& name, Callable&& testFunction, std::vector<std::tuple<Args...>> parameters) {
     return Test::create(name, FunctionVariant{
         [testFunction = std::forward<Callable>(testFunction), parameters](Suite& suite) {
+            auto* typedSuite = dynamic_cast<SuiteType*>(&suite);
+            if (!typedSuite) {
+                throw std::logic_error("Test fixture type does not match suite fixture type");
+            }
             for (const auto& params : parameters) {
-                std::apply([&suite, &testFunction](Args... args) {
-                    testFunction(suite, args...); // Parameter entpacken und Funktion ausführen
+                std::apply([typedSuite, &testFunction](Args... args) {
+                    std::invoke(testFunction, *typedSuite, args...);
                 }, params);
             }
         }

@@ -122,6 +122,11 @@ if(BUILD_TESTING)
         tests/Tests/LifecycleSuiteNameValidation.cpp
     )
 
+    add_testament_test(
+        FixtureTypeValidation FixtureType
+        tests/Tests/FixtureTypeValidation.cpp
+    )
+
     add_testament_internal_test(
         InternalSuiteRepeatRunValidation InternalSuiteRepeatRun
         tests/Tests/InternalSuiteRepeatRunValidation.cpp
