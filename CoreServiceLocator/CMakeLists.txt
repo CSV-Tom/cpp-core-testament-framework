@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.23)
 
 project(CoreServices LANGUAGES CXX VERSION 1.0.0)
 
+include(GNUInstallDirs)
+
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -19,7 +21,9 @@ target_sources(${PROJECT_NAME}
         src/ServiceLocator.cpp
     PUBLIC FILE_SET HEADERS
         BASE_DIRS include
-        PATTERN *.hpp
+        FILES
+            include/CoreServices/ServiceLocator.hpp
+            include/CoreServices/ServiceLocator.tpp
 )
 
 
@@ -34,8 +38,6 @@ target_include_directories(${PROJECT_NAME}
 
 
 # Library Export Configuration
-include(GNUInstallDirs)
-
 install(
     TARGETS ${PROJECT_NAME}
     EXPORT CoreServicesTargets
