@@ -136,6 +136,22 @@ if(BUILD_TESTING)
         LifecycleHookFailureValidation LifecycleHookFailure
         tests/Tests/LifecycleHookFailureValidation.cpp
     )
+
+    add_test(
+        NAME CoreTestamentInstallConsumer
+        COMMAND ${CMAKE_COMMAND}
+            -DTEST_BINARY_DIR=${CMAKE_BINARY_DIR}
+            -DTEST_CONSUMER_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/tests/consumer
+            -DTEST_ROOT=${CMAKE_CURRENT_BINARY_DIR}/install-consumer-test
+            -DTEST_GENERATOR=${CMAKE_GENERATOR}
+            -DTEST_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM}
+            -DTEST_GENERATOR_TOOLSET=${CMAKE_GENERATOR_TOOLSET}
+            -DTEST_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
+            -DTEST_CONFIG=$<CONFIG>
+            -DTEST_CTEST_COMMAND=${CMAKE_CTEST_COMMAND}
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/cmake/InstallConsumerTest.cmake
+    )
+    set_tests_properties(CoreTestamentInstallConsumer PROPERTIES LABELS integration)
 endif()
 
 
