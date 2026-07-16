@@ -3,23 +3,9 @@
 set -euo pipefail
 
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+build_dir="${BUILD_DIR:-${dir}/build}"
 
-pushd "$dir" > /dev/null || exit 2
-
-#mkdir -p build/ && cd build && cmake .. && make -j
-
-
-#rm -rf build/ && mkdir -p build/ && cd build && cmake -GNinja -DBUILD_TESTING=ON -DCMAKE_INSTALL_PREFIX=deploy -DCMAKE_TOOLCHAIN_FILE=toolchains/clang-toolchain.cmake .. && ninja -v -j $(nproc) install && ctest --verbose --output-on-failure -j $(nproc)
-
-# MODULES DO NOT WORK CORRECTLY WITH g++-14 
-#rm -rf build/ && mkdir -p build/ && cd build && cmake -GNinja -DCMAKE_TOOLCHAIN_FILE=toolchains/gcc14-toolchain.cmake .. && ninja -v -j $(nproc)
-
-# MODULES WORK WITH g++-15
-rm -rf build/ && mkdir -p build/ && cd build && cmake -GNinja -DCMAKE_TOOLCHAIN_FILE=toolchains/gcc15-toolchain.cmake .. && ninja -v -j $(nproc)
-
-./CoreServiceLocator/TestCoreServices
-
-./CoreTestament/TestRunner
-
-
-popd > /dev/null || exit 3
+cmake -S "$dir" -B "$build_dir" -G "${CMAKE_GENERATOR:-Ninja}" \
+    -DBUILD_TESTING=ON "$@"
+cmake --build "$build_dir" --parallel
+ctest --test-dir "$build_dir" --output-on-failure --parallel "$(nproc)"
