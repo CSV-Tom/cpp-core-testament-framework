@@ -21,19 +21,21 @@ namespace Testament {
 
 template <typename... Tests>
 requires (std::same_as<std::remove_cvref_t<Tests>, Test> && ...)
-std::shared_ptr<Suite> makeSuite(const std::string& name, Tests&&... cases) {
-    auto suite = Suite::create(name);
-    (suite->addTest(std::forward<Tests>(cases)), ...);
-    return suite;
+Suite makeSuite(const std::string& name, Tests&&... cases) {
+    std::vector<Test> tests;
+    tests.reserve(sizeof...(Tests));
+    (tests.emplace_back(std::forward<Tests>(cases)), ...);
+    return detail::makeSuite(name, std::move(tests));
 }
 
 
 template <typename T, typename... Tests>
 requires (std::derived_from<T, LifecycleSuite> && (std::same_as<std::remove_cvref_t<Tests>, Test> && ...))
-std::shared_ptr<Suite> makeSuite(const std::string& name, Tests&&... cases) {
-    auto suite = LifecycleSuite::create(name, std::make_shared<T>());
-    (suite->addTest(std::forward<Tests>(cases)), ...);
-    return suite;
+Suite makeSuite(const std::string& name, Tests&&... cases) {
+    std::vector<Test> tests;
+    tests.reserve(sizeof...(Tests));
+    (tests.emplace_back(std::forward<Tests>(cases)), ...);
+    return detail::makeSuite(name, std::make_unique<T>(), std::move(tests));
 }
 
 
@@ -44,10 +46,10 @@ Test makeTest(const std::string& name, Callable&& testFunction) {
 }
 
 template <typename SuiteType, typename Callable>
-requires std::derived_from<SuiteType, Suite> && std::invocable<Callable, SuiteType&>
+requires std::derived_from<SuiteType, LifecycleSuite> && std::invocable<Callable, SuiteType&>
 Test makeTest(const std::string& name, Callable&& testFunction) {
-    return detail::makeTest(name, std::function<void(Suite&)>{
-        [testFunction = std::forward<Callable>(testFunction)](Suite& suite) {
+    return detail::makeTest(name, std::function<void(LifecycleSuite&)>{
+        [testFunction = std::forward<Callable>(testFunction)](LifecycleSuite& suite) {
             auto* typedSuite = dynamic_cast<SuiteType*>(&suite);
             if (!typedSuite) {
                 throw std::logic_error("Test fixture type does not match suite fixture type");
@@ -68,10 +70,10 @@ Test makeParameterizedTest(const std::string& name, Callable&& testFunction, std
 }
 
 template <typename SuiteType, typename Callable, typename... Args>
-requires std::derived_from<SuiteType, Suite> && std::invocable<Callable, SuiteType&, Args...>
+requires std::derived_from<SuiteType, LifecycleSuite> && std::invocable<Callable, SuiteType&, Args...>
 Test makeParameterizedTest(const std::string& name, Callable&& testFunction, std::vector<std::tuple<Args...>> parameters) {
-    return detail::makeTest(name, std::function<void(Suite&)>{
-        [testFunction = std::forward<Callable>(testFunction), parameters](Suite& suite) {
+    return detail::makeTest(name, std::function<void(LifecycleSuite&)>{
+        [testFunction = std::forward<Callable>(testFunction), parameters](LifecycleSuite& suite) {
             auto* typedSuite = dynamic_cast<SuiteType*>(&suite);
             if (!typedSuite) {
                 throw std::logic_error("Test fixture type does not match suite fixture type");

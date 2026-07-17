@@ -6,7 +6,7 @@
 #include <variant>
 #include <exception>
 
-#include "Testament/Suite.hpp"
+#include "Testament/LifecycleSuite.hpp"
 #include "FunctionVariant.hpp"
 
 
@@ -23,7 +23,7 @@ public:
     InternalTest& operator=(InternalTest&&) noexcept = default;
     ~InternalTest();
 
-    std::variant<std::monostate, std::exception_ptr> execute(Suite* suite = nullptr);
+    std::variant<std::monostate, std::exception_ptr> execute(LifecycleSuite* fixture = nullptr);
 
     const std::string& getName() const;
 

@@ -7,7 +7,7 @@
 #include <variant>
 #include <exception>
 
-#include "Testament/Suite.hpp"
+#include "Testament/LifecycleSuite.hpp"
 #include "../InternalTest.hpp"
 #include "Testament/TestEventHandler.hpp"
 
@@ -18,10 +18,10 @@ public:
     TestManager(ExecutionTimer& timer, TestStatistics<unsigned int>& statistic_)
         : testTimer(timer), statistic(statistic_) {}
 
-    void executeTest(Suite& suite, std::unique_ptr<InternalTest>& test,
+    void executeTest(LifecycleSuite* fixture, std::unique_ptr<InternalTest>& test,
                      const std::string& suiteName, TestEventHandler* handler = nullptr) {
         testTimer.start();
-        auto result = test->execute(&suite);
+        auto result = test->execute(fixture);
         testTimer.stop();
         processResult(suiteName, test, result, handler);
     }

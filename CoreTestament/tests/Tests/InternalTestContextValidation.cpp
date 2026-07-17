@@ -1,4 +1,4 @@
-#include "Testament/Suite.hpp"
+#include "Testament/LifecycleSuite.hpp"
 
 #include "core/Internal/FunctionVariant.hpp"
 #include "core/Internal/InternalTest.hpp"
@@ -11,8 +11,8 @@ int main() {
     bool testBodyEntered = false;
     Testament::InternalTest test(
         "missing suite context",
-        Testament::FunctionVariant{std::function<void(Testament::Suite&)>(
-            [&testBodyEntered](Testament::Suite&) {
+        Testament::FunctionVariant{std::function<void(Testament::LifecycleSuite&)>(
+            [&testBodyEntered](Testament::LifecycleSuite&) {
                 testBodyEntered = true;
             }
         )}

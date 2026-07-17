@@ -23,10 +23,10 @@ int main() {
             testBodyEntered = true;
         }
     );
-    static_cast<void>(Testament::makeSuite<ActualFixture>(
+    auto mismatchedSuite = Testament::makeSuite<ActualFixture>(
         "fixture type validation",
         std::move(mismatchedTest)
-    ));
+    );
 
     auto matchingParameterizedTest = Testament::makeParameterizedTest<ExpectedFixture>(
         "matching parameterized fixture",
@@ -36,10 +36,10 @@ int main() {
         },
         std::vector<std::tuple<int>>{{1}, {2}, {3}}
     );
-    static_cast<void>(Testament::makeSuite<ExpectedFixture>(
+    auto matchingSuite = Testament::makeSuite<ExpectedFixture>(
         "matching parameterized fixture validation",
         std::move(matchingParameterizedTest)
-    ));
+    );
 
     auto mismatchedParameterizedTest = Testament::makeParameterizedTest<ExpectedFixture>(
         "mismatched parameterized fixture",
@@ -48,10 +48,13 @@ int main() {
         },
         std::vector<std::tuple<int>>{{1}, {2}}
     );
-    static_cast<void>(Testament::makeSuite<ActualFixture>(
+    auto mismatchedParameterizedSuite = Testament::makeSuite<ActualFixture>(
         "mismatched parameterized fixture validation",
         std::move(mismatchedParameterizedTest)
-    ));
+    );
+    static_cast<void>(mismatchedSuite);
+    static_cast<void>(matchingSuite);
+    static_cast<void>(mismatchedParameterizedSuite);
 
     const int runnerResult = Testament::run(0, nullptr);
     return runnerResult == 1

@@ -12,7 +12,7 @@ InternalTest::InternalTest(const std::string& name_, FunctionVariant function_)
 
 InternalTest::~InternalTest() = default;
 
-std::variant<std::monostate, std::exception_ptr> InternalTest::execute(Suite* suite) {
+std::variant<std::monostate, std::exception_ptr> InternalTest::execute(LifecycleSuite* fixture) {
     if (status == TestStatus::Status::Skipped) {
         return std::monostate{}; // Neither success nor exception
     }
@@ -22,15 +22,15 @@ std::variant<std::monostate, std::exception_ptr> InternalTest::execute(Suite* su
     executionTimer.start();
 
     try {
-        std::visit([suite](auto&& func) {
+        std::visit([fixture](auto&& func) {
             using T = std::decay_t<decltype(func)>;
             if constexpr (std::is_same_v<T, std::function<void()>>) {
                 func();
-            } else if constexpr (std::is_same_v<T, std::function<void(Suite&)>>) {
-                if (!suite) {
+            } else if constexpr (std::is_same_v<T, std::function<void(LifecycleSuite&)>>) {
+                if (!fixture) {
                     throw std::logic_error("Suite context is required for this test");
                 }
-                func(*suite);
+                func(*fixture);
             } else {
                 throw std::runtime_error("Invalid FunctionVariant type");
             }

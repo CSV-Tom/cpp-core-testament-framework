@@ -16,9 +16,13 @@ InternalSuite::InternalSuite(const std::string& name_)
     }
 }
 
-InternalSuite::InternalSuite(const std::string& name_, std::shared_ptr<Suite> suite_)
+InternalSuite::InternalSuite(const std::string& name_, std::unique_ptr<LifecycleSuite> fixture_)
     : InternalSuite(name_) {
-    suite = std::move(suite_);
+    fixture = std::move(fixture_);
+    setBeforeSuite([this] { fixture->beforeAll(); });
+    setBeforeEach([this] { fixture->beforeEach(); });
+    setAfterEach([this] { fixture->afterEach(); });
+    setAfterSuite([this] { fixture->afterAll(); });
 }
 
 InternalSuite::~InternalSuite() = default;
@@ -81,7 +85,6 @@ bool InternalSuite::run() {
     }
 
     bool hooksSucceeded = true;
-    Suite& suiteRef = suite ? *suite : static_cast<Suite&>(*this);
     for (auto& test : tests | std::views::filter([this](const auto& t) {
     return !testFilter || testFilter(t->getName());
     })) {
@@ -89,7 +92,7 @@ bool InternalSuite::run() {
             hooksSucceeded = false;
             continue;
         }
-        testManager.executeTest(suiteRef, test, name, handler);
+        testManager.executeTest(fixture.get(), test, name, handler);
         hooksSucceeded = hookManager.invokeAfterEachHook() && hooksSucceeded;
     }
 

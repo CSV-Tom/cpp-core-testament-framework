@@ -155,6 +155,11 @@ if(BUILD_TESTING)
     )
 
     add_testament_internal_test(
+        SuiteLifetimeValidation SuiteLifetime
+        tests/Tests/SuiteLifetimeValidation.cpp
+    )
+
+    add_testament_internal_test(
         InternalSuiteFilterValidation InternalSuiteFilter
         tests/Tests/InternalSuiteFilterValidation.cpp
     )

@@ -1,34 +1,36 @@
 #ifndef TESTFRAMEWORK_TESTAMENT_INTERNALSUITE_HPP
 #define TESTFRAMEWORK_TESTAMENT_INTERNALSUITE_HPP
 
-#include "Testament/Suite.hpp"
-
-#include <vector>
-#include <functional>
-#include <variant>
-#include <regex>
-
-#include "utils/ExecutionTimer.hpp"
-#include "utils/TestStatistics.hpp"
-#include "utils/HookManager.hpp"
-#include "utils/TestManager.hpp"
+#include "Testament/LifecycleSuite.hpp"
+#include "Testament/Test.hpp"
 #include "Testament/TestEventHandler.hpp"
 
+#include "utils/ExecutionTimer.hpp"
+#include "utils/HookManager.hpp"
+#include "utils/TestManager.hpp"
+#include "utils/TestStatistics.hpp"
+
+#include <functional>
+#include <memory>
+#include <regex>
+#include <string>
+#include <variant>
+#include <vector>
 
 namespace Testament {
 
 class InternalTest;
 
-class InternalSuite : public Suite {
+class InternalSuite {
 public:
     using Callback = std::function<void()>;
     using TestFilter = std::function<bool(const std::string&)>;
 
     explicit InternalSuite(const std::string& name);
-    explicit InternalSuite(const std::string& name, std::shared_ptr<Suite> suite);
-    ~InternalSuite() override;
+    explicit InternalSuite(const std::string& name, std::unique_ptr<LifecycleSuite> fixture);
+    ~InternalSuite();
 
-    void addTest(Test test) override;
+    void addTest(Test test);
 
     void setBeforeSuite(Callback callback);
     void setBeforeEach(Callback callback);
@@ -43,6 +45,7 @@ public:
     const std::string& getName() const;
     const TestStatistics<unsigned int>& getStatistics() const;
     const ExecutionTimer& getTotalTimer() const;
+
 private:
     TestStatistics<unsigned int> statistic;
     TestEventHandler* handler{nullptr};
@@ -58,7 +61,7 @@ private:
     TestManager testManager;
     TestFilter testFilter = nullptr;
 
-    std::shared_ptr<Suite> suite = nullptr;
+    std::unique_ptr<LifecycleSuite> fixture;
 };
 
 }

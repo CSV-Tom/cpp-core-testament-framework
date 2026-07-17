@@ -1,29 +1,59 @@
 #include "Testament/Suite.hpp"
+
 #include "Testament/Test.hpp"
 
-#include "Internal/InternalSuite.hpp"
 #include "Internal/InternalRegistry.hpp"
+#include "Internal/InternalSuite.hpp"
+
+#include <utility>
 
 namespace Testament {
 
-std::shared_ptr<Suite> Suite::create(const std::string& name)
-{
-    return InternalRegistry::getInstance().registerSuite(std::make_unique<InternalSuite>(name));
+class Suite::Impl {
+public:
+    explicit Impl(std::shared_ptr<InternalSuite> suite_) : suite(std::move(suite_)) {}
+
+    ~Impl() {
+        InternalRegistry::getInstance().unregisterSuite(suite);
+    }
+
+    std::shared_ptr<InternalSuite> suite;
+};
+
+namespace {
+
+std::shared_ptr<InternalSuite> registerSuite(std::string name,
+                                            std::unique_ptr<LifecycleSuite> fixture,
+                                            std::vector<Test> tests) {
+    auto suite = fixture
+        ? std::make_shared<InternalSuite>(std::move(name), std::move(fixture))
+        : std::make_shared<InternalSuite>(std::move(name));
+    for (auto& test : tests) {
+        suite->addTest(std::move(test));
+    }
+    return InternalRegistry::getInstance().registerSuite(std::move(suite));
 }
 
-void Suite::addTest(Test test)
-{
-    if (auto internalSuite = dynamic_cast<InternalSuite*>(this)) {
-        internalSuite->addTest(std::move(test));
-    }
-    else {
-        throw std::logic_error("addTest called on a non-InternalSuite instance");
-    }
 }
 
-Suite::Suite() = default;
+Suite detail::makeSuite(std::string name, std::vector<Test> tests) {
+    auto suite = registerSuite(std::move(name), nullptr, std::move(tests));
+    return Suite{std::make_unique<Suite::Impl>(std::move(suite))};
+}
+
+Suite detail::makeSuite(std::string name, std::unique_ptr<LifecycleSuite> fixture,
+                        std::vector<Test> tests) {
+    auto suite = registerSuite(std::move(name), std::move(fixture), std::move(tests));
+    return Suite{std::make_unique<Suite::Impl>(std::move(suite))};
+}
+
+Suite::Suite(std::unique_ptr<Impl> impl_) : impl(std::move(impl_)) {}
+Suite::~Suite() = default;
 Suite::Suite(Suite&&) noexcept = default;
 Suite& Suite::operator=(Suite&&) noexcept = default;
-Suite::~Suite() = default;
+
+Suite::operator bool() const noexcept {
+    return static_cast<bool>(impl);
+}
 
 }

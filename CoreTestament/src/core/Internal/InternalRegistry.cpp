@@ -1,5 +1,6 @@
 #include "InternalRegistry.hpp"
 
+#include <algorithm>
 #include <mutex>
 
 #include "InternalSuite.hpp"
@@ -10,6 +11,11 @@ namespace Testament {
 InternalRegistry& InternalRegistry::getInstance() {
     static InternalRegistry instance;
     return instance;
+}
+
+void InternalRegistry::unregisterSuite(const std::shared_ptr<InternalSuite>& suite) {
+    std::unique_lock lock(registryMutex);
+    std::erase(registeredSuites, suite);
 }
 
 std::shared_ptr<InternalSuite> InternalRegistry::registerSuite(std::shared_ptr<InternalSuite> suite) {

@@ -21,7 +21,7 @@ Test detail::makeTest(std::string name, std::function<void()> function) {
     )};
 }
 
-Test detail::makeTest(std::string name, std::function<void(Suite&)> function) {
+Test detail::makeTest(std::string name, std::function<void(LifecycleSuite&)> function) {
     return Test{std::make_unique<Test::Impl>(
         std::make_unique<InternalTest>(std::move(name), FunctionVariant{std::move(function)})
     )};

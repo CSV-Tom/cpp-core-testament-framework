@@ -7,14 +7,14 @@
 
 namespace Testament {
 
-class Suite;
+class LifecycleSuite;
 class Test;
 
 namespace detail {
 
 class TestAccess;
 Test makeTest(std::string name, std::function<void()> function);
-Test makeTest(std::string name, std::function<void(Suite&)> function);
+Test makeTest(std::string name, std::function<void(LifecycleSuite&)> function);
 
 }
 
@@ -34,7 +34,7 @@ private:
     explicit Test(std::unique_ptr<Impl> impl);
 
     friend Test detail::makeTest(std::string, std::function<void()>);
-    friend Test detail::makeTest(std::string, std::function<void(Suite&)>);
+    friend Test detail::makeTest(std::string, std::function<void(LifecycleSuite&)>);
     friend class detail::TestAccess;
 
     std::unique_ptr<Impl> impl;

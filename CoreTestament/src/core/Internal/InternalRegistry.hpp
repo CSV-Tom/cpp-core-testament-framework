@@ -15,6 +15,7 @@ public:
     static InternalRegistry& getInstance();
 
     std::shared_ptr<InternalSuite> registerSuite(std::shared_ptr<InternalSuite> suite);
+    void unregisterSuite(const std::shared_ptr<InternalSuite>& suite);
 
     [[nodiscard]] std::vector<std::shared_ptr<InternalSuite>> getAllSuites() const;
 
