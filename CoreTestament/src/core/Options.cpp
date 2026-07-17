@@ -46,7 +46,7 @@ SuiteOptions& SuiteOptions::operator=(SuiteOptions&&) noexcept = default;
 void SuiteOptions::detach() {
     if (!impl) {
         impl = std::make_shared<Impl>();
-    } else if (!impl.unique()) {
+    } else if (impl.use_count() != 1) {
         impl = std::make_shared<Impl>(*impl);
     }
 }
@@ -91,7 +91,7 @@ TestOptions& TestOptions::operator=(TestOptions&&) noexcept = default;
 void TestOptions::detach() {
     if (!impl) {
         impl = std::make_shared<Impl>();
-    } else if (!impl.unique()) {
+    } else if (impl.use_count() != 1) {
         impl = std::make_shared<Impl>(*impl);
     }
 }
