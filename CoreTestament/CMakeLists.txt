@@ -159,6 +159,11 @@ if(BUILD_TESTING)
         tests/Tests/SuiteLifetimeValidation.cpp
     )
 
+    add_testament_test(
+        HandlerArgumentsValidation HandlerArguments
+        tests/Tests/HandlerArgumentsValidation.cpp
+    )
+
     add_testament_internal_test(
         InternalSuiteFilterValidation InternalSuiteFilter
         tests/Tests/InternalSuiteFilterValidation.cpp

@@ -2,17 +2,25 @@
 
 #include <expected>
 #include <memory>
+#include <string>
+#include <string_view>
 #include <utility>
 
 namespace {
 
 class ConsumerHandler final : public Testament::TestEventHandler {
 public:
+    std::string configure(Arguments arguments) override {
+        configured = arguments.size() == 1 && arguments.front() == "--consumer";
+        return {};
+    }
+
     void onTestPassed(const SuiteInfo&, const TestInfo&) override {
         ++passed;
     }
 
     int passed{};
+    bool configured{};
 };
 
 }
@@ -27,9 +35,14 @@ int main() {
     Testament::Runner runner;
     runner.addHandler(std::move(handler));
 
+    std::string executable = "CoreTestamentConsumer";
+    std::string option = "--consumer";
+    char* arguments[]{executable.data(), option.data()};
+
     return cxx23Value.value() == 23
         && suite
-        && runner.run(0, nullptr) == 0
+        && runner.run(2, arguments) == 0
+        && handlerResult->configured
         && handlerResult->passed == 1
         ? 0
         : 1;

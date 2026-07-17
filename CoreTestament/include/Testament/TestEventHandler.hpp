@@ -3,12 +3,17 @@
 
 #include <chrono>
 #include <exception>
+#include <span>
 #include <string>
+#include <string_view>
 
 namespace Testament {
 
 class TestEventHandler {
 public:
+    // Argument views remain valid for the duration of Runner::run.
+    using Arguments = std::span<const std::string_view>;
+
     struct TestInfo {
         std::string name;
         std::chrono::duration<double> duration;
@@ -24,6 +29,8 @@ public:
 
     virtual ~TestEventHandler() = default;
 
+    // Return an error message to reject the configuration before tests execute.
+    [[nodiscard]] virtual std::string configure(Arguments) { return {}; }
     virtual void onStartReport(unsigned int) {}
     virtual void onSuiteStart(const SuiteInfo&) {}
     virtual void onSuiteEnd(const SuiteInfo&) {}

@@ -17,6 +17,26 @@
 
 namespace Testament {
 
+namespace {
+
+std::optional<std::vector<std::string_view>> commandLineArguments(int argc, char** argv) {
+    if (argc < 0 || (argc > 0 && !argv)) {
+        return std::nullopt;
+    }
+
+    std::vector<std::string_view> arguments;
+    arguments.reserve(argc > 1 ? static_cast<std::size_t>(argc - 1) : 0U);
+    for (int index = 1; index < argc; ++index) {
+        if (!argv[index]) {
+            return std::nullopt;
+        }
+        arguments.emplace_back(argv[index]);
+    }
+    return arguments;
+}
+
+}
+
 class Runner::Impl {
 public:
     std::vector<std::unique_ptr<TestEventHandler>> handlers;
@@ -37,7 +57,24 @@ Runner& Runner::addHandler(std::unique_ptr<TestEventHandler> handler) {
     return *this;
 }
 
-int Runner::run(int, char**) {
+int Runner::run(int argc, char** argv) {
+    const auto arguments = commandLineArguments(argc, argv);
+    if (!arguments) {
+        std::cerr << "Invalid command-line arguments\n";
+        return 2;
+    }
+
+    bool handlersConfigured = true;
+    for (const auto& handler : impl->handlers) {
+        if (const auto error = handler->configure(*arguments); !error.empty()) {
+            std::cerr << error << '\n';
+            handlersConfigured = false;
+        }
+    }
+    if (!handlersConfigured) {
+        return 2;
+    }
+
     TestEventHandlerChain chain;
     for (const auto& handler : impl->handlers) {
         chain.add(handler.get());
@@ -83,15 +120,21 @@ std::unique_ptr<TestEventHandler> makeJUnitHandler(std::filesystem::path outputP
 }
 
 int run(int argc, char** argv) {
+    const auto arguments = commandLineArguments(argc, argv);
+    if (!arguments) {
+        std::cerr << "Invalid command-line arguments\n";
+        return 2;
+    }
+
     std::optional<std::filesystem::path> junitOutput;
-    for (int index = 1; index < argc; ++index) {
-        const std::string_view argument{argv[index]};
+    for (std::size_t index = 0; index < arguments->size(); ++index) {
+        const auto argument = (*arguments)[index];
         if (argument == "--junit") {
-            if (++index >= argc || std::string_view{argv[index]}.empty()) {
+            if (++index >= arguments->size() || (*arguments)[index].empty()) {
                 std::cerr << "--junit requires an output path\n";
                 return 2;
             }
-            junitOutput = argv[index];
+            junitOutput = (*arguments)[index];
         } else if (argument.starts_with("--junit=")) {
             const auto path = argument.substr(std::string_view{"--junit="}.size());
             if (path.empty()) {

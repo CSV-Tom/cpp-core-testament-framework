@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `TestEventHandlerChain` to support dispatching test events to multiple handlers (Observer pattern).
 - Optional JUnit XML reports through the `--junit <path>` and `--junit=<path>` runner options while retaining console output.
 - Public `TestEventHandler` extension API and reporter factories for registering custom output formats with a configurable `Runner`.
+- Command-line argument forwarding to custom test handlers with pre-run configuration validation.
 - End-to-end coverage for JUnit output and installed-package coverage for externally defined test handlers.
 - `CONTRIBUTING.md` with contribution guidelines and Conventional Commits conventions.
 - `CHANGELOG.md` to track notable changes.

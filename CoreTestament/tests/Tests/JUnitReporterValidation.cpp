@@ -25,6 +25,10 @@ int main() {
     }));
 
     std::string executable = "JUnitReporterValidation";
+    std::string missingPathOption = "--junit";
+    char* invalidArguments[]{executable.data(), missingPathOption.data()};
+    const int invalidArgumentsExitCode = Testament::run(2, invalidArguments);
+
     std::string option = "--junit=" + reportPath.string();
     char* arguments[]{executable.data(), option.data()};
     const int exitCode = Testament::run(2, arguments);
@@ -33,7 +37,8 @@ int main() {
     const std::string xml{std::istreambuf_iterator<char>{report}, {}};
     std::filesystem::remove(reportPath, removeError);
 
-    return exitCode == 1
+    return invalidArgumentsExitCode == 2
+        && exitCode == 1
         && xml.contains("<testsuites tests=\"2\" failures=\"1\" errors=\"0\" skipped=\"0\"")
         && xml.contains("<testsuite name=\"suite &lt;&amp;&gt;\"")
         && xml.contains("name=\"failing &quot;test&quot;\"")
