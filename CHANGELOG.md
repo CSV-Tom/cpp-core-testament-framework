@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Command-line argument forwarding to custom test handlers with pre-run configuration validation.
 - Optional Pimpl-based `SuiteOptions` and `TestOptions` with execution order, tags, and custom attributes for reporting and tracing.
 - Test-specific `disabled` and `retries` options with skipped-test reporting and a single final result across retry attempts.
+- Structured `AssertionFailure` exceptions exposing assertion name, expected and actual values, message, and source location.
 - `onTestStart` events exposing suite and test metadata before execution begins.
 - Compile-fail coverage ensuring discarded `Test` and `Suite` handles remain compiler errors under warnings-as-errors.
 - End-to-end coverage for JUnit output and installed-package coverage for externally defined test handlers.
@@ -30,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Suites execute deterministically by configured order and name; tests execute stably by configured order while preserving declaration order for ties.
 - Ambiguous duplicate suite names and duplicate test names within a suite are now rejected.
 - Option values use copy-on-write storage so event metadata snapshots remain owning without repeated deep copies.
+- Assertion messages are now optional, assertion requirements are expressed as concepts, and non-streamable values use a readable fallback representation.
 - Replaced the static `Testament::Runner::run(argc, argv)` entry point with `Testament::run(argc, argv)` for default execution and an instance-based `Runner::run(argc, argv)` for configured handlers.
 - Moved runner state and handler ownership behind a Pimpl implementation to keep implementation details out of the public API.
 - Applied consistent astyle formatting across all C++ sources.

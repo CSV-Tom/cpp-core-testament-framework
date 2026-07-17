@@ -28,11 +28,14 @@ target_sources(${PROJECT_NAME}
         src/core/LifecycleSuite.cpp
         src/core/Test.cpp
         src/core/Options.cpp
+        src/core/AssertionFailure.cpp
+        src/core/Asserts.cpp
         src/EventHandlers/JUnitTestEventHandler.cpp
     PUBLIC FILE_SET HEADERS
         BASE_DIRS include
         FILES
             include/Testament/Asserts.hpp
+            include/Testament/AssertionFailure.hpp
             include/Testament/LifecycleSuite.hpp
             include/Testament/Options.hpp
             include/Testament/Runner.hpp
