@@ -7,9 +7,9 @@
 #include <vector>
 #include <functional>
 
-#include "InternalSuite.hpp"
 namespace Testament {
 
+class InternalSuite;
 
 class InternalRegistry {
 public:

@@ -5,12 +5,11 @@
 #include <memory>
 #include <string_view>
 
-#include "Testament/Options.hpp"
-
 namespace Testament {
 
 class LifecycleSuite;
 class Test;
+class TestOptions;
 
 namespace detail {
 

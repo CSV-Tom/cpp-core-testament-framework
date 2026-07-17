@@ -1,11 +1,11 @@
 #ifndef TESTFRAMEWORK_TESTAMENT_RUNNER_HPP
 #define TESTFRAMEWORK_TESTAMENT_RUNNER_HPP
 
-#include "Testament/TestEventHandler.hpp"
-
 #include <memory>
 
 namespace Testament {
+
+class TestEventHandler;
 
 class Runner {
 public:

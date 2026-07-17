@@ -1,9 +1,7 @@
 #ifndef TESTFRAMEWORK_TESTAMENT_INTERNALSUITE_HPP
 #define TESTFRAMEWORK_TESTAMENT_INTERNALSUITE_HPP
 
-#include "Testament/LifecycleSuite.hpp"
-#include "Testament/Test.hpp"
-#include "Testament/TestEventHandler.hpp"
+#include "Testament/Options.hpp"
 
 #include "utils/ExecutionTimer.hpp"
 #include "utils/HookManager.hpp"
@@ -20,6 +18,9 @@
 
 namespace Testament {
 
+class LifecycleSuite;
+class Test;
+class TestEventHandler;
 class InternalTest;
 
 class InternalSuite {

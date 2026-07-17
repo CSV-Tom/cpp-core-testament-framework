@@ -1,5 +1,7 @@
 #include "Testament/Suite.hpp"
 
+#include "Testament/LifecycleSuite.hpp"
+#include "Testament/Options.hpp"
 #include "Testament/Test.hpp"
 
 #include "Internal/InternalRegistry.hpp"

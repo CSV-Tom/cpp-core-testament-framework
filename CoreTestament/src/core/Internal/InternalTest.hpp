@@ -6,7 +6,6 @@
 #include <variant>
 #include <exception>
 
-#include "Testament/LifecycleSuite.hpp"
 #include "Testament/Options.hpp"
 #include "FunctionVariant.hpp"
 

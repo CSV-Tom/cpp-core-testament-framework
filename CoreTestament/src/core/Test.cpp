@@ -1,5 +1,7 @@
 #include "Testament/Test.hpp"
 
+#include "Testament/Options.hpp"
+
 #include "Internal/FunctionVariant.hpp"
 #include "Internal/InternalTest.hpp"
 #include "Internal/TestAccess.hpp"

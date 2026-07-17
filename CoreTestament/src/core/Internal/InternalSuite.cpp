@@ -2,7 +2,9 @@
 #include "InternalTest.hpp"
 #include "TestAccess.hpp"
 
+#include "Testament/LifecycleSuite.hpp"
 #include "Testament/Test.hpp"
+#include "Testament/TestEventHandler.hpp"
 
 #include <algorithm>
 #include <ranges>

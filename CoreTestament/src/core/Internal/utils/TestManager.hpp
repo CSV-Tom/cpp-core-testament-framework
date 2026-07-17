@@ -8,11 +8,12 @@
 #include <variant>
 #include <exception>
 
-#include "Testament/LifecycleSuite.hpp"
 #include "../InternalTest.hpp"
 #include "Testament/TestEventHandler.hpp"
 
 namespace Testament {
+
+class LifecycleSuite;
 
 class TestManager {
 public:

@@ -1,11 +1,13 @@
 #include "Testament/Runner.hpp"
 
 #include "Testament/Reporters.hpp"
+#include "Testament/TestEventHandler.hpp"
 
 #include "EventHandlers/ConsoleTestEventHandler.hpp"
 #include "EventHandlers/JUnitTestEventHandler.hpp"
 #include "EventHandlers/TestEventHandlerChain.hpp"
 #include "Internal/InternalRegistry.hpp"
+#include "Internal/InternalSuite.hpp"
 #include "Internal/utils/TestStatistics.hpp"
 
 #include <algorithm>
