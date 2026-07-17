@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `Test` and `Suite` are now move-only Pimpl handles instead of polymorphic shared-pointer handles.
+- Suite registration now follows the lifetime of its public `Suite` handle and is removed from the registry when that handle is destroyed.
+- `LifecycleSuite` is now solely the fixture extension interface and no longer derives from the public suite-registration handle.
 - Replaced the static `Testament::Runner::run(argc, argv)` entry point with `Testament::run(argc, argv)` for default execution and an instance-based `Runner::run(argc, argv)` for configured handlers.
 - Moved runner state and handler ownership behind a Pimpl implementation to keep implementation details out of the public API.
 - Applied consistent astyle formatting across all C++ sources.
@@ -46,6 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- `FunctionVariant`, `Test::create`, `Suite::create`, and `Suite::addTest` from the public API; test construction now goes through `makeTest` and `makeSuite`.
 - The unused legacy event dispatcher, event types, event manager, duplicate service locator, and log handler implementation.
 - The unused `onLogEvent` callback from the active reporter interface.
 - Dead code in `src/old/` and commented-out blocks in `InternalRegistry`.
