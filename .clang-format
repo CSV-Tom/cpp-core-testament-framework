@@ -1,0 +1,15 @@
+BasedOnStyle: Google
+IndentWidth: 4
+AccessModifierOffset: -4
+ColumnLimit: 180
+SortIncludes: Never
+AlignAfterOpenBracket: Align
+IndentRequiresClause: false
+RequiresClausePosition: OwnLine
+BreakBeforeBraces: Attach
+SpaceBeforeParens: ControlStatements
+PointerAlignment: Left
+ReferenceAlignment: Left
+NamespaceIndentation: None
+FixNamespaceComments: false
+AllowShortFunctionsOnASingleLine: Empty

@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-find . -type f \( -name "*.cpp" -o -name "*.hpp" \) -exec astyle {} \;
-find . -type f -name "*.orig" -delete
+find . \( -path ./build -o -path ./.git \) -prune -o \
+    -type f \( -name "*.cpp" -o -name "*.hpp" \) -exec clang-format -i {} \;
