@@ -23,7 +23,6 @@ RUN apt-get update && \
         git \
         vim \
         tree \
-        astyle \
         strace \
         gdb && \
     apt-get clean && \
