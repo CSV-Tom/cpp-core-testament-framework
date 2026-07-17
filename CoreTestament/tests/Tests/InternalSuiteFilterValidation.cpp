@@ -1,4 +1,4 @@
-#include "Testament/Test.hpp"
+#include "Testament/Testament.hpp"
 
 #include "core/Internal/InternalSuite.hpp"
 
@@ -11,9 +11,9 @@ int main() {
     int betaOneRuns = 0;
     int betaTwoRuns = 0;
 
-    suite.addTest(Testament::Test::create("alpha", [&alphaRuns] { ++alphaRuns; }));
-    suite.addTest(Testament::Test::create("beta-one", [&betaOneRuns] { ++betaOneRuns; }));
-    suite.addTest(Testament::Test::create("beta-two", [&betaTwoRuns] { ++betaTwoRuns; }));
+    suite.addTest(Testament::makeTest("alpha", [&alphaRuns] { ++alphaRuns; }));
+    suite.addTest(Testament::makeTest("beta-one", [&betaOneRuns] { ++betaOneRuns; }));
+    suite.addTest(Testament::makeTest("beta-two", [&betaTwoRuns] { ++betaTwoRuns; }));
 
     suite.setTestFilter(std::string{"alpha"});
     const bool exactRunSucceeded = suite.run();

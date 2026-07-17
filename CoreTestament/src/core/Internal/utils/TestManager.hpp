@@ -18,7 +18,7 @@ public:
     TestManager(ExecutionTimer& timer, TestStatistics<unsigned int>& statistic_)
         : testTimer(timer), statistic(statistic_) {}
 
-    void executeTest(Suite& suite, std::shared_ptr<InternalTest>& test,
+    void executeTest(Suite& suite, std::unique_ptr<InternalTest>& test,
                      const std::string& suiteName, TestEventHandler* handler = nullptr) {
         testTimer.start();
         auto result = test->execute(&suite);
@@ -30,7 +30,7 @@ private:
     ExecutionTimer& testTimer;
     TestStatistics<unsigned int>& statistic;
 
-    void processResult(const std::string& suiteName, std::shared_ptr<InternalTest>& test,
+    void processResult(const std::string& suiteName, std::unique_ptr<InternalTest>& test,
                        const std::variant<std::monostate, std::exception_ptr>& result,
                        TestEventHandler* handler) {
         TestEventHandler::SuiteInfo suiteInfo{suiteName};

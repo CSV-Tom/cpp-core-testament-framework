@@ -1,5 +1,4 @@
-#include "Testament/FunctionVariant.hpp"
-
+#include "core/Internal/FunctionVariant.hpp"
 #include "core/Internal/InternalTest.hpp"
 
 #include <chrono>

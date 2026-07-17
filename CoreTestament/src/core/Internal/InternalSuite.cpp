@@ -1,5 +1,8 @@
 #include "InternalSuite.hpp"
 #include "InternalTest.hpp"
+#include "TestAccess.hpp"
+
+#include "Testament/Test.hpp"
 
 #include <ranges>
 
@@ -21,12 +24,8 @@ InternalSuite::InternalSuite(const std::string& name_, std::shared_ptr<Suite> su
 InternalSuite::~InternalSuite() = default;
 
 
-void InternalSuite::addTest(const std::shared_ptr<Test>& test) {
-    auto internalTest = std::dynamic_pointer_cast<InternalTest>(test);
-    if (!internalTest) {
-        throw std::logic_error("The provided test is not of type InternalTest");
-    }
-    tests.push_back(std::move(internalTest));
+void InternalSuite::addTest(Test test) {
+    tests.push_back(detail::TestAccess::release(std::move(test)));
 }
 
 void InternalSuite::setBeforeSuite(Callback callback) {

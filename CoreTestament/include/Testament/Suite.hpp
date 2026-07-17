@@ -12,7 +12,7 @@ class Suite {
 public:
 
     static std::shared_ptr<Suite> create(const std::string& name);
-    virtual void addTest(const std::shared_ptr<Test>& test);
+    virtual void addTest(Test test);
 
 protected:
     Suite();

@@ -6,9 +6,8 @@
 #include <variant>
 #include <exception>
 
-#include "Testament/Test.hpp"
 #include "Testament/Suite.hpp"
-#include "Testament/FunctionVariant.hpp"
+#include "FunctionVariant.hpp"
 
 
 #include "utils/TestStatus.hpp"
@@ -17,12 +16,12 @@
 
 namespace Testament {
 
-class InternalTest : public Test {
+class InternalTest {
 public:
     InternalTest(const std::string& name, FunctionVariant function);
     InternalTest(InternalTest&&) noexcept = default;
     InternalTest& operator=(InternalTest&&) noexcept = default;
-    ~InternalTest() override;
+    ~InternalTest();
 
     std::variant<std::monostate, std::exception_ptr> execute(Suite* suite = nullptr);
 

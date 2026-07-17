@@ -2,6 +2,7 @@
 
 #include <expected>
 #include <memory>
+#include <utility>
 
 namespace {
 
@@ -19,7 +20,7 @@ public:
 int main() {
     const std::expected<int, int> cxx23Value{23};
     auto test = Testament::makeTest("installed consumer test", [] {});
-    auto suite = Testament::makeSuite("installed consumer suite", test);
+    auto suite = Testament::makeSuite("installed consumer suite", std::move(test));
 
     auto handler = std::make_unique<ConsumerHandler>();
     auto* handlerResult = handler.get();

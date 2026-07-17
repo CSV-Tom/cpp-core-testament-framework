@@ -1,6 +1,7 @@
 #include "Testament/Testament.hpp"
 
 #include <tuple>
+#include <utility>
 #include <vector>
 
 namespace {
@@ -24,7 +25,7 @@ int main() {
     );
     static_cast<void>(Testament::makeSuite<ActualFixture>(
         "fixture type validation",
-        mismatchedTest
+        std::move(mismatchedTest)
     ));
 
     auto matchingParameterizedTest = Testament::makeParameterizedTest<ExpectedFixture>(
@@ -37,7 +38,7 @@ int main() {
     );
     static_cast<void>(Testament::makeSuite<ExpectedFixture>(
         "matching parameterized fixture validation",
-        matchingParameterizedTest
+        std::move(matchingParameterizedTest)
     ));
 
     auto mismatchedParameterizedTest = Testament::makeParameterizedTest<ExpectedFixture>(
@@ -49,7 +50,7 @@ int main() {
     );
     static_cast<void>(Testament::makeSuite<ActualFixture>(
         "mismatched parameterized fixture validation",
-        mismatchedParameterizedTest
+        std::move(mismatchedParameterizedTest)
     ));
 
     const int runnerResult = Testament::run(0, nullptr);

@@ -1,10 +1,10 @@
-#include "Testament/Test.hpp"
+#include "Testament/Testament.hpp"
 
 #include "core/Internal/InternalSuite.hpp"
 
 int main() {
     Testament::InternalSuite suite("repeat-run validation");
-    suite.addTest(Testament::Test::create("passing test", [] {}));
+    suite.addTest(Testament::makeTest("passing test", [] {}));
 
     const bool firstRunSucceeded = suite.run();
     const bool secondRunSucceeded = suite.run();

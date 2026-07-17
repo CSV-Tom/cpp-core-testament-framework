@@ -28,7 +28,7 @@ public:
     explicit InternalSuite(const std::string& name, std::shared_ptr<Suite> suite);
     ~InternalSuite() override;
 
-    void addTest(const std::shared_ptr<Test>& test) override;
+    void addTest(Test test) override;
 
     void setBeforeSuite(Callback callback);
     void setBeforeEach(Callback callback);
@@ -48,7 +48,7 @@ private:
     TestEventHandler* handler{nullptr};
 
     std::string name;
-    std::vector<std::shared_ptr<InternalTest>> tests;
+    std::vector<std::unique_ptr<InternalTest>> tests;
 
     ExecutionTimer totalTimer;
     ExecutionTimer hookTimer;

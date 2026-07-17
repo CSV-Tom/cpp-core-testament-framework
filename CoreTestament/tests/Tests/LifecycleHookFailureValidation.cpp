@@ -1,4 +1,4 @@
-#include "Testament/Test.hpp"
+#include "Testament/Testament.hpp"
 #include "Testament/Runner.hpp"
 
 #include "core/Internal/InternalRegistry.hpp"
@@ -32,7 +32,7 @@ int main() {
     suite->setBeforeSuite([] {
         throw std::runtime_error("expected hook failure");
     });
-    suite->addTest(Testament::Test::create("must not run", [&testExecuted] {
+    suite->addTest(Testament::makeTest("must not run", [&testExecuted] {
         testExecuted = true;
     }));
 

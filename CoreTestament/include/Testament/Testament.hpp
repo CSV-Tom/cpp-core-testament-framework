@@ -20,7 +20,7 @@ namespace Testament {
 
 
 template <typename... Tests>
-requires (std::same_as<std::remove_cvref_t<Tests>, std::shared_ptr<Test>> && ...)
+requires (std::same_as<std::remove_cvref_t<Tests>, Test> && ...)
 std::shared_ptr<Suite> makeSuite(const std::string& name, Tests&&... cases) {
     auto suite = Suite::create(name);
     (suite->addTest(std::forward<Tests>(cases)), ...);
@@ -29,7 +29,7 @@ std::shared_ptr<Suite> makeSuite(const std::string& name, Tests&&... cases) {
 
 
 template <typename T, typename... Tests>
-requires (std::derived_from<T, LifecycleSuite> && (std::same_as<std::remove_cvref_t<Tests>, std::shared_ptr<Test>> && ...))
+requires (std::derived_from<T, LifecycleSuite> && (std::same_as<std::remove_cvref_t<Tests>, Test> && ...))
 std::shared_ptr<Suite> makeSuite(const std::string& name, Tests&&... cases) {
     auto suite = LifecycleSuite::create(name, std::make_shared<T>());
     (suite->addTest(std::forward<Tests>(cases)), ...);
@@ -39,14 +39,14 @@ std::shared_ptr<Suite> makeSuite(const std::string& name, Tests&&... cases) {
 
 template <typename Callable>
 requires std::invocable<Callable>
-std::shared_ptr<Test> makeTest(const std::string& name, Callable&& testFunction) {
-    return Test::create(name, FunctionVariant{std::function<void()>(std::forward<Callable>(testFunction))});
+Test makeTest(const std::string& name, Callable&& testFunction) {
+    return detail::makeTest(name, std::function<void()>(std::forward<Callable>(testFunction)));
 }
 
 template <typename SuiteType, typename Callable>
 requires std::derived_from<SuiteType, Suite> && std::invocable<Callable, SuiteType&>
-std::shared_ptr<Test> makeTest(const std::string& name, Callable&& testFunction) {
-    return Test::create(name, FunctionVariant{
+Test makeTest(const std::string& name, Callable&& testFunction) {
+    return detail::makeTest(name, std::function<void(Suite&)>{
         [testFunction = std::forward<Callable>(testFunction)](Suite& suite) {
             auto* typedSuite = dynamic_cast<SuiteType*>(&suite);
             if (!typedSuite) {
@@ -59,8 +59,8 @@ std::shared_ptr<Test> makeTest(const std::string& name, Callable&& testFunction)
 
 template <typename Callable, typename... Args>
 requires std::invocable<Callable, Args...>
-std::shared_ptr<Test> makeParameterizedTest(const std::string& name, Callable&& testFunction, std::vector<std::tuple<Args...>> parameters) {
-    return Test::create(name, FunctionVariant{[testFunction = std::forward<Callable>(testFunction), parameters]() {
+Test makeParameterizedTest(const std::string& name, Callable&& testFunction, std::vector<std::tuple<Args...>> parameters) {
+    return detail::makeTest(name, std::function<void()>{[testFunction = std::forward<Callable>(testFunction), parameters]() {
         for (const auto& params : parameters) {
             std::apply(testFunction, params);
         }
@@ -69,8 +69,8 @@ std::shared_ptr<Test> makeParameterizedTest(const std::string& name, Callable&& 
 
 template <typename SuiteType, typename Callable, typename... Args>
 requires std::derived_from<SuiteType, Suite> && std::invocable<Callable, SuiteType&, Args...>
-std::shared_ptr<Test> makeParameterizedTest(const std::string& name, Callable&& testFunction, std::vector<std::tuple<Args...>> parameters) {
-    return Test::create(name, FunctionVariant{
+Test makeParameterizedTest(const std::string& name, Callable&& testFunction, std::vector<std::tuple<Args...>> parameters) {
+    return detail::makeTest(name, std::function<void(Suite&)>{
         [testFunction = std::forward<Callable>(testFunction), parameters](Suite& suite) {
             auto* typedSuite = dynamic_cast<SuiteType*>(&suite);
             if (!typedSuite) {

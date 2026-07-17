@@ -1,5 +1,5 @@
 #include "Testament/Runner.hpp"
-#include "Testament/Test.hpp"
+#include "Testament/Testament.hpp"
 
 #include "core/Internal/InternalRegistry.hpp"
 #include "core/Internal/InternalSuite.hpp"
@@ -19,8 +19,8 @@ int main() {
     auto suite = Testament::InternalRegistry::getInstance().registerSuite(
         std::make_shared<Testament::InternalSuite>("suite <&>")
     );
-    suite->addTest(Testament::Test::create("passing test", [] {}));
-    suite->addTest(Testament::Test::create("failing \"test\"", [] {
+    suite->addTest(Testament::makeTest("passing test", [] {}));
+    suite->addTest(Testament::makeTest("failing \"test\"", [] {
         throw std::runtime_error("failure <reason> & details");
     }));
 

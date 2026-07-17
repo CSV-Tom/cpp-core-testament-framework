@@ -1,6 +1,6 @@
-#include "Testament/FunctionVariant.hpp"
 #include "Testament/Suite.hpp"
 
+#include "core/Internal/FunctionVariant.hpp"
 #include "core/Internal/InternalTest.hpp"
 
 #include <exception>

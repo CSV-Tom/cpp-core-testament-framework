@@ -32,7 +32,6 @@ target_sources(${PROJECT_NAME}
         BASE_DIRS include
         FILES
             include/Testament/Asserts.hpp
-            include/Testament/FunctionVariant.hpp
             include/Testament/LifecycleSuite.hpp
             include/Testament/Runner.hpp
             include/Testament/Reporters.hpp

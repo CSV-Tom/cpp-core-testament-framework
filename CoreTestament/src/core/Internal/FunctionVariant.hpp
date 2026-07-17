@@ -1,8 +1,8 @@
-#ifndef TESTAMENT_FUNCTIONVARIANT_HPP
-#define TESTAMENT_FUNCTIONVARIANT_HPP
+#ifndef TESTAMENT_INTERNAL_FUNCTIONVARIANT_HPP
+#define TESTAMENT_INTERNAL_FUNCTIONVARIANT_HPP
 
-#include <variant>
 #include <functional>
+#include <variant>
 
 namespace Testament {
 
