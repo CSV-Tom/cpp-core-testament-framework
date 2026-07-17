@@ -6,9 +6,11 @@
 
 namespace Testament {
 
+InternalTest::InternalTest(std::string name_, FunctionVariant function_)
+    : InternalTest(std::move(name_), TestOptions{}, std::move(function_)) {}
 
-InternalTest::InternalTest(const std::string& name_, FunctionVariant function_)
-    : name(name_), function(std::move(function_)) {}
+InternalTest::InternalTest(std::string name_, TestOptions options_, FunctionVariant function_)
+    : name(std::move(name_)), options(std::move(options_)), function(std::move(function_)) {}
 
 InternalTest::~InternalTest() = default;
 
@@ -48,6 +50,10 @@ std::variant<std::monostate, std::exception_ptr> InternalTest::execute(Lifecycle
 
 const std::string& InternalTest::getName() const {
     return name;
+}
+
+const TestOptions& InternalTest::getOptions() const {
+    return options;
 }
 
 const ExecutionTimer& InternalTest::getExecutionTimer() const {

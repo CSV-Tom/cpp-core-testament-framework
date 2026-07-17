@@ -27,12 +27,14 @@ target_sources(${PROJECT_NAME}
         src/core/Suite.cpp
         src/core/LifecycleSuite.cpp
         src/core/Test.cpp
+        src/core/Options.cpp
         src/EventHandlers/JUnitTestEventHandler.cpp
     PUBLIC FILE_SET HEADERS
         BASE_DIRS include
         FILES
             include/Testament/Asserts.hpp
             include/Testament/LifecycleSuite.hpp
+            include/Testament/Options.hpp
             include/Testament/Runner.hpp
             include/Testament/Reporters.hpp
             include/Testament/Suite.hpp
@@ -162,6 +164,11 @@ if(BUILD_TESTING)
     add_testament_test(
         HandlerArgumentsValidation HandlerArguments
         tests/Tests/HandlerArgumentsValidation.cpp
+    )
+
+    add_testament_test(
+        OptionsValidation Options
+        tests/Tests/OptionsValidation.cpp
     )
 
     add_testament_internal_test(

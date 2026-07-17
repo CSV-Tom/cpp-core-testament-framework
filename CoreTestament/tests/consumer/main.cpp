@@ -19,16 +19,30 @@ public:
         ++passed;
     }
 
+    void onTestStart(const SuiteInfo& suite, const TestInfo& test) override {
+        metadataReceived = suite.options.attribute("component") == "consumer"
+            && test.options.attribute("operation") == "install-check";
+    }
+
     int passed{};
     bool configured{};
+    bool metadataReceived{};
 };
 
 }
 
 int main() {
     const std::expected<int, int> cxx23Value{23};
-    auto test = Testament::makeTest("installed consumer test", [] {});
-    auto suite = Testament::makeSuite("installed consumer suite", std::move(test));
+    auto test = Testament::makeTest(
+        "installed consumer test",
+        Testament::TestOptions{}.attribute("operation", "install-check"),
+        [] {}
+    );
+    auto suite = Testament::makeSuite(
+        "installed consumer suite",
+        Testament::SuiteOptions{}.attribute("component", "consumer"),
+        std::move(test)
+    );
 
     auto handler = std::make_unique<ConsumerHandler>();
     auto* handlerResult = handler.get();
@@ -43,6 +57,7 @@ int main() {
         && suite
         && runner.run(2, arguments) == 0
         && handlerResult->configured
+        && handlerResult->metadataReceived
         && handlerResult->passed == 1
         ? 0
         : 1;

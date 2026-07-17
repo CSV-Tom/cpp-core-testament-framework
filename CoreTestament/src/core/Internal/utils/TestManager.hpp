@@ -19,22 +19,30 @@ public:
         : testTimer(timer), statistic(statistic_) {}
 
     void executeTest(LifecycleSuite* fixture, std::unique_ptr<InternalTest>& test,
-                     const std::string& suiteName, TestEventHandler* handler = nullptr) {
+                     const TestEventHandler::SuiteInfo& suiteInfo,
+                     TestEventHandler* handler = nullptr) {
+        if (handler) {
+            handler->onTestStart(suiteInfo, {
+                test->getName(), std::chrono::duration<double>::zero(), {}, test->getOptions()
+            });
+        }
         testTimer.start();
         auto result = test->execute(fixture);
         testTimer.stop();
-        processResult(suiteName, test, result, handler);
+        processResult(suiteInfo, test, result, handler);
     }
 
 private:
     ExecutionTimer& testTimer;
     TestStatistics<unsigned int>& statistic;
 
-    void processResult(const std::string& suiteName, std::unique_ptr<InternalTest>& test,
+    void processResult(const TestEventHandler::SuiteInfo& suiteInfo,
+                       std::unique_ptr<InternalTest>& test,
                        const std::variant<std::monostate, std::exception_ptr>& result,
                        TestEventHandler* handler) {
-        TestEventHandler::SuiteInfo suiteInfo{suiteName};
-        TestEventHandler::TestInfo testInfo{test->getName(), test->getExecutionTimer().getDuration(), {}};
+        TestEventHandler::TestInfo testInfo{
+            test->getName(), test->getExecutionTimer().getDuration(), {}, test->getOptions()
+        };
 
         if (std::holds_alternative<std::monostate>(result)) {
             if (test->getStatus().isPassed()) {

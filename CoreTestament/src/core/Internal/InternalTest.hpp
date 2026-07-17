@@ -7,6 +7,7 @@
 #include <exception>
 
 #include "Testament/LifecycleSuite.hpp"
+#include "Testament/Options.hpp"
 #include "FunctionVariant.hpp"
 
 
@@ -18,7 +19,8 @@ namespace Testament {
 
 class InternalTest {
 public:
-    InternalTest(const std::string& name, FunctionVariant function);
+    InternalTest(std::string name, FunctionVariant function);
+    InternalTest(std::string name, TestOptions options, FunctionVariant function);
     InternalTest(InternalTest&&) noexcept = default;
     InternalTest& operator=(InternalTest&&) noexcept = default;
     ~InternalTest();
@@ -26,6 +28,7 @@ public:
     std::variant<std::monostate, std::exception_ptr> execute(LifecycleSuite* fixture = nullptr);
 
     const std::string& getName() const;
+    const TestOptions& getOptions() const;
 
     const ExecutionTimer& getExecutionTimer() const;
     const TestStatus& getStatus() const;
@@ -33,6 +36,7 @@ public:
 
 private:
     std::string name;
+    TestOptions options;
     FunctionVariant function;
     TestStatus status{TestStatus::Status::NotRun};
     std::exception_ptr exception;

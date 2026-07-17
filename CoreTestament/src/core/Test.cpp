@@ -15,15 +15,18 @@ public:
     std::unique_ptr<InternalTest> test;
 };
 
-Test detail::makeTest(std::string name, std::function<void()> function) {
+Test detail::makeTest(std::string name, TestOptions options, std::function<void()> function) {
     return Test{std::make_unique<Test::Impl>(
-        std::make_unique<InternalTest>(std::move(name), FunctionVariant{std::move(function)})
+        std::make_unique<InternalTest>(std::move(name), std::move(options),
+                                       FunctionVariant{std::move(function)})
     )};
 }
 
-Test detail::makeTest(std::string name, std::function<void(LifecycleSuite&)> function) {
+Test detail::makeTest(std::string name, TestOptions options,
+                      std::function<void(LifecycleSuite&)> function) {
     return Test{std::make_unique<Test::Impl>(
-        std::make_unique<InternalTest>(std::move(name), FunctionVariant{std::move(function)})
+        std::make_unique<InternalTest>(std::move(name), std::move(options),
+                                       FunctionVariant{std::move(function)})
     )};
 }
 

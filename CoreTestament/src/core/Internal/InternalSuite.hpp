@@ -26,8 +26,9 @@ public:
     using Callback = std::function<void()>;
     using TestFilter = std::function<bool(const std::string&)>;
 
-    explicit InternalSuite(const std::string& name);
-    explicit InternalSuite(const std::string& name, std::unique_ptr<LifecycleSuite> fixture);
+    explicit InternalSuite(std::string name, SuiteOptions options = {});
+    explicit InternalSuite(std::string name, std::unique_ptr<LifecycleSuite> fixture,
+                           SuiteOptions options = {});
     ~InternalSuite();
 
     void addTest(Test test);
@@ -43,6 +44,7 @@ public:
     [[nodiscard]] bool run();
 
     const std::string& getName() const;
+    const SuiteOptions& getOptions() const;
     const TestStatistics<unsigned int>& getStatistics() const;
     const ExecutionTimer& getTotalTimer() const;
 
@@ -51,6 +53,7 @@ private:
     TestEventHandler* handler{nullptr};
 
     std::string name;
+    SuiteOptions options;
     std::vector<std::unique_ptr<InternalTest>> tests;
 
     ExecutionTimer totalTimer;

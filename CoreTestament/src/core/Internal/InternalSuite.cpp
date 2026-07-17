@@ -4,20 +4,23 @@
 
 #include "Testament/Test.hpp"
 
+#include <algorithm>
 #include <ranges>
 
 
 namespace Testament {
 
-InternalSuite::InternalSuite(const std::string& name_)
-    : name(name_), hookManager(hookTimer), testManager(testTimer, statistic) {
+InternalSuite::InternalSuite(std::string name_, SuiteOptions options_)
+    : name(std::move(name_)), options(std::move(options_)),
+      hookManager(hookTimer), testManager(testTimer, statistic) {
     if (name.empty()) {
         throw std::logic_error("Suite name cannot be empty!");
     }
 }
 
-InternalSuite::InternalSuite(const std::string& name_, std::unique_ptr<LifecycleSuite> fixture_)
-    : InternalSuite(name_) {
+InternalSuite::InternalSuite(std::string name_, std::unique_ptr<LifecycleSuite> fixture_,
+                             SuiteOptions options_)
+    : InternalSuite(std::move(name_), std::move(options_)) {
     fixture = std::move(fixture_);
     setBeforeSuite([this] { fixture->beforeAll(); });
     setBeforeEach([this] { fixture->beforeEach(); });
@@ -29,7 +32,14 @@ InternalSuite::~InternalSuite() = default;
 
 
 void InternalSuite::addTest(Test test) {
-    tests.push_back(detail::TestAccess::release(std::move(test)));
+    auto internalTest = detail::TestAccess::release(std::move(test));
+    if (std::ranges::any_of(tests, [&internalTest](const auto& registered) {
+        return registered->getName() == internalTest->getName();
+    })) {
+        throw std::logic_error("Test name must be unique within a suite: "
+                               + internalTest->getName());
+    }
+    tests.push_back(std::move(internalTest));
 }
 
 void InternalSuite::setBeforeSuite(Callback callback) {
@@ -57,10 +67,14 @@ bool InternalSuite::run() {
     testTimer.reset();
     hookManager.resetErrors();
 
+    std::ranges::stable_sort(tests, {}, [](const auto& test) {
+        return test->getOptions().order().value_or(0);
+    });
+
     totalTimer.start();
 
     if (handler) {
-        handler->onSuiteStart({name});
+        handler->onSuiteStart({name, 0, 0, 0, options});
     }
 
     const auto reportHookErrors = [this] {
@@ -71,7 +85,8 @@ bool InternalSuite::run() {
             name,
             statistic.getPassedTests(),
             statistic.getFailedTests(),
-            statistic.getSkippedTests()
+            statistic.getSkippedTests(),
+            options
         };
         for (const auto& error : hookManager.getErrors()) {
             handler->onSuiteAbort(suiteInfo, error);
@@ -92,7 +107,13 @@ bool InternalSuite::run() {
             hooksSucceeded = false;
             continue;
         }
-        testManager.executeTest(fixture.get(), test, name, handler);
+        testManager.executeTest(fixture.get(), test, {
+            name,
+            statistic.getPassedTests(),
+            statistic.getFailedTests(),
+            statistic.getSkippedTests(),
+            options
+        }, handler);
         hooksSucceeded = hookManager.invokeAfterEachHook() && hooksSucceeded;
     }
 
@@ -102,7 +123,8 @@ bool InternalSuite::run() {
     reportHookErrors();
 
     if (handler) {
-        handler->onSuiteEnd({name, statistic.getPassedTests(), statistic.getFailedTests(), statistic.getSkippedTests()});
+        handler->onSuiteEnd({name, statistic.getPassedTests(), statistic.getFailedTests(),
+                             statistic.getSkippedTests(), options});
     }
 
     return hooksSucceeded;
@@ -110,6 +132,10 @@ bool InternalSuite::run() {
 
 const std::string& InternalSuite::getName() const {
     return name;
+}
+
+const SuiteOptions& InternalSuite::getOptions() const {
+    return options;
 }
 
 const TestStatistics<unsigned int>& InternalSuite::getStatistics() const {

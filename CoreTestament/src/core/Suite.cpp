@@ -24,10 +24,11 @@ namespace {
 
 std::shared_ptr<InternalSuite> registerSuite(std::string name,
                                             std::unique_ptr<LifecycleSuite> fixture,
+                                            SuiteOptions options,
                                             std::vector<Test> tests) {
     auto suite = fixture
-        ? std::make_shared<InternalSuite>(std::move(name), std::move(fixture))
-        : std::make_shared<InternalSuite>(std::move(name));
+        ? std::make_shared<InternalSuite>(std::move(name), std::move(fixture), std::move(options))
+        : std::make_shared<InternalSuite>(std::move(name), std::move(options));
     for (auto& test : tests) {
         suite->addTest(std::move(test));
     }
@@ -36,14 +37,15 @@ std::shared_ptr<InternalSuite> registerSuite(std::string name,
 
 }
 
-Suite detail::makeSuite(std::string name, std::vector<Test> tests) {
-    auto suite = registerSuite(std::move(name), nullptr, std::move(tests));
+Suite detail::makeSuite(std::string name, SuiteOptions options, std::vector<Test> tests) {
+    auto suite = registerSuite(std::move(name), nullptr, std::move(options), std::move(tests));
     return Suite{std::make_unique<Suite::Impl>(std::move(suite))};
 }
 
 Suite detail::makeSuite(std::string name, std::unique_ptr<LifecycleSuite> fixture,
-                        std::vector<Test> tests) {
-    auto suite = registerSuite(std::move(name), std::move(fixture), std::move(tests));
+                        SuiteOptions options, std::vector<Test> tests) {
+    auto suite = registerSuite(std::move(name), std::move(fixture), std::move(options),
+                               std::move(tests));
     return Suite{std::make_unique<Suite::Impl>(std::move(suite))};
 }
 

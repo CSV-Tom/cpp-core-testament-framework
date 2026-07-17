@@ -7,6 +7,8 @@
 #include <string>
 #include <string_view>
 
+#include "Testament/Options.hpp"
+
 namespace Testament {
 
 class TestEventHandler {
@@ -18,6 +20,7 @@ public:
         std::string name;
         std::chrono::duration<double> duration;
         std::exception_ptr exception;
+        TestOptions options;
     };
 
     struct SuiteInfo {
@@ -25,6 +28,7 @@ public:
         unsigned int passed{};
         unsigned int failed{};
         unsigned int skipped{};
+        SuiteOptions options;
     };
 
     virtual ~TestEventHandler() = default;
@@ -35,6 +39,7 @@ public:
     virtual void onSuiteStart(const SuiteInfo&) {}
     virtual void onSuiteEnd(const SuiteInfo&) {}
     virtual void onSuiteAbort(const SuiteInfo&, const std::string&) {}
+    virtual void onTestStart(const SuiteInfo&, const TestInfo&) {}
     virtual void onTestPassed(const SuiteInfo&, const TestInfo&) {}
     virtual void onTestFailed(const SuiteInfo&, const TestInfo&) {}
     virtual void onTestSkipped(const SuiteInfo&, const TestInfo&) {}

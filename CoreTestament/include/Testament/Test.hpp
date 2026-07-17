@@ -5,6 +5,8 @@
 #include <memory>
 #include <string>
 
+#include "Testament/Options.hpp"
+
 namespace Testament {
 
 class LifecycleSuite;
@@ -13,8 +15,9 @@ class Test;
 namespace detail {
 
 class TestAccess;
-Test makeTest(std::string name, std::function<void()> function);
-Test makeTest(std::string name, std::function<void(LifecycleSuite&)> function);
+Test makeTest(std::string name, TestOptions options, std::function<void()> function);
+Test makeTest(std::string name, TestOptions options,
+              std::function<void(LifecycleSuite&)> function);
 
 }
 
@@ -33,8 +36,9 @@ private:
 
     explicit Test(std::unique_ptr<Impl> impl);
 
-    friend Test detail::makeTest(std::string, std::function<void()>);
-    friend Test detail::makeTest(std::string, std::function<void(LifecycleSuite&)>);
+    friend Test detail::makeTest(std::string, TestOptions, std::function<void()>);
+    friend Test detail::makeTest(std::string, TestOptions,
+                                 std::function<void(LifecycleSuite&)>);
     friend class detail::TestAccess;
 
     std::unique_ptr<Impl> impl;

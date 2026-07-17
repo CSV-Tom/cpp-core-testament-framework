@@ -20,6 +20,9 @@ public:
     void onSuiteAbort(const SuiteInfo& suite, const std::string& message) override {
         for (auto* h : handlers) h->onSuiteAbort(suite, message);
     }
+    void onTestStart(const SuiteInfo& suite, const TestInfo& test) override {
+        for (auto* h : handlers) h->onTestStart(suite, test);
+    }
     void onTestPassed(const SuiteInfo& suite, const TestInfo& test) override {
         for (auto* h : handlers) h->onTestPassed(suite, test);
     }

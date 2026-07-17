@@ -24,6 +24,11 @@ std::shared_ptr<InternalSuite> InternalRegistry::registerSuite(std::shared_ptr<I
     }
 
     std::unique_lock lock(registryMutex);  // Schreibzugriff
+    if (std::ranges::any_of(registeredSuites, [&suite](const auto& registered) {
+        return registered->getName() == suite->getName();
+    })) {
+        throw std::logic_error("Suite name must be unique: " + suite->getName());
+    }
     registeredSuites.push_back(std::move(suite));
 
     return registeredSuites.back();

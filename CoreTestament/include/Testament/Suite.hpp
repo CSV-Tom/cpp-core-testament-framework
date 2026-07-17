@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "Testament/Options.hpp"
+
 namespace Testament {
 
 class LifecycleSuite;
@@ -13,9 +15,9 @@ class Suite;
 
 namespace detail {
 
-Suite makeSuite(std::string name, std::vector<Test> tests);
+Suite makeSuite(std::string name, SuiteOptions options, std::vector<Test> tests);
 Suite makeSuite(std::string name, std::unique_ptr<LifecycleSuite> fixture,
-                std::vector<Test> tests);
+                SuiteOptions options, std::vector<Test> tests);
 
 }
 
@@ -36,9 +38,9 @@ private:
 
     explicit Suite(std::unique_ptr<Impl> impl);
 
-    friend Suite detail::makeSuite(std::string, std::vector<Test>);
+    friend Suite detail::makeSuite(std::string, SuiteOptions, std::vector<Test>);
     friend Suite detail::makeSuite(std::string, std::unique_ptr<LifecycleSuite>,
-                                  std::vector<Test>);
+                                  SuiteOptions, std::vector<Test>);
 
     std::unique_ptr<Impl> impl;
 };

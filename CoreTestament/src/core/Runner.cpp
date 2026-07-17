@@ -8,6 +8,7 @@
 #include "Internal/InternalRegistry.hpp"
 #include "Internal/utils/TestStatistics.hpp"
 
+#include <algorithm>
 #include <filesystem>
 #include <iostream>
 #include <optional>
@@ -82,6 +83,14 @@ int Runner::run(int argc, char** argv) {
 
     auto& registry = InternalRegistry::getInstance();
     auto suites = registry.getAllSuites();
+    std::ranges::sort(suites, [](const auto& left, const auto& right) {
+        const auto leftOrder = left->getOptions().order().value_or(0);
+        const auto rightOrder = right->getOptions().order().value_or(0);
+        if (leftOrder != rightOrder) {
+            return leftOrder < rightOrder;
+        }
+        return left->getName() < right->getName();
+    });
 
     chain.onStartReport(static_cast<unsigned int>(suites.size()));
 

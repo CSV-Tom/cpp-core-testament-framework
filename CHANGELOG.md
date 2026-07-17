@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Optional JUnit XML reports through the `--junit <path>` and `--junit=<path>` runner options while retaining console output.
 - Public `TestEventHandler` extension API and reporter factories for registering custom output formats with a configurable `Runner`.
 - Command-line argument forwarding to custom test handlers with pre-run configuration validation.
+- Optional Pimpl-based `SuiteOptions` and `TestOptions` with execution order, tags, and custom attributes for reporting and tracing.
+- `onTestStart` events exposing suite and test metadata before execution begins.
 - End-to-end coverage for JUnit output and installed-package coverage for externally defined test handlers.
 - `CONTRIBUTING.md` with contribution guidelines and Conventional Commits conventions.
 - `CHANGELOG.md` to track notable changes.
@@ -23,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Test` and `Suite` are now move-only Pimpl handles instead of polymorphic shared-pointer handles.
 - Suite registration now follows the lifetime of its public `Suite` handle and is removed from the registry when that handle is destroyed.
 - `LifecycleSuite` is now solely the fixture extension interface and no longer derives from the public suite-registration handle.
+- Suites execute deterministically by configured order and name; tests execute stably by configured order while preserving declaration order for ties.
+- Ambiguous duplicate suite names and duplicate test names within a suite are now rejected.
 - Replaced the static `Testament::Runner::run(argc, argv)` entry point with `Testament::run(argc, argv)` for default execution and an instance-based `Runner::run(argc, argv)` for configured handlers.
 - Moved runner state and handler ownership behind a Pimpl implementation to keep implementation details out of the public API.
 - Applied consistent astyle formatting across all C++ sources.
