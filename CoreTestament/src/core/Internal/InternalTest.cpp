@@ -3,6 +3,9 @@
 
 #include "utils/TestStatistics.hpp"
 
+#include <stdexcept>
+#include <type_traits>
+#include <utility>
 
 namespace Testament {
 

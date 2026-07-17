@@ -13,7 +13,9 @@
 #include <functional>
 #include <memory>
 #include <stdexcept>
+#include <string_view>
 #include <tuple>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -22,7 +24,7 @@ namespace Testament {
 
 template <typename... Tests>
 requires (std::same_as<std::remove_cvref_t<Tests>, Test> && ...)
-[[nodiscard]] Suite makeSuite(const std::string& name, Tests&&... cases) {
+[[nodiscard]] Suite makeSuite(std::string_view name, Tests&&... cases) {
     std::vector<Test> tests;
     tests.reserve(sizeof...(Tests));
     (tests.emplace_back(std::forward<Tests>(cases)), ...);
@@ -31,7 +33,7 @@ requires (std::same_as<std::remove_cvref_t<Tests>, Test> && ...)
 
 template <typename... Tests>
 requires (std::same_as<std::remove_cvref_t<Tests>, Test> && ...)
-[[nodiscard]] Suite makeSuite(const std::string& name, SuiteOptions options, Tests&&... cases) {
+[[nodiscard]] Suite makeSuite(std::string_view name, SuiteOptions options, Tests&&... cases) {
     std::vector<Test> tests;
     tests.reserve(sizeof...(Tests));
     (tests.emplace_back(std::forward<Tests>(cases)), ...);
@@ -41,7 +43,7 @@ requires (std::same_as<std::remove_cvref_t<Tests>, Test> && ...)
 
 template <typename T, typename... Tests>
 requires (std::derived_from<T, LifecycleSuite> && (std::same_as<std::remove_cvref_t<Tests>, Test> && ...))
-[[nodiscard]] Suite makeSuite(const std::string& name, Tests&&... cases) {
+[[nodiscard]] Suite makeSuite(std::string_view name, Tests&&... cases) {
     std::vector<Test> tests;
     tests.reserve(sizeof...(Tests));
     (tests.emplace_back(std::forward<Tests>(cases)), ...);
@@ -50,7 +52,7 @@ requires (std::derived_from<T, LifecycleSuite> && (std::same_as<std::remove_cvre
 
 template <typename T, typename... Tests>
 requires (std::derived_from<T, LifecycleSuite> && (std::same_as<std::remove_cvref_t<Tests>, Test> && ...))
-[[nodiscard]] Suite makeSuite(const std::string& name, SuiteOptions options, Tests&&... cases) {
+[[nodiscard]] Suite makeSuite(std::string_view name, SuiteOptions options, Tests&&... cases) {
     std::vector<Test> tests;
     tests.reserve(sizeof...(Tests));
     (tests.emplace_back(std::forward<Tests>(cases)), ...);
@@ -60,21 +62,21 @@ requires (std::derived_from<T, LifecycleSuite> && (std::same_as<std::remove_cvre
 
 template <typename Callable>
 requires std::invocable<Callable>
-[[nodiscard]] Test makeTest(const std::string& name, Callable&& testFunction) {
+[[nodiscard]] Test makeTest(std::string_view name, Callable&& testFunction) {
     return detail::makeTest(name, TestOptions{},
                             std::function<void()>(std::forward<Callable>(testFunction)));
 }
 
 template <typename Callable>
 requires std::invocable<Callable>
-[[nodiscard]] Test makeTest(const std::string& name, TestOptions options, Callable&& testFunction) {
+[[nodiscard]] Test makeTest(std::string_view name, TestOptions options, Callable&& testFunction) {
     return detail::makeTest(name, std::move(options),
                             std::function<void()>(std::forward<Callable>(testFunction)));
 }
 
 template <typename SuiteType, typename Callable>
 requires std::derived_from<SuiteType, LifecycleSuite> && std::invocable<Callable, SuiteType&>
-[[nodiscard]] Test makeTest(const std::string& name, Callable&& testFunction) {
+[[nodiscard]] Test makeTest(std::string_view name, Callable&& testFunction) {
     return detail::makeTest(name, TestOptions{}, std::function<void(LifecycleSuite&)>{
         [testFunction = std::forward<Callable>(testFunction)](LifecycleSuite& suite) {
             auto* typedSuite = dynamic_cast<SuiteType*>(&suite);
@@ -88,7 +90,7 @@ requires std::derived_from<SuiteType, LifecycleSuite> && std::invocable<Callable
 
 template <typename SuiteType, typename Callable>
 requires std::derived_from<SuiteType, LifecycleSuite> && std::invocable<Callable, SuiteType&>
-[[nodiscard]] Test makeTest(const std::string& name, TestOptions options, Callable&& testFunction) {
+[[nodiscard]] Test makeTest(std::string_view name, TestOptions options, Callable&& testFunction) {
     return detail::makeTest(name, std::move(options), std::function<void(LifecycleSuite&)>{
         [testFunction = std::forward<Callable>(testFunction)](LifecycleSuite& suite) {
             auto* typedSuite = dynamic_cast<SuiteType*>(&suite);
@@ -102,7 +104,7 @@ requires std::derived_from<SuiteType, LifecycleSuite> && std::invocable<Callable
 
 template <typename Callable, typename... Args>
 requires std::invocable<Callable, Args...>
-[[nodiscard]] Test makeParameterizedTest(const std::string& name, Callable&& testFunction,
+[[nodiscard]] Test makeParameterizedTest(std::string_view name, Callable&& testFunction,
                                          std::vector<std::tuple<Args...>> parameters) {
     return detail::makeTest(name, TestOptions{}, std::function<void()>{[testFunction = std::forward<Callable>(testFunction), parameters]() {
         for (const auto& params : parameters) {
@@ -113,7 +115,7 @@ requires std::invocable<Callable, Args...>
 
 template <typename Callable, typename... Args>
 requires std::invocable<Callable, Args...>
-[[nodiscard]] Test makeParameterizedTest(const std::string& name, TestOptions options,
+[[nodiscard]] Test makeParameterizedTest(std::string_view name, TestOptions options,
                                          Callable&& testFunction,
                                          std::vector<std::tuple<Args...>> parameters) {
     return detail::makeTest(name, std::move(options), std::function<void()>{
@@ -127,7 +129,7 @@ requires std::invocable<Callable, Args...>
 
 template <typename SuiteType, typename Callable, typename... Args>
 requires std::derived_from<SuiteType, LifecycleSuite> && std::invocable<Callable, SuiteType&, Args...>
-[[nodiscard]] Test makeParameterizedTest(const std::string& name, Callable&& testFunction,
+[[nodiscard]] Test makeParameterizedTest(std::string_view name, Callable&& testFunction,
                                          std::vector<std::tuple<Args...>> parameters) {
     return detail::makeTest(name, TestOptions{}, std::function<void(LifecycleSuite&)>{
         [testFunction = std::forward<Callable>(testFunction), parameters](LifecycleSuite& suite) {
@@ -146,7 +148,7 @@ requires std::derived_from<SuiteType, LifecycleSuite> && std::invocable<Callable
 
 template <typename SuiteType, typename Callable, typename... Args>
 requires std::derived_from<SuiteType, LifecycleSuite> && std::invocable<Callable, SuiteType&, Args...>
-[[nodiscard]] Test makeParameterizedTest(const std::string& name, TestOptions options,
+[[nodiscard]] Test makeParameterizedTest(std::string_view name, TestOptions options,
                                          Callable&& testFunction,
                                          std::vector<std::tuple<Args...>> parameters) {
     return detail::makeTest(name, std::move(options), std::function<void(LifecycleSuite&)>{

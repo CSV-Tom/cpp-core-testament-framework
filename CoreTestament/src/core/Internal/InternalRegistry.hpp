@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <shared_mutex>  // Für std::shared_mutex
+#include <string_view>
 #include <vector>
 #include <functional>
 
@@ -35,7 +36,9 @@ public:
 
 
 
-    static std::function<bool(const std::shared_ptr<InternalSuite>&)> createFilter(const std::string& type, const std::string& value = "");
+    static std::function<bool(const std::shared_ptr<InternalSuite>&)> createFilter(
+        std::string_view type, std::string_view value = {}
+    );
 
 private:
     InternalRegistry() = default;

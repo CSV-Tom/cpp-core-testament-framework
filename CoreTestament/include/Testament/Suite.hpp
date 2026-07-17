@@ -2,7 +2,7 @@
 #define TESTFRAMEWORK_TESTAMENT_SUITE_HPP
 
 #include <memory>
-#include <string>
+#include <string_view>
 #include <vector>
 
 #include "Testament/Options.hpp"
@@ -15,8 +15,8 @@ class Suite;
 
 namespace detail {
 
-Suite makeSuite(std::string name, SuiteOptions options, std::vector<Test> tests);
-Suite makeSuite(std::string name, std::unique_ptr<LifecycleSuite> fixture,
+Suite makeSuite(std::string_view name, SuiteOptions options, std::vector<Test> tests);
+Suite makeSuite(std::string_view name, std::unique_ptr<LifecycleSuite> fixture,
                 SuiteOptions options, std::vector<Test> tests);
 
 }
@@ -38,8 +38,8 @@ private:
 
     explicit Suite(std::unique_ptr<Impl> impl);
 
-    friend Suite detail::makeSuite(std::string, SuiteOptions, std::vector<Test>);
-    friend Suite detail::makeSuite(std::string, std::unique_ptr<LifecycleSuite>,
+    friend Suite detail::makeSuite(std::string_view, SuiteOptions, std::vector<Test>);
+    friend Suite detail::makeSuite(std::string_view, std::unique_ptr<LifecycleSuite>,
                                   SuiteOptions, std::vector<Test>);
 
     std::unique_ptr<Impl> impl;

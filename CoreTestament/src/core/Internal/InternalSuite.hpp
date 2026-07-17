@@ -14,6 +14,7 @@
 #include <memory>
 #include <regex>
 #include <string>
+#include <string_view>
 #include <variant>
 #include <vector>
 
@@ -24,7 +25,7 @@ class InternalTest;
 class InternalSuite {
 public:
     using Callback = std::function<void()>;
-    using TestFilter = std::function<bool(const std::string&)>;
+    using TestFilter = std::function<bool(std::string_view)>;
 
     explicit InternalSuite(std::string name, SuiteOptions options = {});
     explicit InternalSuite(std::string name, std::unique_ptr<LifecycleSuite> fixture,

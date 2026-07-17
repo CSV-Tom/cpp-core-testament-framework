@@ -7,12 +7,13 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 
 namespace {
 
 class RecordingHandler : public Testament::TestEventHandler {
 public:
-    void onSuiteAbort(const SuiteInfo& suite, const std::string& message) override {
+    void onSuiteAbort(const SuiteInfo& suite, std::string_view message) override {
         suiteName = suite.name;
         error = message;
     }

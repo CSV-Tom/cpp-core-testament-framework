@@ -1,7 +1,11 @@
 #pragma once
+#include <chrono>
+#include <exception>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
-#include <iomanip>
+#include <string>
+#include <string_view>
 #include "Testament/TestEventHandler.hpp"
 
 class ConsoleTestEventHandler : public Testament::TestEventHandler {
@@ -30,7 +34,7 @@ public:
                   << "Skipped: " << suite.skipped << "\n" << std::endl;
     }
 
-    void onSuiteAbort(const SuiteInfo& suite, const std::string& message) override {
+    void onSuiteAbort(const SuiteInfo& suite, std::string_view message) override {
         std::cout << "[ABORT] Suite '" << suite.name << "' aborted: " << message << std::endl;
     }
 

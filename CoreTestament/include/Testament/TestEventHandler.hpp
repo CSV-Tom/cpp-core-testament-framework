@@ -38,7 +38,7 @@ public:
     virtual void onStartReport(unsigned int) {}
     virtual void onSuiteStart(const SuiteInfo&) {}
     virtual void onSuiteEnd(const SuiteInfo&) {}
-    virtual void onSuiteAbort(const SuiteInfo&, const std::string&) {}
+    virtual void onSuiteAbort(const SuiteInfo&, std::string_view) {}
     virtual void onTestStart(const SuiteInfo&, const TestInfo&) {}
     virtual void onTestPassed(const SuiteInfo&, const TestInfo&) {}
     virtual void onTestFailed(const SuiteInfo&, const TestInfo&) {}

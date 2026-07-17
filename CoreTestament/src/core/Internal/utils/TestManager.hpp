@@ -3,6 +3,7 @@
 
 #include "ExecutionTimer.hpp"
 #include "TestStatistics.hpp"
+#include <chrono>
 #include <memory>
 #include <variant>
 #include <exception>

@@ -5,6 +5,7 @@
 #include "Internal/InternalRegistry.hpp"
 #include "Internal/InternalSuite.hpp"
 
+#include <string>
 #include <utility>
 
 namespace Testament {
@@ -37,14 +38,14 @@ std::shared_ptr<InternalSuite> registerSuite(std::string name,
 
 }
 
-Suite detail::makeSuite(std::string name, SuiteOptions options, std::vector<Test> tests) {
-    auto suite = registerSuite(std::move(name), nullptr, std::move(options), std::move(tests));
+Suite detail::makeSuite(std::string_view name, SuiteOptions options, std::vector<Test> tests) {
+    auto suite = registerSuite(std::string{name}, nullptr, std::move(options), std::move(tests));
     return Suite{std::make_unique<Suite::Impl>(std::move(suite))};
 }
 
-Suite detail::makeSuite(std::string name, std::unique_ptr<LifecycleSuite> fixture,
+Suite detail::makeSuite(std::string_view name, std::unique_ptr<LifecycleSuite> fixture,
                         SuiteOptions options, std::vector<Test> tests) {
-    auto suite = registerSuite(std::move(name), std::move(fixture), std::move(options),
+    auto suite = registerSuite(std::string{name}, std::move(fixture), std::move(options),
                                std::move(tests));
     return Suite{std::make_unique<Suite::Impl>(std::move(suite))};
 }

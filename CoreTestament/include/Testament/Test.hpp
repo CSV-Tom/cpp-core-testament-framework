@@ -3,7 +3,7 @@
 
 #include <functional>
 #include <memory>
-#include <string>
+#include <string_view>
 
 #include "Testament/Options.hpp"
 
@@ -15,8 +15,8 @@ class Test;
 namespace detail {
 
 class TestAccess;
-Test makeTest(std::string name, TestOptions options, std::function<void()> function);
-Test makeTest(std::string name, TestOptions options,
+Test makeTest(std::string_view name, TestOptions options, std::function<void()> function);
+Test makeTest(std::string_view name, TestOptions options,
               std::function<void(LifecycleSuite&)> function);
 
 }
@@ -36,8 +36,8 @@ private:
 
     explicit Test(std::unique_ptr<Impl> impl);
 
-    friend Test detail::makeTest(std::string, TestOptions, std::function<void()>);
-    friend Test detail::makeTest(std::string, TestOptions,
+    friend Test detail::makeTest(std::string_view, TestOptions, std::function<void()>);
+    friend Test detail::makeTest(std::string_view, TestOptions,
                                  std::function<void(LifecycleSuite&)>);
     friend class detail::TestAccess;
 

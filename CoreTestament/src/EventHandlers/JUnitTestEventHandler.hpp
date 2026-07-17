@@ -4,6 +4,7 @@
 
 #include <filesystem>
 #include <string>
+#include <string_view>
 #include <vector>
 
 class JUnitTestEventHandler final : public Testament::TestEventHandler {
@@ -12,7 +13,7 @@ public:
 
     void onStartReport(unsigned int suiteCount) override;
     void onSuiteStart(const SuiteInfo& suite) override;
-    void onSuiteAbort(const SuiteInfo& suite, const std::string& message) override;
+    void onSuiteAbort(const SuiteInfo& suite, std::string_view message) override;
     void onTestPassed(const SuiteInfo& suite, const TestInfo& test) override;
     void onTestFailed(const SuiteInfo& suite, const TestInfo& test) override;
     void onTestSkipped(const SuiteInfo& suite, const TestInfo& test) override;

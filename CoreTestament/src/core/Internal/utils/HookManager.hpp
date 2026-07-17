@@ -3,10 +3,13 @@
 
 #include "ExecutionTimer.hpp"
 
+#include <exception>
 #include <functional>
-#include <vector>
-#include <string>
 #include <sstream>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 namespace Testament {
 
@@ -59,7 +62,7 @@ private:
     Callback afterEachHook;
     Callback afterSuiteHook;
 
-    bool invokeHook(const Callback& hook, const std::string& hookName) {
+    bool invokeHook(const Callback& hook, std::string_view hookName) {
         if (hook) {
             try {
                 hookTimer.start();

@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iomanip>
 #include <sstream>
+#include <string>
 #include <string_view>
 #include <system_error>
 #include <utility>
@@ -70,8 +71,8 @@ void JUnitTestEventHandler::onSuiteStart(const SuiteInfo& suite) {
     suiteResults.push_back({suite.name, {}, {}});
 }
 
-void JUnitTestEventHandler::onSuiteAbort(const SuiteInfo& suite, const std::string& message) {
-    suiteResult(suite).lifecycleErrors.push_back(message);
+void JUnitTestEventHandler::onSuiteAbort(const SuiteInfo& suite, std::string_view message) {
+    suiteResult(suite).lifecycleErrors.emplace_back(message);
 }
 
 void JUnitTestEventHandler::onTestPassed(const SuiteInfo& suite, const TestInfo& test) {

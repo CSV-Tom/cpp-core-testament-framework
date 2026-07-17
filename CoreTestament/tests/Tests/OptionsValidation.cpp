@@ -3,6 +3,7 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -69,6 +70,15 @@ int main() {
         Testament::makeTest("only", [] {})
     );
 
+    std::string suiteNameStorage = "[view suite]";
+    std::string testNameStorage = "[view test]";
+    auto viewed = Testament::makeSuite(
+        std::string_view{suiteNameStorage}.substr(1, 10),
+        Testament::makeTest(std::string_view{testNameStorage}.substr(1, 9), [] {})
+    );
+    suiteNameStorage.clear();
+    testNameStorage.clear();
+
     bool duplicateSuiteRejected = false;
     try {
         static_cast<void>(Testament::makeSuite("alpha"));
@@ -93,20 +103,23 @@ int main() {
     runner.addHandler(std::move(handler));
     const int exitCode = runner.run(0, nullptr);
 
-    return zeta && alpha && early
+    return zeta && alpha && early && viewed
         && exitCode == 0
         && optionsAreIndependent
         && duplicateSuiteRejected
         && duplicateTestRejected
         && result->suiteMetadataReceived
         && result->testMetadataReceived
-        && result->suites == std::vector<std::string>{"early suite", "alpha", "zeta"}
+        && result->suites == std::vector<std::string>{
+            "early suite", "alpha", "view suite", "zeta"
+        }
         && result->tests == std::vector<std::string>{
             "early suite/only",
             "alpha/early",
             "alpha/first default",
             "alpha/second default",
             "alpha/late",
+            "view suite/view test",
             "zeta/only"
         }
         ? 0

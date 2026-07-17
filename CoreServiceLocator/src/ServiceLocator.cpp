@@ -5,6 +5,7 @@
 #include <mutex>
 #include <shared_mutex>
 #include <stdexcept>
+#include <utility>
 
 namespace Core::Services {
 

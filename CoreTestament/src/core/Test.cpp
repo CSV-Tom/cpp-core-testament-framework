@@ -4,6 +4,7 @@
 #include "Internal/InternalTest.hpp"
 #include "Internal/TestAccess.hpp"
 
+#include <string>
 #include <utility>
 
 namespace Testament {
@@ -15,17 +16,17 @@ public:
     std::unique_ptr<InternalTest> test;
 };
 
-Test detail::makeTest(std::string name, TestOptions options, std::function<void()> function) {
+Test detail::makeTest(std::string_view name, TestOptions options, std::function<void()> function) {
     return Test{std::make_unique<Test::Impl>(
-        std::make_unique<InternalTest>(std::move(name), std::move(options),
+        std::make_unique<InternalTest>(std::string{name}, std::move(options),
                                        FunctionVariant{std::move(function)})
     )};
 }
 
-Test detail::makeTest(std::string name, TestOptions options,
+Test detail::makeTest(std::string_view name, TestOptions options,
                       std::function<void(LifecycleSuite&)> function) {
     return Test{std::make_unique<Test::Impl>(
-        std::make_unique<InternalTest>(std::move(name), std::move(options),
+        std::make_unique<InternalTest>(std::string{name}, std::move(options),
                                        FunctionVariant{std::move(function)})
     )};
 }

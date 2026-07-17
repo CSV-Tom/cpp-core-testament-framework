@@ -3,6 +3,9 @@
 
 #include "CoreServices/ServiceLocator.hpp"
 
+#include <type_traits>
+#include <utility>
+
 namespace Core::Services {
 
 template<typename T>

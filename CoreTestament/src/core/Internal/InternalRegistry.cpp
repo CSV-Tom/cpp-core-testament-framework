@@ -2,6 +2,9 @@
 
 #include <algorithm>
 #include <mutex>
+#include <stdexcept>
+#include <string>
+#include <utility>
 
 #include "InternalSuite.hpp"
 
@@ -39,9 +42,11 @@ std::vector<std::shared_ptr<InternalSuite>> InternalRegistry::getAllSuites() con
     return registeredSuites;
 }
 
-std::function<bool(const std::shared_ptr<InternalSuite>&)> InternalRegistry::createFilter(const std::string& type, const std::string& value) {
+std::function<bool(const std::shared_ptr<InternalSuite>&)> InternalRegistry::createFilter(
+    std::string_view type, std::string_view value
+) {
     if (type == "name") {
-        return [value](const std::shared_ptr<InternalSuite>& suite) {
+        return [value = std::string{value}](const std::shared_ptr<InternalSuite>& suite) {
             return suite->getName() == value;
         };
     } else {

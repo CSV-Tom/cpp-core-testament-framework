@@ -6,6 +6,8 @@
 
 #include <algorithm>
 #include <ranges>
+#include <stdexcept>
+#include <utility>
 
 
 namespace Testament {

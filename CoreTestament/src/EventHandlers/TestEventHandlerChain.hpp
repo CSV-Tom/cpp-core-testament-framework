@@ -1,5 +1,6 @@
 #pragma once
 #include "Testament/TestEventHandler.hpp"
+#include <string_view>
 #include <vector>
 
 class TestEventHandlerChain : public Testament::TestEventHandler {
@@ -17,7 +18,7 @@ public:
     void onSuiteEnd(const SuiteInfo& suite) override {
         for (auto* h : handlers) h->onSuiteEnd(suite);
     }
-    void onSuiteAbort(const SuiteInfo& suite, const std::string& message) override {
+    void onSuiteAbort(const SuiteInfo& suite, std::string_view message) override {
         for (auto* h : handlers) h->onSuiteAbort(suite, message);
     }
     void onTestStart(const SuiteInfo& suite, const TestInfo& test) override {
