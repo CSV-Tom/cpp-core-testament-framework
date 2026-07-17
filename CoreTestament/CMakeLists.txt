@@ -171,6 +171,19 @@ if(BUILD_TESTING)
         tests/Tests/OptionsValidation.cpp
     )
 
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang|MSVC")
+        add_test(
+            NAME DiscardedHandles
+            COMMAND ${CMAKE_COMMAND}
+                -DCXX_COMPILER=${CMAKE_CXX_COMPILER}
+                -DCOMPILER_ID=${CMAKE_CXX_COMPILER_ID}
+                -DINCLUDE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/include
+                -DSOURCE_FILE=${CMAKE_CURRENT_SOURCE_DIR}/tests/compile-fail/DiscardedHandles.cpp
+                -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/cmake/DiscardedHandlesTest.cmake
+        )
+        set_tests_properties(DiscardedHandles PROPERTIES LABELS compile-fail)
+    endif()
+
     add_testament_internal_test(
         InternalSuiteFilterValidation InternalSuiteFilter
         tests/Tests/InternalSuiteFilterValidation.cpp

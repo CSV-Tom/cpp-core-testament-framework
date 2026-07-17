@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Command-line argument forwarding to custom test handlers with pre-run configuration validation.
 - Optional Pimpl-based `SuiteOptions` and `TestOptions` with execution order, tags, and custom attributes for reporting and tracing.
 - `onTestStart` events exposing suite and test metadata before execution begins.
+- Compile-fail coverage ensuring discarded `Test` and `Suite` handles remain compiler errors under warnings-as-errors.
 - End-to-end coverage for JUnit output and installed-package coverage for externally defined test handlers.
 - `CONTRIBUTING.md` with contribution guidelines and Conventional Commits conventions.
 - `CHANGELOG.md` to track notable changes.
