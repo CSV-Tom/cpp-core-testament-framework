@@ -45,6 +45,18 @@ int main() {
     const bool optionsAreIndependent = reusableSuiteOptions.tags().size() == 1
         && copiedSuiteOptions.tags().size() == 2;
 
+    auto movedSuiteOptions = std::move(copiedSuiteOptions);
+    movedSuiteOptions.tag("moved-only");
+    Testament::TestOptions originalTestOptions;
+    originalTestOptions.disabled().retries(2);
+    auto movedTestOptions = std::move(originalTestOptions);
+    movedTestOptions.retries(3);
+    const bool movedOptionsRemainValid = copiedSuiteOptions.tags().size() == 2
+        && movedSuiteOptions.tags().size() == 3
+        && originalTestOptions.isDisabled()
+        && originalTestOptions.retryCount() == 2
+        && movedTestOptions.retryCount() == 3;
+
     auto zeta = Testament::makeSuite(
         "zeta",
         Testament::makeTest("only", [] {})
@@ -106,6 +118,7 @@ int main() {
     return zeta && alpha && early && viewed
         && exitCode == 0
         && optionsAreIndependent
+        && movedOptionsRemainValid
         && duplicateSuiteRejected
         && duplicateTestRejected
         && result->suiteMetadataReceived

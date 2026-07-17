@@ -27,12 +27,15 @@ template <typename... Types>
 concept TestHandles = (std::same_as<std::remove_cvref_t<Types>, Test> && ...);
 
 template <typename Type>
-concept FixtureSelection = std::same_as<Type, void> || std::derived_from<Type, LifecycleSuite>;
+concept FixtureSelection = std::same_as<Type, void>
+    || (std::derived_from<Type, LifecycleSuite> && std::default_initializable<Type>);
 
 template <typename SuiteType, typename Callable, typename... Args>
 concept CompatibleCallable = FixtureSelection<SuiteType>
-    && ((std::same_as<SuiteType, void> && std::invocable<Callable, Args...>)
-        || std::invocable<Callable, SuiteType&, Args...>);
+    && std::copy_constructible<std::decay_t<Callable>>
+    && ((std::same_as<SuiteType, void>
+         && std::invocable<std::decay_t<Callable>&, const Args&...>)
+        || std::invocable<std::decay_t<Callable>&, SuiteType&, const Args&...>);
 
 template <TestHandles... Tests>
 std::vector<Test> collectTests(Tests&&... cases) {
@@ -85,15 +88,16 @@ template <typename SuiteType = void, typename Callable, typename... Args>
 requires detail::CompatibleCallable<SuiteType, Callable, Args...>
 [[nodiscard]] Test makeParameterizedTest(std::string_view name, Callable&& function,
                                          std::vector<std::tuple<Args...>> parameters, TestOptions options = {}) {
+    auto parameterData = std::make_shared<const std::vector<std::tuple<Args...>>>(std::move(parameters));
     if constexpr (std::same_as<SuiteType, void>) {
-        return makeTest(name, [function = std::forward<Callable>(function), parameters = std::move(parameters)]() mutable {
-            for (const auto& values : parameters) std::apply(function, values);
+        return makeTest(name, [function = std::forward<Callable>(function), parameters = std::move(parameterData)]() mutable {
+            for (const auto& values : *parameters) std::apply(function, values);
         }, std::move(options));
     } else {
         return makeTest<SuiteType>(name, [function = std::forward<Callable>(function),
-                                         parameters = std::move(parameters)](SuiteType& fixture) mutable {
-            for (const auto& values : parameters) {
-                std::apply([&](Args... args) { std::invoke(function, fixture, args...); }, values);
+                                         parameters = std::move(parameterData)](SuiteType& fixture) mutable {
+            for (const auto& values : *parameters) {
+                std::apply([&](const Args&... args) { std::invoke(function, fixture, args...); }, values);
             }
         }, std::move(options));
     }

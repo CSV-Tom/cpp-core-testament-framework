@@ -40,8 +40,11 @@ AssertionFailure::AssertionFailure(std::string assertion, std::string expected,
 AssertionFailure::~AssertionFailure() = default;
 AssertionFailure::AssertionFailure(const AssertionFailure&) noexcept = default;
 AssertionFailure& AssertionFailure::operator=(const AssertionFailure&) noexcept = default;
-AssertionFailure::AssertionFailure(AssertionFailure&&) noexcept = default;
-AssertionFailure& AssertionFailure::operator=(AssertionFailure&&) noexcept = default;
+AssertionFailure::AssertionFailure(AssertionFailure&& other) noexcept : impl(other.impl) {}
+AssertionFailure& AssertionFailure::operator=(AssertionFailure&& other) noexcept {
+    impl = other.impl;
+    return *this;
+}
 
 const char* AssertionFailure::what() const noexcept { return impl->description.c_str(); }
 std::string_view AssertionFailure::assertion() const noexcept { return impl->assertion; }

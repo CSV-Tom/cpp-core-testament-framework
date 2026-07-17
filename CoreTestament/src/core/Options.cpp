@@ -41,8 +41,11 @@ SuiteOptions::SuiteOptions() : impl(std::make_shared<Impl>()) {}
 SuiteOptions::~SuiteOptions() = default;
 SuiteOptions::SuiteOptions(const SuiteOptions& other) = default;
 SuiteOptions& SuiteOptions::operator=(const SuiteOptions& other) = default;
-SuiteOptions::SuiteOptions(SuiteOptions&&) noexcept = default;
-SuiteOptions& SuiteOptions::operator=(SuiteOptions&&) noexcept = default;
+SuiteOptions::SuiteOptions(SuiteOptions&& other) noexcept : impl(other.impl) {}
+SuiteOptions& SuiteOptions::operator=(SuiteOptions&& other) noexcept {
+    impl = other.impl;
+    return *this;
+}
 
 void SuiteOptions::detach() {
     if (!impl) {
@@ -86,8 +89,11 @@ TestOptions::TestOptions() : impl(std::make_shared<Impl>()) {}
 TestOptions::~TestOptions() = default;
 TestOptions::TestOptions(const TestOptions& other) = default;
 TestOptions& TestOptions::operator=(const TestOptions& other) = default;
-TestOptions::TestOptions(TestOptions&&) noexcept = default;
-TestOptions& TestOptions::operator=(TestOptions&&) noexcept = default;
+TestOptions::TestOptions(TestOptions&& other) noexcept : impl(other.impl) {}
+TestOptions& TestOptions::operator=(TestOptions&& other) noexcept {
+    impl = other.impl;
+    return *this;
+}
 
 void TestOptions::detach() {
     if (!impl) {

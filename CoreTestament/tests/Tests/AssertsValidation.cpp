@@ -3,6 +3,7 @@
 #include <initializer_list>
 #include <string>
 #include <string_view>
+#include <utility>
 
 namespace {
 
@@ -83,12 +84,15 @@ int main() {
         Testament::Asserts::assertEquals(2, 3, "structured failure");
     } catch (const Testament::AssertionFailure& failure) {
         const auto copiedFailure = failure;
+        auto moveSource = failure;
+        const auto movedFailure = std::move(moveSource);
         structuredFailure = failure.assertion() == "assertEquals"
             && failure.expected() == "2"
             && failure.actual() == "3"
             && failure.message() == "structured failure"
             && failure.location().line() != 0
-            && std::string_view{copiedFailure.what()} == failure.what();
+            && std::string_view{copiedFailure.what()} == failure.what()
+            && std::string_view{moveSource.what()} == movedFailure.what();
     }
 
     return trueFailure && falseFailure && equalsFailure && nullFailure
