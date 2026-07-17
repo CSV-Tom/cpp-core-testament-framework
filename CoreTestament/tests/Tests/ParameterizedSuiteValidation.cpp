@@ -23,7 +23,8 @@ std::vector<std::tuple<int, int, int>> {
     {10, 2, 5},
     {20, 4, 5},
     {30, 6, 5}
-}
+},
+TestOptions{}.tag("parameterized")
                                                    )
                              );
 

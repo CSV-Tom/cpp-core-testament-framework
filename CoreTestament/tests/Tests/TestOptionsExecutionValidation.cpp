@@ -45,25 +45,25 @@ int main() {
         "test option execution",
         Testament::makeTest(
             "disabled",
-            Testament::TestOptions{}.disabled(),
-            [&disabledExecutions] { ++disabledExecutions; }
+            [&disabledExecutions] { ++disabledExecutions; },
+            Testament::TestOptions{}.disabled()
         ),
         Testament::makeTest(
             "flaky",
-            Testament::TestOptions{}.retries(2),
             [&flakyExecutions] {
                 if (++flakyExecutions < 3) {
                     throw 1;
                 }
-            }
+            },
+            Testament::TestOptions{}.retries(2)
         ),
         Testament::makeTest(
             "always failing",
-            Testament::TestOptions{}.retries(2),
             [&failingExecutions] {
                 ++failingExecutions;
                 throw 1;
-            }
+            },
+            Testament::TestOptions{}.retries(2)
         )
     );
 

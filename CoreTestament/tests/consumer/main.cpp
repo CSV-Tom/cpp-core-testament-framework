@@ -35,8 +35,8 @@ int main() {
     const std::expected<int, int> cxx23Value{23};
     auto test = Testament::makeTest(
         "installed consumer test",
-        Testament::TestOptions{}.attribute("operation", "install-check"),
-        [] {}
+        [] {},
+        Testament::TestOptions{}.attribute("operation", "install-check")
     );
     auto suite = Testament::makeSuite(
         "installed consumer suite",

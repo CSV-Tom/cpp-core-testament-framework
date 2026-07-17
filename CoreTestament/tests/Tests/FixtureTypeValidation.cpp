@@ -34,10 +34,12 @@ int main() {
             ++parameterInvocationCount;
             parameterSum += value;
         },
-        std::vector<std::tuple<int>>{{1}, {2}, {3}}
+        std::vector<std::tuple<int>>{{1}, {2}, {3}},
+        Testament::TestOptions{}.tag("fixture")
     );
     auto matchingSuite = Testament::makeSuite<ExpectedFixture>(
         "matching parameterized fixture validation",
+        Testament::SuiteOptions{}.order(1),
         std::move(matchingParameterizedTest)
     );
 

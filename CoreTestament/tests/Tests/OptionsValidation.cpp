@@ -52,15 +52,15 @@ int main() {
     auto alpha = Testament::makeSuite(
         "alpha",
         reusableSuiteOptions,
-        Testament::makeTest("late", Testament::TestOptions{}.order(20), [] {}),
+        Testament::makeTest("late", [] {}, Testament::TestOptions{}.order(20)),
         Testament::makeTest("first default", [] {}),
         Testament::makeTest(
             "early",
+            [] {},
             Testament::TestOptions{}
                 .order(-5)
                 .tag("trace")
-                .attribute("operation", "insert"),
-            [] {}
+                .attribute("operation", "insert")
         ),
         Testament::makeTest("second default", [] {})
     );

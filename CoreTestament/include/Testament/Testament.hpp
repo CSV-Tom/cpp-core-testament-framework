@@ -2,11 +2,11 @@
 #define TESTFRAMEWORK_TESTAMENT_HPP
 
 #include "Testament/Asserts.hpp"
-#include "Testament/Runner.hpp"
-#include "Testament/Reporters.hpp"
-#include "Testament/Suite.hpp"
 #include "Testament/LifecycleSuite.hpp"
 #include "Testament/Options.hpp"
+#include "Testament/Reporters.hpp"
+#include "Testament/Runner.hpp"
+#include "Testament/Suite.hpp"
 #include "Testament/Test.hpp"
 
 #include <concepts>
@@ -21,149 +21,82 @@
 
 namespace Testament {
 
+namespace detail {
 
-template <typename... Tests>
-requires (std::same_as<std::remove_cvref_t<Tests>, Test> && ...)
-[[nodiscard]] Suite makeSuite(std::string_view name, Tests&&... cases) {
-    std::vector<Test> tests;
-    tests.reserve(sizeof...(Tests));
-    (tests.emplace_back(std::forward<Tests>(cases)), ...);
-    return detail::makeSuite(name, SuiteOptions{}, std::move(tests));
-}
+template <typename... Types>
+concept TestHandles = (std::same_as<std::remove_cvref_t<Types>, Test> && ...);
 
-template <typename... Tests>
-requires (std::same_as<std::remove_cvref_t<Tests>, Test> && ...)
-[[nodiscard]] Suite makeSuite(std::string_view name, SuiteOptions options, Tests&&... cases) {
-    std::vector<Test> tests;
-    tests.reserve(sizeof...(Tests));
-    (tests.emplace_back(std::forward<Tests>(cases)), ...);
-    return detail::makeSuite(name, std::move(options), std::move(tests));
-}
-
-
-template <typename T, typename... Tests>
-requires (std::derived_from<T, LifecycleSuite> && (std::same_as<std::remove_cvref_t<Tests>, Test> && ...))
-[[nodiscard]] Suite makeSuite(std::string_view name, Tests&&... cases) {
-    std::vector<Test> tests;
-    tests.reserve(sizeof...(Tests));
-    (tests.emplace_back(std::forward<Tests>(cases)), ...);
-    return detail::makeSuite(name, std::make_unique<T>(), SuiteOptions{}, std::move(tests));
-}
-
-template <typename T, typename... Tests>
-requires (std::derived_from<T, LifecycleSuite> && (std::same_as<std::remove_cvref_t<Tests>, Test> && ...))
-[[nodiscard]] Suite makeSuite(std::string_view name, SuiteOptions options, Tests&&... cases) {
-    std::vector<Test> tests;
-    tests.reserve(sizeof...(Tests));
-    (tests.emplace_back(std::forward<Tests>(cases)), ...);
-    return detail::makeSuite(name, std::make_unique<T>(), std::move(options), std::move(tests));
-}
-
-
-template <typename Callable>
-requires std::invocable<Callable>
-[[nodiscard]] Test makeTest(std::string_view name, Callable&& testFunction) {
-    return detail::makeTest(name, TestOptions{},
-                            std::function<void()>(std::forward<Callable>(testFunction)));
-}
-
-template <typename Callable>
-requires std::invocable<Callable>
-[[nodiscard]] Test makeTest(std::string_view name, TestOptions options, Callable&& testFunction) {
-    return detail::makeTest(name, std::move(options),
-                            std::function<void()>(std::forward<Callable>(testFunction)));
-}
-
-template <typename SuiteType, typename Callable>
-requires std::derived_from<SuiteType, LifecycleSuite> && std::invocable<Callable, SuiteType&>
-[[nodiscard]] Test makeTest(std::string_view name, Callable&& testFunction) {
-    return detail::makeTest(name, TestOptions{}, std::function<void(LifecycleSuite&)>{
-        [testFunction = std::forward<Callable>(testFunction)](LifecycleSuite& suite) {
-            auto* typedSuite = dynamic_cast<SuiteType*>(&suite);
-            if (!typedSuite) {
-                throw std::logic_error("Test fixture type does not match suite fixture type");
-            }
-            std::invoke(testFunction, *typedSuite);
-        }
-    });
-}
-
-template <typename SuiteType, typename Callable>
-requires std::derived_from<SuiteType, LifecycleSuite> && std::invocable<Callable, SuiteType&>
-[[nodiscard]] Test makeTest(std::string_view name, TestOptions options, Callable&& testFunction) {
-    return detail::makeTest(name, std::move(options), std::function<void(LifecycleSuite&)>{
-        [testFunction = std::forward<Callable>(testFunction)](LifecycleSuite& suite) {
-            auto* typedSuite = dynamic_cast<SuiteType*>(&suite);
-            if (!typedSuite) {
-                throw std::logic_error("Test fixture type does not match suite fixture type");
-            }
-            std::invoke(testFunction, *typedSuite);
-        }
-    });
-}
-
-template <typename Callable, typename... Args>
-requires std::invocable<Callable, Args...>
-[[nodiscard]] Test makeParameterizedTest(std::string_view name, Callable&& testFunction,
-                                         std::vector<std::tuple<Args...>> parameters) {
-    return detail::makeTest(name, TestOptions{}, std::function<void()>{[testFunction = std::forward<Callable>(testFunction), parameters]() {
-        for (const auto& params : parameters) {
-            std::apply(testFunction, params);
-        }
-    }});
-}
-
-template <typename Callable, typename... Args>
-requires std::invocable<Callable, Args...>
-[[nodiscard]] Test makeParameterizedTest(std::string_view name, TestOptions options,
-                                         Callable&& testFunction,
-                                         std::vector<std::tuple<Args...>> parameters) {
-    return detail::makeTest(name, std::move(options), std::function<void()>{
-        [testFunction = std::forward<Callable>(testFunction), parameters]() {
-            for (const auto& params : parameters) {
-                std::apply(testFunction, params);
-            }
-        }
-    });
-}
+template <typename Type>
+concept FixtureSelection = std::same_as<Type, void> || std::derived_from<Type, LifecycleSuite>;
 
 template <typename SuiteType, typename Callable, typename... Args>
-requires std::derived_from<SuiteType, LifecycleSuite> && std::invocable<Callable, SuiteType&, Args...>
-[[nodiscard]] Test makeParameterizedTest(std::string_view name, Callable&& testFunction,
-                                         std::vector<std::tuple<Args...>> parameters) {
-    return detail::makeTest(name, TestOptions{}, std::function<void(LifecycleSuite&)>{
-        [testFunction = std::forward<Callable>(testFunction), parameters](LifecycleSuite& suite) {
-            auto* typedSuite = dynamic_cast<SuiteType*>(&suite);
-            if (!typedSuite) {
-                throw std::logic_error("Test fixture type does not match suite fixture type");
-            }
-            for (const auto& params : parameters) {
-                std::apply([typedSuite, &testFunction](Args... args) {
-                    std::invoke(testFunction, *typedSuite, args...);
-                }, params);
-            }
-        }
-    });
+concept CompatibleCallable = FixtureSelection<SuiteType>
+    && ((std::same_as<SuiteType, void> && std::invocable<Callable, Args...>)
+        || std::invocable<Callable, SuiteType&, Args...>);
+
+template <TestHandles... Tests>
+std::vector<Test> collectTests(Tests&&... cases) {
+    std::vector<Test> result;
+    result.reserve(sizeof...(Tests));
+    (result.emplace_back(std::forward<Tests>(cases)), ...);
+    return result;
 }
 
-template <typename SuiteType, typename Callable, typename... Args>
-requires std::derived_from<SuiteType, LifecycleSuite> && std::invocable<Callable, SuiteType&, Args...>
-[[nodiscard]] Test makeParameterizedTest(std::string_view name, TestOptions options,
-                                         Callable&& testFunction,
-                                         std::vector<std::tuple<Args...>> parameters) {
-    return detail::makeTest(name, std::move(options), std::function<void(LifecycleSuite&)>{
-        [testFunction = std::forward<Callable>(testFunction), parameters](LifecycleSuite& suite) {
-            auto* typedSuite = dynamic_cast<SuiteType*>(&suite);
-            if (!typedSuite) {
-                throw std::logic_error("Test fixture type does not match suite fixture type");
+template <std::derived_from<LifecycleSuite> SuiteType>
+SuiteType& checkedFixture(LifecycleSuite& fixture) {
+    if (auto* typed = dynamic_cast<SuiteType*>(&fixture)) return *typed;
+    throw std::logic_error("Test fixture type does not match suite fixture type");
+}
+
+}
+
+template <typename SuiteType = void, typename... Tests>
+requires detail::FixtureSelection<SuiteType> && detail::TestHandles<Tests...>
+[[nodiscard]] Suite makeSuite(std::string_view name, SuiteOptions options, Tests&&... cases) {
+    auto tests = detail::collectTests(std::forward<Tests>(cases)...);
+    if constexpr (std::same_as<SuiteType, void>) {
+        return detail::makeSuite(name, std::move(options), std::move(tests));
+    } else {
+        return detail::makeSuite(name, std::make_unique<SuiteType>(), std::move(options), std::move(tests));
+    }
+}
+
+template <typename SuiteType = void, typename... Tests>
+requires detail::FixtureSelection<SuiteType> && detail::TestHandles<Tests...>
+[[nodiscard]] Suite makeSuite(std::string_view name, Tests&&... cases) {
+    return makeSuite<SuiteType>(name, SuiteOptions{}, std::forward<Tests>(cases)...);
+}
+
+template <typename SuiteType = void, typename Callable>
+requires detail::CompatibleCallable<SuiteType, Callable>
+[[nodiscard]] Test makeTest(std::string_view name, Callable&& function, TestOptions options = {}) {
+    if constexpr (std::same_as<SuiteType, void>) {
+        return detail::makeTest(name, std::move(options), std::function<void()>{std::forward<Callable>(function)});
+    } else {
+        return detail::makeTest(name, std::move(options), std::function<void(LifecycleSuite&)>{
+            [function = std::forward<Callable>(function)](LifecycleSuite& fixture) mutable {
+                std::invoke(function, detail::checkedFixture<SuiteType>(fixture));
             }
-            for (const auto& params : parameters) {
-                std::apply([typedSuite, &testFunction](Args... args) {
-                    std::invoke(testFunction, *typedSuite, args...);
-                }, params);
+        });
+    }
+}
+
+template <typename SuiteType = void, typename Callable, typename... Args>
+requires detail::CompatibleCallable<SuiteType, Callable, Args...>
+[[nodiscard]] Test makeParameterizedTest(std::string_view name, Callable&& function,
+                                         std::vector<std::tuple<Args...>> parameters, TestOptions options = {}) {
+    if constexpr (std::same_as<SuiteType, void>) {
+        return makeTest(name, [function = std::forward<Callable>(function), parameters = std::move(parameters)]() mutable {
+            for (const auto& values : parameters) std::apply(function, values);
+        }, std::move(options));
+    } else {
+        return makeTest<SuiteType>(name, [function = std::forward<Callable>(function),
+                                         parameters = std::move(parameters)](SuiteType& fixture) mutable {
+            for (const auto& values : parameters) {
+                std::apply([&](Args... args) { std::invoke(function, fixture, args...); }, values);
             }
-        }
-    });
+        }, std::move(options));
+    }
 }
 
 }

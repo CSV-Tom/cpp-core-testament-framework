@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Option values use copy-on-write storage so event metadata snapshots remain owning without repeated deep copies.
 - Assertion messages are now optional, assertion requirements are expressed as concepts, and non-streamable values use a readable fallback representation.
 - Test and suite factory names and synchronous handler messages now accept non-owning `std::string_view` inputs.
+- Test factory options now follow the callable and parameter data, allowing one defaulted signature for fixture and non-fixture tests.
 - Replaced the static `Testament::Runner::run(argc, argv)` entry point with `Testament::run(argc, argv)` for default execution and an instance-based `Runner::run(argc, argv)` for configured handlers.
 - Moved runner state and handler ownership behind a Pimpl implementation to keep implementation details out of the public API.
 - Applied consistent astyle formatting across all C++ sources.
