@@ -30,7 +30,7 @@ endif()
 set(diagnostics "${compiler_output}\n${compiler_error}")
 
 if(compile_result EQUAL 0)
-    message(FATAL_ERROR "Discarding Test and Suite handles compiled without an error")
+    message(FATAL_ERROR "Discarding handles or runner exit codes compiled without an error")
 endif()
 
 if(NOT diagnostics MATCHES "nodiscard|unused-result|C4834")

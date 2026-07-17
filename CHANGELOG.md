@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `LifecycleSuite` is now solely the fixture extension interface and no longer derives from the public suite-registration handle.
 - Suites execute deterministically by configured order and name; tests execute stably by configured order while preserving declaration order for ties.
 - Ambiguous duplicate suite names and duplicate test names within a suite are now rejected.
+- Option values use copy-on-write storage so event metadata snapshots remain owning without repeated deep copies.
 - Replaced the static `Testament::Runner::run(argc, argv)` entry point with `Testament::run(argc, argv)` for default execution and an instance-based `Runner::run(argc, argv)` for configured handlers.
 - Moved runner state and handler ownership behind a Pimpl implementation to keep implementation details out of the public API.
 - Applied consistent astyle formatting across all C++ sources.
@@ -43,6 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Discarding a `Test` or `Suite` handle now produces a compiler warning instead of silently losing the test or deregistering the suite.
+- Discarding a runner exit code now produces a compiler warning instead of silently hiding failed tests from CI.
 - Undefined behavior in `makeSuite<T>`.
 - Fixture tests now reject mismatched suite types at runtime instead of dereferencing an invalid cast.
 - Test execution now rejects a missing suite context instead of invoking fixture callbacks with invalid state.

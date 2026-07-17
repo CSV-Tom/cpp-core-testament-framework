@@ -19,6 +19,7 @@ public:
     Runner& operator=(const Runner&) = delete;
 
     Runner& addHandler(std::unique_ptr<TestEventHandler> handler);
+    [[nodiscard("propagate the test exit code, e.g. return runner.run(argc, argv)")]]
     int run(int argc, char** argv);
 
 private:
@@ -26,6 +27,7 @@ private:
     std::unique_ptr<Impl> impl;
 };
 
+[[nodiscard("propagate the test exit code, e.g. return Testament::run(argc, argv)")]]
 int run(int argc, char** argv);
 
 }

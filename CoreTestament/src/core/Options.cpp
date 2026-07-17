@@ -36,27 +36,33 @@ public:
 
 class SuiteOptions::Impl : public OptionsStorage<Attribute> {};
 
-SuiteOptions::SuiteOptions() : impl(std::make_unique<Impl>()) {}
+SuiteOptions::SuiteOptions() : impl(std::make_shared<Impl>()) {}
 SuiteOptions::~SuiteOptions() = default;
-SuiteOptions::SuiteOptions(const SuiteOptions& other) : impl(std::make_unique<Impl>(*other.impl)) {}
-SuiteOptions& SuiteOptions::operator=(const SuiteOptions& other) {
-    if (this != &other) {
-        *impl = *other.impl;
-    }
-    return *this;
-}
+SuiteOptions::SuiteOptions(const SuiteOptions& other) = default;
+SuiteOptions& SuiteOptions::operator=(const SuiteOptions& other) = default;
 SuiteOptions::SuiteOptions(SuiteOptions&&) noexcept = default;
 SuiteOptions& SuiteOptions::operator=(SuiteOptions&&) noexcept = default;
 
+void SuiteOptions::detach() {
+    if (!impl) {
+        impl = std::make_shared<Impl>();
+    } else if (!impl.unique()) {
+        impl = std::make_shared<Impl>(*impl);
+    }
+}
+
 SuiteOptions& SuiteOptions::order(int value) {
+    detach();
     impl->order = value;
     return *this;
 }
 SuiteOptions& SuiteOptions::tag(std::string value) {
+    detach();
     impl->tags.push_back(std::move(value));
     return *this;
 }
 SuiteOptions& SuiteOptions::attribute(std::string key, std::string value) {
+    detach();
     impl->setAttribute(std::move(key), std::move(value));
     return *this;
 }
@@ -75,35 +81,43 @@ public:
     unsigned int retries{};
 };
 
-TestOptions::TestOptions() : impl(std::make_unique<Impl>()) {}
+TestOptions::TestOptions() : impl(std::make_shared<Impl>()) {}
 TestOptions::~TestOptions() = default;
-TestOptions::TestOptions(const TestOptions& other) : impl(std::make_unique<Impl>(*other.impl)) {}
-TestOptions& TestOptions::operator=(const TestOptions& other) {
-    if (this != &other) {
-        *impl = *other.impl;
-    }
-    return *this;
-}
+TestOptions::TestOptions(const TestOptions& other) = default;
+TestOptions& TestOptions::operator=(const TestOptions& other) = default;
 TestOptions::TestOptions(TestOptions&&) noexcept = default;
 TestOptions& TestOptions::operator=(TestOptions&&) noexcept = default;
 
+void TestOptions::detach() {
+    if (!impl) {
+        impl = std::make_shared<Impl>();
+    } else if (!impl.unique()) {
+        impl = std::make_shared<Impl>(*impl);
+    }
+}
+
 TestOptions& TestOptions::order(int value) {
+    detach();
     impl->order = value;
     return *this;
 }
 TestOptions& TestOptions::tag(std::string value) {
+    detach();
     impl->tags.push_back(std::move(value));
     return *this;
 }
 TestOptions& TestOptions::attribute(std::string key, std::string value) {
+    detach();
     impl->setAttribute(std::move(key), std::move(value));
     return *this;
 }
 TestOptions& TestOptions::disabled(bool value) {
+    detach();
     impl->disabled = value;
     return *this;
 }
 TestOptions& TestOptions::retries(unsigned int value) {
+    detach();
     impl->retries = value;
     return *this;
 }

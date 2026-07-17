@@ -33,7 +33,8 @@ public:
 
 private:
     class Impl;
-    std::unique_ptr<Impl> impl;
+    void detach();
+    std::shared_ptr<Impl> impl;
 };
 
 class TestOptions {
@@ -63,7 +64,8 @@ public:
 
 private:
     class Impl;
-    std::unique_ptr<Impl> impl;
+    void detach();
+    std::shared_ptr<Impl> impl;
 };
 
 }
