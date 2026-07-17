@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Public `TestEventHandler` extension API and reporter factories for registering custom output formats with a configurable `Runner`.
 - Command-line argument forwarding to custom test handlers with pre-run configuration validation.
 - Optional Pimpl-based `SuiteOptions` and `TestOptions` with execution order, tags, and custom attributes for reporting and tracing.
+- Test-specific `disabled` and `retries` options with skipped-test reporting and a single final result across retry attempts.
 - `onTestStart` events exposing suite and test metadata before execution begins.
 - Compile-fail coverage ensuring discarded `Test` and `Suite` handles remain compiler errors under warnings-as-errors.
 - End-to-end coverage for JUnit output and installed-package coverage for externally defined test handlers.

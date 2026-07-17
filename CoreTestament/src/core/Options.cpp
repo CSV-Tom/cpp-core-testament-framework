@@ -8,33 +8,33 @@ namespace Testament {
 namespace {
 
 template <typename Attribute>
-void setAttribute(std::vector<Attribute>& attributes, std::string key, std::string value) {
-    const auto existing = std::ranges::find(attributes, key, &Attribute::first);
-    if (existing == attributes.end()) {
-        attributes.emplace_back(std::move(key), std::move(value));
-    } else {
-        existing->second = std::move(value);
-    }
-}
-
-template <typename Attribute>
-std::optional<std::string_view> findAttribute(const std::vector<Attribute>& attributes,
-                                              std::string_view key) noexcept {
-    const auto existing = std::ranges::find(attributes, key, &Attribute::first);
-    if (existing == attributes.end()) {
-        return std::nullopt;
-    }
-    return existing->second;
-}
-
-}
-
-class SuiteOptions::Impl {
+class OptionsStorage {
 public:
+    void setAttribute(std::string key, std::string value) {
+        const auto existing = std::ranges::find(attributes, key, &Attribute::first);
+        if (existing == attributes.end()) {
+            attributes.emplace_back(std::move(key), std::move(value));
+        } else {
+            existing->second = std::move(value);
+        }
+    }
+
+    std::optional<std::string_view> findAttribute(std::string_view key) const noexcept {
+        const auto existing = std::ranges::find(attributes, key, &Attribute::first);
+        if (existing == attributes.end()) {
+            return std::nullopt;
+        }
+        return existing->second;
+    }
+
     std::optional<int> order;
     std::vector<std::string> tags;
     std::vector<Attribute> attributes;
 };
+
+}
+
+class SuiteOptions::Impl : public OptionsStorage<Attribute> {};
 
 SuiteOptions::SuiteOptions() : impl(std::make_unique<Impl>()) {}
 SuiteOptions::~SuiteOptions() = default;
@@ -57,7 +57,7 @@ SuiteOptions& SuiteOptions::tag(std::string value) {
     return *this;
 }
 SuiteOptions& SuiteOptions::attribute(std::string key, std::string value) {
-    setAttribute(impl->attributes, std::move(key), std::move(value));
+    impl->setAttribute(std::move(key), std::move(value));
     return *this;
 }
 std::optional<int> SuiteOptions::order() const noexcept { return impl->order; }
@@ -66,14 +66,13 @@ std::span<const SuiteOptions::Attribute> SuiteOptions::attributes() const noexce
     return impl->attributes;
 }
 std::optional<std::string_view> SuiteOptions::attribute(std::string_view key) const noexcept {
-    return findAttribute(impl->attributes, key);
+    return impl->findAttribute(key);
 }
 
-class TestOptions::Impl {
+class TestOptions::Impl : public OptionsStorage<Attribute> {
 public:
-    std::optional<int> order;
-    std::vector<std::string> tags;
-    std::vector<Attribute> attributes;
+    bool disabled{};
+    unsigned int retries{};
 };
 
 TestOptions::TestOptions() : impl(std::make_unique<Impl>()) {}
@@ -97,7 +96,15 @@ TestOptions& TestOptions::tag(std::string value) {
     return *this;
 }
 TestOptions& TestOptions::attribute(std::string key, std::string value) {
-    setAttribute(impl->attributes, std::move(key), std::move(value));
+    impl->setAttribute(std::move(key), std::move(value));
+    return *this;
+}
+TestOptions& TestOptions::disabled(bool value) {
+    impl->disabled = value;
+    return *this;
+}
+TestOptions& TestOptions::retries(unsigned int value) {
+    impl->retries = value;
     return *this;
 }
 std::optional<int> TestOptions::order() const noexcept { return impl->order; }
@@ -106,7 +113,9 @@ std::span<const TestOptions::Attribute> TestOptions::attributes() const noexcept
     return impl->attributes;
 }
 std::optional<std::string_view> TestOptions::attribute(std::string_view key) const noexcept {
-    return findAttribute(impl->attributes, key);
+    return impl->findAttribute(key);
 }
+bool TestOptions::isDisabled() const noexcept { return impl->disabled; }
+unsigned int TestOptions::retryCount() const noexcept { return impl->retries; }
 
 }

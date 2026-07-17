@@ -171,6 +171,11 @@ if(BUILD_TESTING)
         tests/Tests/OptionsValidation.cpp
     )
 
+    add_testament_test(
+        TestOptionsExecutionValidation TestOptionsExecution
+        tests/Tests/TestOptionsExecutionValidation.cpp
+    )
+
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang|MSVC")
         add_test(
             NAME DiscardedHandles

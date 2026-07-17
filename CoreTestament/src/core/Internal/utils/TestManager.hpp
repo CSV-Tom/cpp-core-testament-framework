@@ -21,6 +21,12 @@ public:
     void executeTest(LifecycleSuite* fixture, std::unique_ptr<InternalTest>& test,
                      const TestEventHandler::SuiteInfo& suiteInfo,
                      TestEventHandler* handler = nullptr) {
+        if (test->getOptions().isDisabled()) {
+            const auto result = test->execute(fixture);
+            processResult(suiteInfo, test, result, std::chrono::duration<double>::zero(), handler);
+            return;
+        }
+
         if (handler) {
             handler->onTestStart(suiteInfo, {
                 test->getName(), std::chrono::duration<double>::zero(), {}, test->getOptions()
@@ -28,8 +34,15 @@ public:
         }
         testTimer.start();
         auto result = test->execute(fixture);
+        auto duration = test->getExecutionTimer().getDuration();
+        auto remainingRetries = test->getOptions().retryCount();
+        while (std::holds_alternative<std::exception_ptr>(result) && remainingRetries > 0) {
+            --remainingRetries;
+            result = test->execute(fixture);
+            duration += test->getExecutionTimer().getDuration();
+        }
         testTimer.stop();
-        processResult(suiteInfo, test, result, handler);
+        processResult(suiteInfo, test, result, duration, handler);
     }
 
 private:
@@ -39,9 +52,10 @@ private:
     void processResult(const TestEventHandler::SuiteInfo& suiteInfo,
                        std::unique_ptr<InternalTest>& test,
                        const std::variant<std::monostate, std::exception_ptr>& result,
+                       std::chrono::duration<double> duration,
                        TestEventHandler* handler) {
         TestEventHandler::TestInfo testInfo{
-            test->getName(), test->getExecutionTimer().getDuration(), {}, test->getOptions()
+            test->getName(), duration, {}, test->getOptions()
         };
 
         if (std::holds_alternative<std::monostate>(result)) {
