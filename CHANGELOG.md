@@ -40,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Discarding a `Test` or `Suite` handle now produces a compiler warning instead of silently losing the test or deregistering the suite.
 - Undefined behavior in `makeSuite<T>`.
 - Fixture tests now reject mismatched suite types at runtime instead of dereferencing an invalid cast.
 - Test execution now rejects a missing suite context instead of invoking fixture callbacks with invalid state.

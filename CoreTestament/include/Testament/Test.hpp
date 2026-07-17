@@ -21,7 +21,7 @@ Test makeTest(std::string name, TestOptions options,
 
 }
 
-class Test {
+class [[nodiscard("the test handle must be added to a suite")]] Test {
 public:
     ~Test();
 

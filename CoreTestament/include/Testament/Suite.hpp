@@ -21,7 +21,7 @@ Suite makeSuite(std::string name, std::unique_ptr<LifecycleSuite> fixture,
 
 }
 
-class Suite {
+class [[nodiscard("the suite handle keeps its registration alive")]] Suite {
 public:
     ~Suite();
 
