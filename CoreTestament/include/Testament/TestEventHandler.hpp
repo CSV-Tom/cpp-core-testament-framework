@@ -16,11 +16,20 @@ public:
     // Argument views remain valid for the duration of Runner::run.
     using Arguments = std::span<const std::string_view>;
 
+    enum class TestResultStatus {
+        NotRun,
+        Passed,
+        Failed,
+        Skipped,
+        LifecycleError
+    };
+
     struct TestInfo {
         std::string name;
         std::chrono::duration<double> duration;
         std::exception_ptr exception;
         TestOptions options;
+        TestResultStatus status{TestResultStatus::NotRun};
     };
 
     struct SuiteInfo {

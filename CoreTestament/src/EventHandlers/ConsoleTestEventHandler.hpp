@@ -43,7 +43,9 @@ public:
     }
 
     void onTestFailed(const SuiteInfo&, const TestInfo& test) override {
-        std::cout << "❌ FAILED: " << test.name << formatDuration(test.duration);
+        const bool lifecycleError = test.status == TestResultStatus::LifecycleError;
+        std::cout << (lifecycleError ? "⚠️ LIFECYCLE ERROR: " : "❌ FAILED: ")
+                  << test.name << formatDuration(test.duration);
         if (test.exception) {
             try {
                 std::rethrow_exception(test.exception);

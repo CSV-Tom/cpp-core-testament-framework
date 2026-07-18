@@ -208,6 +208,11 @@ if(BUILD_TESTING)
     )
 
     add_testament_internal_test(
+        LifecycleRetryValidation LifecycleRetry
+        tests/Tests/LifecycleRetryValidation.cpp
+    )
+
+    add_testament_internal_test(
         JUnitReporterValidation JUnitReporter
         tests/Tests/JUnitReporterValidation.cpp
     )

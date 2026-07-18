@@ -24,6 +24,14 @@ int main() {
         throw std::runtime_error("failure <reason> & details");
     }));
 
+    auto lifecycleSuite = Testament::InternalRegistry::getInstance().registerSuite(
+        std::make_shared<Testament::InternalSuite>("lifecycle suite")
+    );
+    lifecycleSuite->setBeforeEach([] {
+        throw std::runtime_error("setup <failed>");
+    });
+    lifecycleSuite->addTest(Testament::makeTest("lifecycle test", [] {}));
+
     std::string executable = "JUnitReporterValidation";
     std::string missingPathOption = "--junit";
     char* invalidArguments[]{executable.data(), missingPathOption.data()};
@@ -39,10 +47,11 @@ int main() {
 
     return invalidArgumentsExitCode == 2
         && exitCode == 1
-        && xml.contains("<testsuites tests=\"2\" failures=\"1\" errors=\"0\" skipped=\"0\"")
+        && xml.contains("<testsuites tests=\"3\" failures=\"1\" errors=\"1\" skipped=\"0\"")
         && xml.contains("<testsuite name=\"suite &lt;&amp;&gt;\"")
         && xml.contains("name=\"failing &quot;test&quot;\"")
         && xml.contains("failure &lt;reason&gt; &amp; details")
+        && xml.contains("<error message=\"Error in beforeEach: setup &lt;failed&gt;\"")
         ? 0
         : 1;
 }

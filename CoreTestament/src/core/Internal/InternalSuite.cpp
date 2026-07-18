@@ -7,8 +7,11 @@
 #include "Testament/TestEventHandler.hpp"
 
 #include <algorithm>
+#include <chrono>
+#include <exception>
 #include <ranges>
 #include <stdexcept>
+#include <string>
 #include <utility>
 
 
@@ -81,55 +84,98 @@ bool InternalSuite::run() {
         handler->onSuiteStart({name, 0, 0, 0, options});
     }
 
-    const auto reportHookErrors = [this] {
-        if (!handler) {
-            return;
-        }
-        const TestEventHandler::SuiteInfo suiteInfo{
+    const auto suiteInfo = [this] {
+        return TestEventHandler::SuiteInfo{
             name,
             statistic.getPassedTests(),
             statistic.getFailedTests(),
             statistic.getSkippedTests(),
             options
         };
-        for (const auto& error : hookManager.getErrors()) {
-            handler->onSuiteAbort(suiteInfo, error);
-        }
+    };
+    const auto reportSuiteError = [this, &suiteInfo](std::string_view error) {
+        if (handler) handler->onSuiteAbort(suiteInfo(), error);
+    };
+    const auto selected = [this](const auto& test) {
+        return !testFilter || testFilter(test->getName());
     };
 
     if (!hookManager.invokeBeforeSuiteHook()) {
+        const auto error = hookManager.getErrors().back();
+        for (auto& test : tests | std::views::filter(selected)) {
+            testManager.reportStart(suiteInfo(), test, handler);
+            testManager.reportResult(
+                suiteInfo(), test, TestEventHandler::TestResultStatus::LifecycleError,
+                std::chrono::duration<double>::zero(),
+                std::make_exception_ptr(std::runtime_error(error)), handler
+            );
+        }
         totalTimer.stop();
-        reportHookErrors();
+        reportSuiteError(error);
+        if (handler) handler->onSuiteEnd(suiteInfo());
         return false;
     }
 
     bool hooksSucceeded = true;
-    for (auto& test : tests | std::views::filter([this](const auto& t) {
-    return !testFilter || testFilter(t->getName());
-    })) {
-        if (!hookManager.invokeBeforeEachHook()) {
-            hooksSucceeded = false;
+    for (auto& test : tests | std::views::filter(selected)) {
+        if (test->getOptions().isDisabled()) {
+            testManager.reportResult(
+                suiteInfo(), test, TestEventHandler::TestResultStatus::Skipped,
+                std::chrono::duration<double>::zero(), {}, handler
+            );
             continue;
         }
-        testManager.executeTest(fixture.get(), test, {
-            name,
-            statistic.getPassedTests(),
-            statistic.getFailedTests(),
-            statistic.getSkippedTests(),
-            options
-        }, handler);
-        hooksSucceeded = hookManager.invokeAfterEachHook() && hooksSucceeded;
+
+        testManager.reportStart(suiteInfo(), test, handler);
+        auto remainingRetries = test->getOptions().retryCount();
+        auto duration = std::chrono::duration<double>::zero();
+        auto status = TestEventHandler::TestResultStatus::Failed;
+        std::exception_ptr exception;
+
+        while (true) {
+            std::string lifecycleError;
+            const bool beforeEachSucceeded = hookManager.invokeBeforeEachHook();
+            if (!beforeEachSucceeded) lifecycleError = hookManager.getErrors().back();
+
+            TestManager::Result result{std::monostate{}};
+            if (beforeEachSucceeded) {
+                result = testManager.executeAttempt(fixture.get(), test);
+                duration += test->getExecutionTimer().getDuration();
+            }
+
+            if (!hookManager.invokeAfterEachHook()) {
+                if (!lifecycleError.empty()) lifecycleError += "; ";
+                lifecycleError += hookManager.getErrors().back();
+            }
+
+            if (!lifecycleError.empty()) {
+                status = TestEventHandler::TestResultStatus::LifecycleError;
+                exception = std::make_exception_ptr(std::runtime_error(lifecycleError));
+            } else if (std::holds_alternative<std::exception_ptr>(result)) {
+                status = TestEventHandler::TestResultStatus::Failed;
+                exception = std::get<std::exception_ptr>(result);
+            } else {
+                status = TestEventHandler::TestResultStatus::Passed;
+                exception = {};
+            }
+
+            if (status == TestEventHandler::TestResultStatus::Passed || remainingRetries == 0) break;
+            --remainingRetries;
+        }
+
+        hooksSucceeded = status != TestEventHandler::TestResultStatus::LifecycleError
+            && hooksSucceeded;
+        testManager.reportResult(suiteInfo(), test, status, duration, exception, handler);
     }
 
-    hooksSucceeded = hookManager.invokeAfterSuiteHook() && hooksSucceeded;
+    if (!hookManager.invokeAfterSuiteHook()) {
+        hooksSucceeded = false;
+        reportSuiteError(hookManager.getErrors().back());
+    }
 
     totalTimer.stop();
-    reportHookErrors();
 
-    if (handler) {
-        handler->onSuiteEnd({name, statistic.getPassedTests(), statistic.getFailedTests(),
-                             statistic.getSkippedTests(), options});
-    }
+    if (handler) handler->onSuiteEnd(suiteInfo());
 
     return hooksSucceeded;
 }

@@ -27,7 +27,8 @@ private:
     enum class Status {
         Passed,
         Failed,
-        Skipped
+        Skipped,
+        Error
     };
 
     struct TestResult {

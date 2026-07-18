@@ -80,7 +80,10 @@ void JUnitTestEventHandler::onTestPassed(const SuiteInfo& suite, const TestInfo&
 }
 
 void JUnitTestEventHandler::onTestFailed(const SuiteInfo& suite, const TestInfo& test) {
-    suiteResult(suite).tests.push_back({test, Status::Failed, exceptionMessage(test.exception)});
+    const auto status = test.status == TestResultStatus::LifecycleError
+        ? Status::Error
+        : Status::Failed;
+    suiteResult(suite).tests.push_back({test, status, exceptionMessage(test.exception)});
 }
 
 void JUnitTestEventHandler::onTestSkipped(const SuiteInfo& suite, const TestInfo& test) {
@@ -119,6 +122,7 @@ void JUnitTestEventHandler::writeReport() {
         for (const auto& test : suite.tests) {
             totalDuration += durationSeconds(test.info);
             failureCount += test.status == Status::Failed ? 1U : 0U;
+            errorCount += test.status == Status::Error ? 1U : 0U;
             skippedCount += test.status == Status::Skipped ? 1U : 0U;
         }
     }
@@ -148,18 +152,20 @@ void JUnitTestEventHandler::writeReport() {
 
     for (const auto& suite : suiteResults) {
         std::size_t suiteFailures = 0;
+        std::size_t suiteErrors = suite.lifecycleErrors.size();
         std::size_t suiteSkipped = 0;
         double suiteDuration = 0.0;
         for (const auto& test : suite.tests) {
             suiteDuration += durationSeconds(test.info);
             suiteFailures += test.status == Status::Failed ? 1U : 0U;
+            suiteErrors += test.status == Status::Error ? 1U : 0U;
             suiteSkipped += test.status == Status::Skipped ? 1U : 0U;
         }
 
         output << "  <testsuite name=\"" << escapeXml(suite.name)
                << "\" tests=\"" << suite.tests.size() + suite.lifecycleErrors.size()
                << "\" failures=\"" << suiteFailures
-               << "\" errors=\"" << suite.lifecycleErrors.size()
+               << "\" errors=\"" << suiteErrors
                << "\" skipped=\"" << suiteSkipped
                << "\" time=\"" << suiteDuration << "\">\n";
 
@@ -171,10 +177,14 @@ void JUnitTestEventHandler::writeReport() {
                 output << "/>\n";
             } else if (test.status == Status::Skipped) {
                 output << "><skipped/></testcase>\n";
-            } else {
+            } else if (test.status == Status::Failed) {
                 output << "><failure message=\"" << escapeXml(test.failureMessage)
                        << "\">" << escapeXml(test.failureMessage)
                        << "</failure></testcase>\n";
+            } else {
+                output << "><error message=\"" << escapeXml(test.failureMessage)
+                       << "\">" << escapeXml(test.failureMessage)
+                       << "</error></testcase>\n";
             }
         }
 
