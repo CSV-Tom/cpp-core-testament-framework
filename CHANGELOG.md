@@ -51,6 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Lifecycle hook failures now produce explicit `LifecycleError` test results and contribute to failed-test statistics.
 - Retried tests now execute `beforeEach` and `afterEach` around every attempt instead of sharing fixture state across attempts.
 - Test result events now contain the updated suite statistics including the reported result.
+- Fixture-bound tests now reject incompatible or fixture-less suites while the suite is assembled instead of failing during execution.
 - Moved-from assertion failures and option values now retain valid readable state.
 - Factory constraints now match stored callable invocation, reject unsupported fixtures early, and support move-only parameter values.
 - Discarding a `Test` or `Suite` handle now produces a compiler warning instead of silently losing the test or deregistering the suite.

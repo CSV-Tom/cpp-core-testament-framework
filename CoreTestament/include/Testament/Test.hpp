@@ -4,6 +4,7 @@
 #include <functional>
 #include <memory>
 #include <string_view>
+#include <typeindex>
 
 namespace Testament {
 
@@ -15,7 +16,7 @@ namespace detail {
 
 class TestAccess;
 Test makeTest(std::string_view name, TestOptions options, std::function<void()> function);
-Test makeTest(std::string_view name, TestOptions options,
+Test makeTest(std::string_view name, TestOptions options, std::type_index fixtureType,
               std::function<void(LifecycleSuite&)> function);
 
 }
@@ -38,7 +39,7 @@ private:
     explicit Test(std::unique_ptr<Impl> impl);
 
     friend Test detail::makeTest(std::string_view, TestOptions, std::function<void()>);
-    friend Test detail::makeTest(std::string_view, TestOptions,
+    friend Test detail::makeTest(std::string_view, TestOptions, std::type_index,
                                  std::function<void(LifecycleSuite&)>);
     friend class detail::TestAccess;
 

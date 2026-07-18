@@ -1,6 +1,7 @@
 #include "Testament/Testament.hpp"
 
 #include <memory>
+#include <stdexcept>
 #include <tuple>
 #include <utility>
 #include <vector>
@@ -34,6 +35,9 @@ static_assert(!TestFactoryAccepts<RvalueOnlyCallable>);
 int main() {
     bool testBodyEntered = false;
     bool parameterizedBodyEntered = false;
+    bool mismatchedFixtureRejected = false;
+    bool missingFixtureRejected = false;
+    bool mismatchedParameterizedFixtureRejected = false;
     int parameterInvocationCount = 0;
     int parameterSum = 0;
     int moveOnlyParameterSum = 0;
@@ -44,10 +48,29 @@ int main() {
             testBodyEntered = true;
         }
     );
-    auto mismatchedSuite = Testament::makeSuite<ActualFixture>(
-        "fixture type validation",
-        std::move(mismatchedTest)
+    try {
+        auto mismatchedSuite = Testament::makeSuite<ActualFixture>(
+            "fixture type validation",
+            std::move(mismatchedTest)
+        );
+        static_cast<void>(mismatchedSuite);
+    } catch (const std::invalid_argument&) {
+        mismatchedFixtureRejected = true;
+    }
+
+    auto missingFixtureTest = Testament::makeTest<ExpectedFixture>(
+        "missing fixture",
+        [&testBodyEntered](ExpectedFixture&) { testBodyEntered = true; }
     );
+    try {
+        auto missingFixtureSuite = Testament::makeSuite(
+            "missing fixture validation",
+            std::move(missingFixtureTest)
+        );
+        static_cast<void>(missingFixtureSuite);
+    } catch (const std::invalid_argument&) {
+        missingFixtureRejected = true;
+    }
 
     auto matchingParameterizedTest = Testament::makeParameterizedTest<ExpectedFixture>(
         "matching parameterized fixture",
@@ -81,16 +104,22 @@ int main() {
         },
         std::vector<std::tuple<int>>{{1}, {2}}
     );
-    auto mismatchedParameterizedSuite = Testament::makeSuite<ActualFixture>(
-        "mismatched parameterized fixture validation",
-        std::move(mismatchedParameterizedTest)
-    );
-    static_cast<void>(mismatchedSuite);
+    try {
+        auto mismatchedParameterizedSuite = Testament::makeSuite<ActualFixture>(
+            "mismatched parameterized fixture validation",
+            std::move(mismatchedParameterizedTest)
+        );
+        static_cast<void>(mismatchedParameterizedSuite);
+    } catch (const std::invalid_argument&) {
+        mismatchedParameterizedFixtureRejected = true;
+    }
     static_cast<void>(matchingSuite);
-    static_cast<void>(mismatchedParameterizedSuite);
 
     const int runnerResult = Testament::run(0, nullptr);
-    return runnerResult == 1
+    return runnerResult == 0
+        && mismatchedFixtureRejected
+        && missingFixtureRejected
+        && mismatchedParameterizedFixtureRejected
         && !testBodyEntered
         && !parameterizedBodyEntered
         && parameterInvocationCount == 3

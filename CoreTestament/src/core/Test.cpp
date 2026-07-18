@@ -26,11 +26,11 @@ Test detail::makeTest(std::string_view name, TestOptions options, std::function<
     )};
 }
 
-Test detail::makeTest(std::string_view name, TestOptions options,
+Test detail::makeTest(std::string_view name, TestOptions options, std::type_index fixtureType,
                       std::function<void(LifecycleSuite&)> function) {
     return Test{std::make_unique<Test::Impl>(
         std::make_unique<InternalTest>(std::string{name}, std::move(options),
-                                       FunctionVariant{std::move(function)})
+                                       FunctionVariant{std::move(function)}, fixtureType)
     )};
 }
 

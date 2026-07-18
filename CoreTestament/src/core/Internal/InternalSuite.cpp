@@ -29,6 +29,8 @@ InternalSuite::InternalSuite(std::string name_, std::unique_ptr<LifecycleSuite> 
                              SuiteOptions options_)
     : InternalSuite(std::move(name_), std::move(options_)) {
     fixture = std::move(fixture_);
+    if (!fixture) throw std::invalid_argument("Lifecycle suite fixture cannot be null");
+    fixtureType = std::type_index(typeid(*fixture));
     setBeforeSuite([this] { fixture->beforeAll(); });
     setBeforeEach([this] { fixture->beforeEach(); });
     setAfterEach([this] { fixture->afterEach(); });
@@ -40,6 +42,10 @@ InternalSuite::~InternalSuite() = default;
 
 void InternalSuite::addTest(Test test) {
     auto internalTest = detail::TestAccess::release(std::move(test));
+    if (const auto expectedFixture = internalTest->getFixtureType();
+        expectedFixture && expectedFixture != fixtureType) {
+        throw std::invalid_argument("Test fixture type does not match suite fixture type");
+    }
     if (std::ranges::any_of(tests, [&internalTest](const auto& registered) {
         return registered->getName() == internalTest->getName();
     })) {

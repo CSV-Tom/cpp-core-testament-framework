@@ -10,9 +10,11 @@
 
 #include <functional>
 #include <memory>
+#include <optional>
 #include <regex>
 #include <string>
 #include <string_view>
+#include <typeindex>
 #include <variant>
 #include <vector>
 
@@ -67,6 +69,7 @@ private:
     TestFilter testFilter = nullptr;
 
     std::unique_ptr<LifecycleSuite> fixture;
+    std::optional<std::type_index> fixtureType;
 };
 
 }

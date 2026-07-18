@@ -16,6 +16,7 @@
 #include <string_view>
 #include <tuple>
 #include <type_traits>
+#include <typeindex>
 #include <utility>
 #include <vector>
 
@@ -76,7 +77,8 @@ requires detail::CompatibleCallable<SuiteType, Callable>
     if constexpr (std::same_as<SuiteType, void>) {
         return detail::makeTest(name, std::move(options), std::function<void()>{std::forward<Callable>(function)});
     } else {
-        return detail::makeTest(name, std::move(options), std::function<void(LifecycleSuite&)>{
+        return detail::makeTest(name, std::move(options), std::type_index(typeid(SuiteType)),
+                                std::function<void(LifecycleSuite&)>{
             [function = std::forward<Callable>(function)](LifecycleSuite& fixture) mutable {
                 std::invoke(function, detail::checkedFixture<SuiteType>(fixture));
             }
