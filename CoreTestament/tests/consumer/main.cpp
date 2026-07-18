@@ -46,7 +46,7 @@ int main() {
     auto handler = std::make_unique<ConsumerHandler>();
     auto* handlerResult = handler.get();
     Testament::Runner runner;
-    runner.addHandler(std::move(handler));
+    runner.addHandler(std::move(handler)).addHandler(Testament::makeJUnitHandler());
 
     std::string executable = "CoreTestamentConsumer";
     std::string option = "--consumer";

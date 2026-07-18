@@ -127,6 +127,10 @@ std::unique_ptr<TestEventHandler> makeConsoleHandler() {
     return std::make_unique<detail::ConsoleTestEventHandler>();
 }
 
+std::unique_ptr<TestEventHandler> makeJUnitHandler() {
+    return std::make_unique<detail::JUnitTestEventHandler>();
+}
+
 std::unique_ptr<TestEventHandler> makeJUnitHandler(std::filesystem::path outputPath) {
     return std::make_unique<detail::JUnitTestEventHandler>(std::move(outputPath));
 }
@@ -134,7 +138,7 @@ std::unique_ptr<TestEventHandler> makeJUnitHandler(std::filesystem::path outputP
 int run(int argc, char** argv) {
     Runner runner;
     runner.addHandler(makeConsoleHandler());
-    runner.addHandler(std::make_unique<detail::JUnitTestEventHandler>());
+    runner.addHandler(makeJUnitHandler());
     return runner.run(argc, argv);
 }
 
