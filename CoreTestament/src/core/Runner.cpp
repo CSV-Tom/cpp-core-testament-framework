@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <iostream>
+#include <mutex>
 #include <optional>
 #include <string_view>
 #include <utility>
@@ -21,6 +22,8 @@
 namespace Testament {
 
 namespace {
+
+std::mutex testRunMutex;
 
 std::optional<std::vector<std::string_view>> commandLineArguments(int argc, char** argv) {
     if (argc < 0 || (argc > 0 && !argv)) {
@@ -66,6 +69,8 @@ int Runner::run(int argc, char** argv) {
         std::cerr << "Invalid command-line arguments\n";
         return 2;
     }
+
+    const std::scoped_lock runLock(testRunMutex);
 
     TestEventHandlerChain chain;
     for (const auto& handler : impl->handlers) {

@@ -210,6 +210,13 @@ if(BUILD_TESTING)
         tests/Tests/HandlerFailureIsolationValidation.cpp
     )
 
+    find_package(Threads REQUIRED)
+    add_testament_test(
+        ConcurrentRunnerValidation ConcurrentRunner
+        tests/Tests/ConcurrentRunnerValidation.cpp
+    )
+    target_link_libraries(ConcurrentRunnerValidation PRIVATE Threads::Threads)
+
     add_testament_test(
         OptionsValidation Options
         tests/Tests/OptionsValidation.cpp

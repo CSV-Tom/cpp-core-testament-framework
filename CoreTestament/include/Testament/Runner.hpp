@@ -19,6 +19,7 @@ public:
     Runner& operator=(const Runner&) = delete;
 
     Runner& addHandler(std::unique_ptr<TestEventHandler> handler);
+    // Concurrent calls are serialized. Complete suite registration before starting a run.
     [[nodiscard("propagate the test exit code, e.g. return runner.run(argc, argv)")]]
     int run(int argc, char** argv);
 
