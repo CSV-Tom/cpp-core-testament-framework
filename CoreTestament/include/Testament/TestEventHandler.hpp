@@ -7,7 +7,8 @@
 #include <string>
 #include <string_view>
 
-#include "Testament/Options.hpp"
+#include "Testament/SuiteOptions.hpp"
+#include "Testament/TestOptions.hpp"
 
 namespace Testament {
 

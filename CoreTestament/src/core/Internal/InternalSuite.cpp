@@ -3,7 +3,7 @@
 #include "TestAccess.hpp"
 
 #include "Testament/LifecycleSuite.hpp"
-#include "Testament/SuiteRegistration.hpp"
+#include "Testament/detail/TestHandle.hpp"
 #include "Testament/TestEventHandler.hpp"
 
 #include <algorithm>

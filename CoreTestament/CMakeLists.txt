@@ -23,11 +23,14 @@ target_sources(${PROJECT_NAME}
         src/core/Internal/InternalTest.cpp
         src/core/Internal/InternalSuite.cpp
         src/core/Internal/InternalRegistry.cpp
+        src/core/Internal/ConfigurationDiagnostics.cpp
+        src/core/Internal/SuiteAssembler.cpp
         src/core/Runner.cpp
-        src/core/Suite.cpp
+        src/core/SuiteRegistration.cpp
         src/core/LifecycleSuite.cpp
-        src/core/Test.cpp
-        src/core/Options.cpp
+        src/core/TestHandle.cpp
+        src/core/SuiteOptions.cpp
+        src/core/TestOptions.cpp
         src/core/AssertionFailure.cpp
         src/core/Asserts.cpp
         src/EventHandlers/JUnitTestEventHandler.cpp
@@ -36,14 +39,25 @@ target_sources(${PROJECT_NAME}
         FILES
             include/Testament/Asserts.hpp
             include/Testament/AssertionFailure.hpp
-            include/Testament/Definitions.hpp
             include/Testament/LifecycleSuite.hpp
-            include/Testament/Options.hpp
+            include/Testament/ParameterizedTest.hpp
             include/Testament/Runner.hpp
             include/Testament/Reporters.hpp
+            include/Testament/Suite.hpp
+            include/Testament/SuiteOptions.hpp
             include/Testament/SuiteRegistration.hpp
+            include/Testament/Test.hpp
+            include/Testament/TestCase.hpp
             include/Testament/TestEventHandler.hpp
+            include/Testament/TestOptions.hpp
             include/Testament/Testament.hpp
+            include/Testament/detail/CaseSet.hpp
+            include/Testament/detail/Concepts.hpp
+            include/Testament/detail/NamedTestCase.hpp
+            include/Testament/detail/ParameterizedTestDefinition.hpp
+            include/Testament/detail/RuntimeBridge.hpp
+            include/Testament/detail/TestDefinition.hpp
+            include/Testament/detail/TestHandle.hpp
 )
 
 

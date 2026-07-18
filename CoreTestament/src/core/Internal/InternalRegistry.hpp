@@ -1,12 +1,14 @@
 #ifndef TESTFRAMEWORK_TESTAMENT_INTERNALREGISTRY_HPP
 #define TESTFRAMEWORK_TESTAMENT_INTERNALREGISTRY_HPP
 
+#include "ConfigurationDiagnostics.hpp"
+
+#include <functional>
 #include <memory>
-#include <shared_mutex>  // Für std::shared_mutex
+#include <shared_mutex>
 #include <string>
 #include <string_view>
 #include <vector>
-#include <functional>
 
 namespace Testament {
 
@@ -24,7 +26,9 @@ public:
     [[nodiscard]] std::vector<std::string> getConfigurationErrors() const;
 
     template <typename Predicate>
-    [[nodiscard]] std::vector<std::shared_ptr<InternalSuite>> getSuitesByFilter(Predicate&& filter) const {
+    [[nodiscard]] std::vector<std::shared_ptr<InternalSuite>> getSuitesByFilter(
+        Predicate&& filter
+    ) const {
         std::shared_lock lock(registryMutex);
         std::vector<std::shared_ptr<InternalSuite>> matchingSuites;
         matchingSuites.reserve(registeredSuites.size());
@@ -35,10 +39,6 @@ public:
         }
         return matchingSuites;
     }
-
-
-
-
     static std::function<bool(const std::shared_ptr<InternalSuite>&)> createFilter(
         std::string_view type, std::string_view value = {}
     );
@@ -51,7 +51,7 @@ private:
 
     mutable std::shared_mutex registryMutex;
     std::vector<std::shared_ptr<InternalSuite>> registeredSuites;
-    std::vector<std::string> configurationErrors;
+    ConfigurationDiagnostics configurationDiagnostics;
 };
 
 }

@@ -19,8 +19,8 @@ int main() {
     auto suite = Testament::InternalRegistry::getInstance().registerSuite(
         std::make_shared<Testament::InternalSuite>("suite <&>")
     );
-    suite->addTest(Testament::detail::makeRuntimeTest("passing test", {}, [] {}));
-    suite->addTest(Testament::detail::makeRuntimeTest("failing \"test\"", {}, [] {
+    suite->addTest(Testament::detail::RuntimeBridge::makeTest("passing test", {}, [] {}));
+    suite->addTest(Testament::detail::RuntimeBridge::makeTest("failing \"test\"", {}, [] {
         throw std::runtime_error("failure <reason> & details");
     }));
 
@@ -30,7 +30,7 @@ int main() {
     lifecycleSuite->setBeforeEach([] {
         throw std::runtime_error("setup <failed>");
     });
-    lifecycleSuite->addTest(Testament::detail::makeRuntimeTest("lifecycle test", {}, [] {}));
+    lifecycleSuite->addTest(Testament::detail::RuntimeBridge::makeTest("lifecycle test", {}, [] {}));
 
     auto parameterSuite = Testament::Suite(
         "parameter suite",

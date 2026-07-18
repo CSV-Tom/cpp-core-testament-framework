@@ -1,6 +1,6 @@
-#include "Testament/SuiteRegistration.hpp"
+#include "Testament/detail/RuntimeBridge.hpp"
 
-#include "Testament/Options.hpp"
+#include "Testament/TestOptions.hpp"
 
 #include "Internal/FunctionVariant.hpp"
 #include "Internal/InternalTest.hpp"
@@ -19,17 +19,18 @@ public:
     std::unique_ptr<InternalTest> test;
 };
 
-detail::TestHandle detail::makeRuntimeTest(std::string_view name, TestOptions options,
-                                          std::function<void()> function) {
+detail::TestHandle detail::RuntimeBridge::makeTest(std::string_view name, TestOptions options,
+                                                  std::function<void()> function) {
     return TestHandle{std::make_unique<TestHandle::Impl>(
         std::make_unique<InternalTest>(std::string{name}, std::move(options),
                                        FunctionVariant{std::move(function)})
     )};
 }
 
-detail::TestHandle detail::makeRuntimeTest(std::string_view name, TestOptions options,
-                                          std::type_index fixtureType,
-                                          std::function<void(LifecycleSuite&)> function) {
+detail::TestHandle detail::RuntimeBridge::makeTest(
+    std::string_view name, TestOptions options, std::type_index fixtureType,
+    std::function<void(LifecycleSuite&)> function
+) {
     return TestHandle{std::make_unique<TestHandle::Impl>(
         std::make_unique<InternalTest>(std::string{name}, std::move(options),
                                        FunctionVariant{std::move(function)}, fixtureType)

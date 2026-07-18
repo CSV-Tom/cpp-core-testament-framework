@@ -24,7 +24,7 @@ public:
         accumulatedDuration += (endTime - startTime);
     }
 
-    std::chrono::duration<double> getDuration() const {
+    [[nodiscard]] std::chrono::duration<double> getDuration() const {
         if (startTime == Clock::time_point{}) {
             throw std::logic_error("Timer was not started before querying elapsed time!");
         }
@@ -40,15 +40,13 @@ public:
         accumulatedDuration = std::chrono::duration<double>::zero();
     }
 
-    // Operator+, um zwei Timer-Zeiten zu addieren
-    ExecutionTimer operator+(const ExecutionTimer& other) const {
+    [[nodiscard]] ExecutionTimer operator+(const ExecutionTimer& other) const noexcept {
         ExecutionTimer result;
         result.accumulatedDuration = this->accumulatedDuration + other.accumulatedDuration;
         return result;
     }
 
-    // Operator+= für einfaches Akkumulieren von Zeiten
-    ExecutionTimer& operator+=(const ExecutionTimer& other) {
+    ExecutionTimer& operator+=(const ExecutionTimer& other) noexcept {
         this->accumulatedDuration += other.accumulatedDuration;
         return *this;
     }

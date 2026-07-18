@@ -12,51 +12,44 @@ public:
         Skipped
     };
 
-private:
-    Status currentStatus = Status::NotRun;
-
-public:
-    // Konstruktor
     TestStatus() = default;
     explicit TestStatus(Status initialStatus) : currentStatus(initialStatus) {}
 
-    // Getter
-    Status getStatus() const {
+    [[nodiscard]] Status getStatus() const noexcept {
         return currentStatus;
     }
 
-    // Setter
-    void setStatus(Status newStatus) {
+    void setStatus(Status newStatus) noexcept {
         currentStatus = newStatus;
     }
 
-    // Zuweisungsoperator
-    TestStatus& operator=(Status newStatus) {
+    TestStatus& operator=(Status newStatus) noexcept {
         currentStatus = newStatus;
         return *this;
     }
 
-    // Vergleichsoperatoren
-    bool operator==(Status otherStatus) const {
+    [[nodiscard]] bool operator==(Status otherStatus) const noexcept {
         return currentStatus == otherStatus;
     }
 
-    bool operator!=(Status otherStatus) const {
+    [[nodiscard]] bool operator!=(Status otherStatus) const noexcept {
         return currentStatus != otherStatus;
     }
 
-    // Statusprüfungen
-    bool isPassed() const {
+    [[nodiscard]] bool isPassed() const noexcept {
         return currentStatus == Status::Passed;
     }
 
-    bool isSkipped() const {
+    [[nodiscard]] bool isSkipped() const noexcept {
         return currentStatus == Status::Skipped;
     }
 
-    bool isFailed() const {
+    [[nodiscard]] bool isFailed() const noexcept {
         return currentStatus == Status::Failed;
     }
+
+private:
+    Status currentStatus{Status::NotRun};
 };
 
 }

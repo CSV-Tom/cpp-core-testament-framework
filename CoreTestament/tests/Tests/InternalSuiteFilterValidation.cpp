@@ -11,9 +11,9 @@ int main() {
     int betaOneRuns = 0;
     int betaTwoRuns = 0;
 
-    suite.addTest(Testament::detail::makeRuntimeTest("alpha", {}, [&alphaRuns] { ++alphaRuns; }));
-    suite.addTest(Testament::detail::makeRuntimeTest("beta-one", {}, [&betaOneRuns] { ++betaOneRuns; }));
-    suite.addTest(Testament::detail::makeRuntimeTest("beta-two", {}, [&betaTwoRuns] { ++betaTwoRuns; }));
+    suite.addTest(Testament::detail::RuntimeBridge::makeTest("alpha", {}, [&alphaRuns] { ++alphaRuns; }));
+    suite.addTest(Testament::detail::RuntimeBridge::makeTest("beta-one", {}, [&betaOneRuns] { ++betaOneRuns; }));
+    suite.addTest(Testament::detail::RuntimeBridge::makeTest("beta-two", {}, [&betaTwoRuns] { ++betaTwoRuns; }));
     auto parameterized = Testament::ParameterizedTest(
         "values",
         Testament::Cases(

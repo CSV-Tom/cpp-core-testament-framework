@@ -6,47 +6,43 @@ namespace Testament {
 template <typename CounterType = unsigned int>
 class TestStatistics {
 public:
-    // Konstruktor
-    TestStatistics() : skippedTests(0), failedTests(0), successfulTests(0) {}
+    TestStatistics() = default;
 
-    // Getter für die Testanzahlen
-    CounterType getSkippedTests() const {
+    [[nodiscard]] CounterType getSkippedTests() const noexcept {
         return skippedTests;
     }
 
-    CounterType getFailedTests() const {
+    [[nodiscard]] CounterType getFailedTests() const noexcept {
         return failedTests;
     }
 
-    CounterType getPassedTests() const {
+    [[nodiscard]] CounterType getPassedTests() const noexcept {
         return successfulTests;
     }
 
-    CounterType getTotalTests() const {
+    [[nodiscard]] CounterType getTotalTests() const noexcept {
         return skippedTests + failedTests + successfulTests;
     }
 
-    // Setter zum Ändern der Werte
-    void incrementSkippedTests() {
+    void incrementSkippedTests() noexcept {
         ++skippedTests;
     }
 
-    void incrementFailedTests() {
+    void incrementFailedTests() noexcept {
         ++failedTests;
     }
 
-    void incrementPassedTests() {
+    void incrementPassedTests() noexcept {
         ++successfulTests;
     }
 
-    void reset() {
+    void reset() noexcept {
         skippedTests = 0;
         failedTests = 0;
         successfulTests = 0;
     }
 
-    // Überladen des + Operators
-    TestStatistics operator+(const TestStatistics& other) const {
+    [[nodiscard]] TestStatistics operator+(const TestStatistics& other) const noexcept {
         TestStatistics result;
         result.skippedTests = this->skippedTests + other.skippedTests;
         result.failedTests = this->failedTests + other.failedTests;
@@ -54,8 +50,7 @@ public:
         return result;
     }
 
-    // Überladen des += Operators
-    TestStatistics& operator+=(const TestStatistics& other) {
+    TestStatistics& operator+=(const TestStatistics& other) noexcept {
         this->skippedTests += other.skippedTests;
         this->failedTests += other.failedTests;
         this->successfulTests += other.successfulTests;
@@ -63,9 +58,9 @@ public:
     }
 
 private:
-    CounterType skippedTests;
-    CounterType failedTests;
-    CounterType successfulTests;
+    CounterType skippedTests{};
+    CounterType failedTests{};
+    CounterType successfulTests{};
 };
 
 }

@@ -1,4 +1,3 @@
-
 #ifndef TESTFRAMEWORK_TESTAMENT_INTERNALTEST_HPP
 #define TESTFRAMEWORK_TESTAMENT_INTERNALTEST_HPP
 
@@ -8,13 +7,10 @@
 #include <typeindex>
 #include <variant>
 
-#include "Testament/Options.hpp"
+#include "Testament/TestOptions.hpp"
 #include "FunctionVariant.hpp"
-
-
-#include "utils/TestStatus.hpp"
 #include "utils/ExecutionTimer.hpp"
-
+#include "utils/TestStatus.hpp"
 
 namespace Testament {
 

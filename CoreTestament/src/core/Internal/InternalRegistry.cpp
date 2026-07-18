@@ -43,13 +43,11 @@ std::vector<std::shared_ptr<InternalSuite>> InternalRegistry::getAllSuites() con
 }
 
 void InternalRegistry::recordConfigurationError(std::string error) {
-    std::unique_lock lock(registryMutex);
-    configurationErrors.push_back(std::move(error));
+    configurationDiagnostics.record(std::move(error));
 }
 
 std::vector<std::string> InternalRegistry::getConfigurationErrors() const {
-    std::shared_lock lock(registryMutex);
-    return configurationErrors;
+    return configurationDiagnostics.errors();
 }
 
 std::function<bool(const std::shared_ptr<InternalSuite>&)> InternalRegistry::createFilter(

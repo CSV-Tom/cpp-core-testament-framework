@@ -1,7 +1,7 @@
 #ifndef TESTFRAMEWORK_TESTAMENT_INTERNALSUITE_HPP
 #define TESTFRAMEWORK_TESTAMENT_INTERNALSUITE_HPP
 
-#include "Testament/Options.hpp"
+#include "Testament/SuiteOptions.hpp"
 
 #include "utils/ExecutionTimer.hpp"
 #include "utils/HookManager.hpp"

@@ -42,7 +42,7 @@ int main() {
     suite->setBeforeSuite([] {
         throw std::runtime_error("expected hook failure");
     });
-    suite->addTest(Testament::detail::makeRuntimeTest("must not run", {}, [&testExecuted] {
+    suite->addTest(Testament::detail::RuntimeBridge::makeTest("must not run", {}, [&testExecuted] {
         testExecuted = true;
     }));
 
@@ -55,7 +55,7 @@ int main() {
     beforeEachSuite.setBeforeEach([] {
         throw std::runtime_error("expected before each failure");
     });
-    beforeEachSuite.addTest(Testament::detail::makeRuntimeTest("must also not run", {}, [&beforeEachTestExecuted] {
+    beforeEachSuite.addTest(Testament::detail::RuntimeBridge::makeTest("must also not run", {}, [&beforeEachTestExecuted] {
         beforeEachTestExecuted = true;
     }));
     RecordingHandler beforeEachHandler;

@@ -4,7 +4,7 @@
 
 int main() {
     Testament::InternalSuite suite("repeat-run validation");
-    suite.addTest(Testament::detail::makeRuntimeTest("passing test", {}, [] {}));
+    suite.addTest(Testament::detail::RuntimeBridge::makeTest("passing test", {}, [] {}));
 
     const bool firstRunSucceeded = suite.run();
     const bool secondRunSucceeded = suite.run();

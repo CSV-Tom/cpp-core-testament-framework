@@ -29,7 +29,7 @@ int main() {
 
     suite.setBeforeEach([&beforeEachCalls] { ++beforeEachCalls; });
     suite.setAfterEach([&afterEachCalls] { ++afterEachCalls; });
-    suite.addTest(Testament::detail::makeRuntimeTest(
+    suite.addTest(Testament::detail::RuntimeBridge::makeTest(
         "flaky",
         Testament::TestOptions{}.maxAttempts(3),
         [&attempts] {
