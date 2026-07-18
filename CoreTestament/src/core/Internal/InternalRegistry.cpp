@@ -42,6 +42,16 @@ std::vector<std::shared_ptr<InternalSuite>> InternalRegistry::getAllSuites() con
     return registeredSuites;
 }
 
+void InternalRegistry::recordConfigurationError(std::string error) {
+    std::unique_lock lock(registryMutex);
+    configurationErrors.push_back(std::move(error));
+}
+
+std::vector<std::string> InternalRegistry::getConfigurationErrors() const {
+    std::shared_lock lock(registryMutex);
+    return configurationErrors;
+}
+
 std::function<bool(const std::shared_ptr<InternalSuite>&)> InternalRegistry::createFilter(
     std::string_view type, std::string_view value
 ) {

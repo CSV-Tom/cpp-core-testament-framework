@@ -84,6 +84,10 @@ int Runner::run(int argc, char** argv) {
     }
 
     auto& registry = InternalRegistry::getInstance();
+    if (const auto errors = registry.getConfigurationErrors(); !errors.empty()) {
+        for (const auto& error : errors) std::cerr << "Test configuration error: " << error << '\n';
+        return 2;
+    }
     auto suites = registry.getAllSuites();
     std::ranges::sort(suites, [](const auto& left, const auto& right) {
         const auto leftOrder = left->getOptions().order().value_or(0);

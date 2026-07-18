@@ -1,8 +1,7 @@
-#include "Testament/Suite.hpp"
+#include "Testament/SuiteRegistration.hpp"
 
 #include "Testament/LifecycleSuite.hpp"
 #include "Testament/Options.hpp"
-#include "Testament/Test.hpp"
 
 #include "Internal/InternalRegistry.hpp"
 #include "Internal/InternalSuite.hpp"
@@ -12,7 +11,7 @@
 
 namespace Testament {
 
-class Suite::Impl {
+class SuiteRegistration::Impl {
 public:
     explicit Impl(std::shared_ptr<InternalSuite> suite_) : suite(std::move(suite_)) {}
 
@@ -25,10 +24,10 @@ public:
 
 namespace {
 
-std::shared_ptr<InternalSuite> registerSuite(std::string name,
+std::shared_ptr<InternalSuite> assembleSuite(std::string name,
                                             std::unique_ptr<LifecycleSuite> fixture,
                                             SuiteOptions options,
-                                            std::vector<Test> tests) {
+                                            std::vector<detail::TestHandle> tests) {
     auto suite = fixture
         ? std::make_shared<InternalSuite>(std::move(name), std::move(fixture), std::move(options))
         : std::make_shared<InternalSuite>(std::move(name), std::move(options));
@@ -40,24 +39,44 @@ std::shared_ptr<InternalSuite> registerSuite(std::string name,
 
 }
 
-Suite detail::makeSuite(std::string_view name, SuiteOptions options, std::vector<Test> tests) {
-    auto suite = registerSuite(std::string{name}, nullptr, std::move(options), std::move(tests));
-    return Suite{std::make_unique<Suite::Impl>(std::move(suite))};
+SuiteRegistration detail::registerSuite(std::string_view name, SuiteOptions options,
+                                        std::vector<TestHandle> tests) {
+    try {
+        auto suite = assembleSuite(std::string{name}, nullptr, std::move(options), std::move(tests));
+        return SuiteRegistration{std::make_unique<SuiteRegistration::Impl>(std::move(suite))};
+    } catch (const std::logic_error& error) {
+        recordConfigurationError(std::string{name} + ": " + error.what());
+        return invalidSuiteRegistration();
+    }
 }
 
-Suite detail::makeSuite(std::string_view name, std::unique_ptr<LifecycleSuite> fixture,
-                        SuiteOptions options, std::vector<Test> tests) {
-    auto suite = registerSuite(std::string{name}, std::move(fixture), std::move(options),
-                               std::move(tests));
-    return Suite{std::make_unique<Suite::Impl>(std::move(suite))};
+SuiteRegistration detail::registerSuite(std::string_view name,
+                                        std::unique_ptr<LifecycleSuite> fixture,
+                                        SuiteOptions options, std::vector<TestHandle> tests) {
+    try {
+        auto suite = assembleSuite(std::string{name}, std::move(fixture), std::move(options),
+                                   std::move(tests));
+        return SuiteRegistration{std::make_unique<SuiteRegistration::Impl>(std::move(suite))};
+    } catch (const std::logic_error& error) {
+        recordConfigurationError(std::string{name} + ": " + error.what());
+        return invalidSuiteRegistration();
+    }
 }
 
-Suite::Suite(std::unique_ptr<Impl> impl_) : impl(std::move(impl_)) {}
-Suite::~Suite() = default;
-Suite::Suite(Suite&&) noexcept = default;
-Suite& Suite::operator=(Suite&&) noexcept = default;
+SuiteRegistration detail::invalidSuiteRegistration() {
+    return SuiteRegistration{nullptr};
+}
 
-Suite::operator bool() const noexcept {
+void detail::recordConfigurationError(std::string error) {
+    InternalRegistry::getInstance().recordConfigurationError(std::move(error));
+}
+
+SuiteRegistration::SuiteRegistration(std::unique_ptr<Impl> impl_) : impl(std::move(impl_)) {}
+SuiteRegistration::~SuiteRegistration() = default;
+SuiteRegistration::SuiteRegistration(SuiteRegistration&&) noexcept = default;
+SuiteRegistration& SuiteRegistration::operator=(SuiteRegistration&&) noexcept = default;
+
+SuiteRegistration::operator bool() const noexcept {
     return static_cast<bool>(impl);
 }
 

@@ -82,7 +82,7 @@ std::optional<std::string_view> SuiteOptions::attribute(std::string_view key) co
 class TestOptions::Impl : public OptionsStorage<Attribute> {
 public:
     bool disabled{};
-    unsigned int retries{};
+    unsigned int maxAttempts{1};
 };
 
 TestOptions::TestOptions() : impl(std::make_shared<Impl>()) {}
@@ -123,9 +123,9 @@ TestOptions& TestOptions::disabled(bool value) {
     impl->disabled = value;
     return *this;
 }
-TestOptions& TestOptions::retries(unsigned int value) {
+TestOptions& TestOptions::maxAttempts(unsigned int value) {
     detach();
-    impl->retries = value;
+    impl->maxAttempts = value;
     return *this;
 }
 std::optional<int> TestOptions::order() const noexcept { return impl->order; }
@@ -137,6 +137,6 @@ std::optional<std::string_view> TestOptions::attribute(std::string_view key) con
     return impl->findAttribute(key);
 }
 bool TestOptions::isDisabled() const noexcept { return impl->disabled; }
-unsigned int TestOptions::retryCount() const noexcept { return impl->retries; }
+unsigned int TestOptions::maxAttempts() const noexcept { return impl->maxAttempts; }
 
 }

@@ -11,9 +11,20 @@ int main() {
     int betaOneRuns = 0;
     int betaTwoRuns = 0;
 
-    suite.addTest(Testament::makeTest("alpha", [&alphaRuns] { ++alphaRuns; }));
-    suite.addTest(Testament::makeTest("beta-one", [&betaOneRuns] { ++betaOneRuns; }));
-    suite.addTest(Testament::makeTest("beta-two", [&betaTwoRuns] { ++betaTwoRuns; }));
+    suite.addTest(Testament::detail::makeRuntimeTest("alpha", {}, [&alphaRuns] { ++alphaRuns; }));
+    suite.addTest(Testament::detail::makeRuntimeTest("beta-one", {}, [&betaOneRuns] { ++betaOneRuns; }));
+    suite.addTest(Testament::detail::makeRuntimeTest("beta-two", {}, [&betaTwoRuns] { ++betaTwoRuns; }));
+    auto parameterized = Testament::ParameterizedTest(
+        "values",
+        Testament::Cases(
+            Testament::TestCase("one", 1),
+            Testament::TestCase("two", 2)
+        ),
+        [&betaTwoRuns](int value) { betaTwoRuns += value; }
+    );
+    for (auto& test : std::move(parameterized).materialize<void>()) {
+        suite.addTest(std::move(test));
+    }
 
     suite.setTestFilter(std::string{"alpha"});
     const bool exactRunSucceeded = suite.run();
@@ -29,8 +40,14 @@ int main() {
         && betaTwoRuns == 1
         && suite.getStatistics().getPassedTests() == 2;
 
+    suite.setTestFilter(std::string{"values / two"});
+    const bool parameterFilterSucceeded = suite.run();
+    const bool parameterFilterMatched = betaTwoRuns == 3
+        && suite.getStatistics().getPassedTests() == 1;
+
     return exactRunSucceeded && exactFilterMatched
         && regexRunSucceeded && regexFilterMatched
+        && parameterFilterSucceeded && parameterFilterMatched
         ? 0
         : 1;
 }

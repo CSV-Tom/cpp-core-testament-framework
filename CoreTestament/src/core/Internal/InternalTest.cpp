@@ -16,6 +16,7 @@ InternalTest::InternalTest(std::string name_, TestOptions options_, FunctionVari
                            std::optional<std::type_index> fixtureType_)
     : name(std::move(name_)), options(std::move(options_)), function(std::move(function_)),
       fixtureType(fixtureType_) {
+    if (name.empty()) throw std::invalid_argument("Test name cannot be empty");
     if (options.isDisabled()) {
         status = TestStatus::Status::Skipped;
     }

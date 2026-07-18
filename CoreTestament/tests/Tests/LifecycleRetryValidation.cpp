@@ -29,12 +29,12 @@ int main() {
 
     suite.setBeforeEach([&beforeEachCalls] { ++beforeEachCalls; });
     suite.setAfterEach([&afterEachCalls] { ++afterEachCalls; });
-    suite.addTest(Testament::makeTest(
+    suite.addTest(Testament::detail::makeRuntimeTest(
         "flaky",
+        Testament::TestOptions{}.maxAttempts(3),
         [&attempts] {
             if (++attempts < 3) throw std::runtime_error("retry");
-        },
-        Testament::TestOptions{}.retries(2)
+        }
     ));
 
     RecordingHandler handler;

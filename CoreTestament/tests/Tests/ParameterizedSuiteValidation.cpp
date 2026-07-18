@@ -1,31 +1,21 @@
 #include "Testament/Testament.hpp"
 
-#include <iostream>
-#include <string>
-
 namespace Testament {
 
-
-static auto suite = makeSuite("Parameterized Suite",
-                              makeParameterizedTest("Division Tests",
-[](int a, int b, int expected) {
-    std::cout << "Executing Division Test with a = " << a << ", b = " << b << "\n";
-
-    if (b == 0) {
-        throw std::logic_error("Division by zero");
-    }
-
-    if (a / b != expected) {
-        throw std::logic_error("Division test failed");
-    }
-},
-std::vector<std::tuple<int, int, int>> {
-    {10, 2, 5},
-    {20, 4, 5},
-    {30, 6, 5}
-},
-TestOptions{}.tag("parameterized")
-                                                   )
-                             );
+inline const auto suite = Suite(
+    "Parameterized Suite",
+    ParameterizedTest(
+        "Division Tests",
+        TestOptions{}.tag("parameterized"),
+        Cases(
+            TestCase("10 divided by 2", 10, 2, 5),
+            TestCase("20 divided by 4", 20, 4, 5),
+            TestCase("30 divided by 6", 30, 6, 5)
+        ),
+        [](int dividend, int divisor, int expected) {
+            Asserts::assertEquals(expected, dividend / divisor);
+        }
+    )
+);
 
 }

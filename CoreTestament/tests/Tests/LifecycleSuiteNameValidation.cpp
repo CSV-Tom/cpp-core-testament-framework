@@ -1,19 +1,22 @@
 #include "Testament/Testament.hpp"
 
-#include <stdexcept>
+#include "core/Internal/InternalRegistry.hpp"
 
 namespace {
 
 class EmptyNameLifecycleSuite : public Testament::LifecycleSuite {};
 
+inline const auto invalidSuite = Testament::Suite<EmptyNameLifecycleSuite>(
+    "",
+    Testament::Test("must not register", [](EmptyNameLifecycleSuite&) {})
+);
+
 }
 
 int main() {
-    try {
-        static_cast<void>(Testament::makeSuite<EmptyNameLifecycleSuite>(""));
-    } catch (const std::logic_error&) {
-        return 0;
-    }
-
-    return 1;
+    return !invalidSuite
+        && Testament::InternalRegistry::getInstance().getAllSuites().empty()
+        && Testament::run(0, nullptr) == 2
+        ? 0
+        : 1;
 }

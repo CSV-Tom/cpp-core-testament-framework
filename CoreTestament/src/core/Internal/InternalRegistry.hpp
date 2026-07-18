@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <shared_mutex>  // Für std::shared_mutex
+#include <string>
 #include <string_view>
 #include <vector>
 #include <functional>
@@ -19,6 +20,8 @@ public:
     void unregisterSuite(const std::shared_ptr<InternalSuite>& suite);
 
     [[nodiscard]] std::vector<std::shared_ptr<InternalSuite>> getAllSuites() const;
+    void recordConfigurationError(std::string error);
+    [[nodiscard]] std::vector<std::string> getConfigurationErrors() const;
 
     template <typename Predicate>
     [[nodiscard]] std::vector<std::shared_ptr<InternalSuite>> getSuitesByFilter(Predicate&& filter) const {
@@ -48,6 +51,7 @@ private:
 
     mutable std::shared_mutex registryMutex;
     std::vector<std::shared_ptr<InternalSuite>> registeredSuites;
+    std::vector<std::string> configurationErrors;
 };
 
 }

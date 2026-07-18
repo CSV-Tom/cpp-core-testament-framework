@@ -30,9 +30,9 @@ public:
 
 int main() {
     int executions = 0;
-    auto suite = Testament::makeSuite(
+    auto suite = Testament::Suite(
         "handler arguments",
-        Testament::makeTest("runs", [&executions] { ++executions; })
+        Testament::Test("runs", [&executions] { ++executions; })
     );
 
     auto firstHandler = std::make_unique<ArgumentHandler>(false);

@@ -21,9 +21,11 @@
 namespace Testament {
 
 class LifecycleSuite;
-class Test;
 class TestEventHandler;
 class InternalTest;
+namespace detail {
+class TestHandle;
+}
 
 class InternalSuite {
 public:
@@ -35,7 +37,7 @@ public:
                            SuiteOptions options = {});
     ~InternalSuite();
 
-    void addTest(Test test);
+    void addTest(detail::TestHandle test);
 
     void setBeforeSuite(Callback callback);
     void setBeforeEach(Callback callback);

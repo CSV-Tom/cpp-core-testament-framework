@@ -6,13 +6,15 @@
 namespace Testament {
 
 class InternalTest;
-class Test;
+namespace detail {
+class TestHandle;
+}
 
 namespace detail {
 
 class TestAccess {
 public:
-    static std::unique_ptr<InternalTest> release(Test&& test);
+    static std::unique_ptr<InternalTest> release(TestHandle&& test);
 };
 
 }

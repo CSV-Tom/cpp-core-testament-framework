@@ -3,7 +3,7 @@
 #include "TestAccess.hpp"
 
 #include "Testament/LifecycleSuite.hpp"
-#include "Testament/Test.hpp"
+#include "Testament/SuiteRegistration.hpp"
 #include "Testament/TestEventHandler.hpp"
 
 #include <algorithm>
@@ -40,11 +40,14 @@ InternalSuite::InternalSuite(std::string name_, std::unique_ptr<LifecycleSuite> 
 InternalSuite::~InternalSuite() = default;
 
 
-void InternalSuite::addTest(Test test) {
+void InternalSuite::addTest(detail::TestHandle test) {
     auto internalTest = detail::TestAccess::release(std::move(test));
     if (const auto expectedFixture = internalTest->getFixtureType();
         expectedFixture && expectedFixture != fixtureType) {
         throw std::invalid_argument("Test fixture type does not match suite fixture type");
+    }
+    if (internalTest->getOptions().maxAttempts() == 0) {
+        throw std::invalid_argument("Test maxAttempts must be greater than zero");
     }
     if (std::ranges::any_of(tests, [&internalTest](const auto& registered) {
         return registered->getName() == internalTest->getName();
@@ -133,7 +136,7 @@ bool InternalSuite::run() {
         }
 
         testManager.reportStart(suiteInfo(), test, handler);
-        auto remainingRetries = test->getOptions().retryCount();
+        auto remainingAttempts = test->getOptions().maxAttempts();
         auto duration = std::chrono::duration<double>::zero();
         auto status = TestEventHandler::TestResultStatus::Failed;
         std::exception_ptr exception;
@@ -165,8 +168,8 @@ bool InternalSuite::run() {
                 exception = {};
             }
 
-            if (status == TestEventHandler::TestResultStatus::Passed || remainingRetries == 0) break;
-            --remainingRetries;
+            if (status == TestEventHandler::TestResultStatus::Passed || remainingAttempts <= 1) break;
+            --remainingAttempts;
         }
 
         hooksSucceeded = status != TestEventHandler::TestResultStatus::LifecycleError

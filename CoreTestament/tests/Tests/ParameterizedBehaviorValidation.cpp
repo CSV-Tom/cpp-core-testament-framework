@@ -1,16 +1,18 @@
 #include "Testament/Testament.hpp"
 
+#include <array>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
 namespace {
 
-inline int beforeAllCalls = 0;
-inline int afterAllCalls = 0;
-inline int beforeEachCalls = 0;
-inline int afterEachCalls = 0;
-inline int sum = 0;
+inline std::array<unsigned int, 2> attempts{};
+inline unsigned int beforeAllCalls{};
+inline unsigned int afterAllCalls{};
+inline unsigned int beforeEachCalls{};
+inline unsigned int afterEachCalls{};
 
 class Fixture final : public Testament::LifecycleSuite {
     void beforeAll() override { ++beforeAllCalls; }
@@ -29,23 +31,18 @@ public:
 };
 
 inline const auto suite = Testament::Suite<Fixture>(
-    "fixture definition validation",
-    Testament::Test("normal", [](Fixture&) { ++sum; }),
+    "parameter behavior",
     Testament::ParameterizedTest(
-        "values",
+        "retry cases",
+        Testament::TestOptions{}.maxAttempts(2),
         Testament::Cases(
-            Testament::TestCase("one", 1),
-            Testament::TestCase("two", 2),
-            Testament::TestCase("three", 3)
+            Testament::TestCase("flaky", 0U),
+            Testament::TestCase("stable", 1U)
         ),
-        [](Fixture&, int value) { sum += value; }
-    ),
-    Testament::ParameterizedTest(
-        "move-only",
-        Testament::Cases(
-            Testament::TestCase("owned", std::make_unique<int>(4))
-        ),
-        [](Fixture&, const std::unique_ptr<int>& value) { sum += *value; }
+        [](Fixture&, unsigned int index) {
+            ++attempts[index];
+            if (index == 0 && attempts[index] == 1) throw std::runtime_error("retry");
+        }
     )
 );
 
@@ -59,13 +56,13 @@ int main() {
 
     return suite
         && runner.run(0, nullptr) == 0
-        && sum == 11
+        && attempts == std::array<unsigned int, 2>{2, 1}
         && beforeAllCalls == 1
         && afterAllCalls == 1
-        && beforeEachCalls == 5
-        && afterEachCalls == 5
+        && beforeEachCalls == 3
+        && afterEachCalls == 3
         && result->names == std::vector<std::string>{
-            "normal", "values / one", "values / two", "values / three", "move-only / owned"
+            "retry cases / flaky", "retry cases / stable"
         }
         ? 0
         : 1;

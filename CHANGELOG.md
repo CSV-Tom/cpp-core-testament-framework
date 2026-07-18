@@ -1,91 +1,53 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+All notable changes will be documented in this file. No public version has been
+released yet.
 
 ## [Unreleased]
 
 ### Added
 
-- `TestEventHandlerChain` to support dispatching test events to multiple handlers (Observer pattern).
-- Optional JUnit XML reports through the `--junit <path>` and `--junit=<path>` runner options while retaining console output.
-- Public `TestEventHandler` extension API and reporter factories for registering custom output formats with a configurable `Runner`.
-- Command-line argument forwarding to custom test handlers with pre-run configuration validation.
-- Optional Pimpl-based `SuiteOptions` and `TestOptions` with execution order, tags, and custom attributes for reporting and tracing.
-- Test-specific `disabled` and `retries` options with skipped-test reporting and a single final result across retry attempts.
-- Structured `AssertionFailure` exceptions exposing assertion name, expected and actual values, message, and source location.
-- `onTestStart` events exposing suite and test metadata before execution begins.
-- Compile-fail coverage ensuring discarded `Test` and `Suite` handles remain compiler errors under warnings-as-errors.
-- End-to-end coverage for JUnit output and installed-package coverage for externally defined test handlers.
-- `CONTRIBUTING.md` with contribution guidelines and Conventional Commits conventions.
-- `CHANGELOG.md` to track notable changes.
-- "Using in Your Project" section in `README.md` documenting `FetchContent`/`ExternalProject_Add` integration.
+- Declarative `Suite`, `Test`, `ParameterizedTest`, `Cases` and `TestCase` DSL.
+- Compile-time validation for fixtures, test callables and parameter structures.
+- Named parameter cases materialized as independent runtime tests with their own
+  results, timing, retries, filters, lifecycle hooks and JUnit elements.
+- Move-only parameter support when bodies consume values through const references.
+- `SuiteRegistration`, a move-only RAII value that keeps automatic static suite
+  registration active.
+- Controlled collection and runner reporting of configuration errors discovered
+  during static initialization.
+- Public custom reporter API, console and JUnit reporters.
+- Structured assertion failures with source locations and expected/actual values.
+- Install-and-consume, compile-fail, multi-translation-unit and sanitizer-oriented
+  regression coverage.
 
 ### Changed
 
-- `Test` and `Suite` are now move-only Pimpl handles instead of polymorphic shared-pointer handles.
-- Suite registration now follows the lifetime of its public `Suite` handle and is removed from the registry when that handle is destroyed.
-- `LifecycleSuite` is now solely the fixture extension interface and no longer derives from the public suite-registration handle.
-- Suites execute deterministically by configured order and name; tests execute stably by configured order while preserving declaration order for ties.
-- Ambiguous duplicate suite names and duplicate test names within a suite are now rejected.
-- Option values use copy-on-write storage so event metadata snapshots remain owning without repeated deep copies.
-- Assertion messages are now optional, assertion requirements are expressed as concepts, and non-streamable values use a readable fallback representation.
-- Test and suite factory names and synchronous handler messages now accept non-owning `std::string_view` inputs.
-- Test factory options now follow the callable and parameter data, allowing one defaulted signature for fixture and non-fixture tests.
-- Replaced the static `Testament::Runner::run(argc, argv)` entry point with `Testament::run(argc, argv)` for default execution and an instance-based `Runner::run(argc, argv)` for configured handlers.
-- Moved runner state and handler ownership behind a Pimpl implementation to keep implementation details out of the public API.
-- Applied consistent astyle formatting across all C++ sources.
-- Switched the container tooling from Docker to Podman; renamed `Dockerfile` to `Containerfile` and `scripts/build-docker-image.sh`/`scripts/run-docker-image.sh` to `scripts/build-image.sh`/`scripts/run-container.sh`.
-- Upgraded the build container to g++-16, the latest compiler available in Ubuntu 26.04 LTS.
-- Restructured `README.md` with concrete, code-grounded feature descriptions.
-- Lowered the minimum required CMake version to 3.23, matching the `FILE_SET HEADERS` feature already in use.
-- `CoreTestament`'s test runner and CTest registration now respect the `BUILD_TESTING` option instead of always building.
-- Selected compiler warning flags per compiler (GNU/Clang vs. MSVC) instead of hardcoding GCC-specific flags.
-- Simplified `build.sh` to use `cmake --build`/`ctest` without deleting the build directory on every run.
+- `TestOptions::maxAttempts()` now expresses the total number of attempts instead
+  of exposing ambiguous retry counts.
+- Suites and tests execute deterministically by configured order and name.
+- Every retry executes a complete `beforeEach`, body and `afterEach` attempt.
+- Lifecycle failures are explicit test errors and contribute to statistics.
+- Test result events expose current statistics and immutable option snapshots.
+- CoreTestament's development package version is `0.1.0`.
 
 ### Fixed
 
-- Adding an empty or moved-from `Test` handle now throws `invalid_argument` instead of dereferencing an empty implementation.
-- Lifecycle hook failures now produce explicit `LifecycleError` test results and contribute to failed-test statistics.
-- Retried tests now execute `beforeEach` and `afterEach` around every attempt instead of sharing fixture state across attempts.
-- Test result events now contain the updated suite statistics including the reported result.
-- Fixture-bound tests now reject incompatible or fixture-less suites while the suite is assembled instead of failing during execution.
-- Moved-from assertion failures and option values now retain valid readable state.
-- Factory constraints now match stored callable invocation, reject unsupported fixtures early, and support move-only parameter values.
-- Discarding a `Test` or `Suite` handle now produces a compiler warning instead of silently losing the test or deregistering the suite.
-- Discarding a runner exit code now produces a compiler warning instead of silently hiding failed tests from CI.
-- Undefined behavior in `makeSuite<T>`.
-- Fixture tests now reject mismatched suite types at runtime instead of dereferencing an invalid cast.
-- Test execution now rejects a missing suite context instead of invoking fixture callbacks with invalid state.
-- Filtered registry queries now return independent snapshots instead of exposing shared mutable result storage.
-- Lifecycle hook failures are routed through registered event handlers and included in JUnit reports.
-- `CoreServices` public headers are now installed via an explicit `FILE_SET HEADERS` file list, so the exported package includes every header.
-- `CoreServices`' build-time include path now resolves relative to the component directory instead of the repository root.
-- `CoreTestament` suites now reset their statistics, timers, and hook errors between repeated runs instead of accumulating stale state.
-- Test execution timers are now stopped when a test throws, so reported durations stop increasing.
-- A failing `beforeAll` lifecycle hook now aborts the suite and propagates as a runner failure instead of being silently ignored.
-- `CoreServiceLocator` now rejects null service registrations with `invalid_argument` instead of allowing them into the registry.
+- Suite registration is atomic; invalid suites leave no partial registry state.
+- Invalid namespace-scope definitions no longer terminate before `main()` for
+  supported configuration errors; the runner exits with code 2 instead.
+- Registry filtering returns snapshots instead of lazy views crossing lock scope.
+- Repeated suite runs reset statistics, timers and hook errors.
+- Assertion and option PImpl values remain readable after moves.
+- Compiler flags, installation paths, exported headers and package targets are
+  portable across supported CMake generators.
 
 ### Removed
 
-- The unused `ServiceBase` helper and `IService::getTypeIndex()` type identity; service lookup identity is now selected explicitly by `registerService<T>()`.
-- `FunctionVariant`, `Test::create`, `Suite::create`, and `Suite::addTest` from the public API; test construction now goes through `makeTest` and `makeSuite`.
-- The unused legacy event dispatcher, event types, event manager, duplicate service locator, and log handler implementation.
-- The unused `onLogEvent` callback from the active reporter interface.
-- Dead code in `src/old/` and commented-out blocks in `InternalRegistry`.
-- Commented-out `EventManager`-based `ServiceLocator` alternative.
-
-## [0.1.0] - 2025
-
-### Added
-
-- Initial `CoreTestament` framework: macro-free, C++23 test suites, lifecycle hooks, and assertions.
-- `CoreServiceLocator` module providing a lightweight service locator for dependency wiring.
-- Console test event handler wired into `CoreTestament` test execution.
-- Docker-based build environment (Ubuntu, g++-15) with CMake/Ninja toolchains for GCC 14, GCC 15, and Clang.
-- `build.sh` and `quickstart.sh` scripts for building and running the test suites.
+- Legacy `makeTest`, `makeSuite` and `makeParameterizedTest` factories.
+- Public runtime `Test` and `Suite` handle classes.
+- Ambiguous `TestOptions::retries()` and `retryCount()` APIs.
+- Unused event-system experiments, duplicate service locator and dead CMake/test
+  fragments.
 
 [Unreleased]: https://github.com/CSV-Tom/cpp-core-testament-framework/compare/HEAD
-[0.1.0]: https://github.com/CSV-Tom/cpp-core-testament-framework/releases/tag/v0.1.0

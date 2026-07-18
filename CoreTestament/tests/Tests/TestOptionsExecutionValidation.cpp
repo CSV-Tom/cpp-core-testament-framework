@@ -13,12 +13,12 @@ public:
 
     void onTestPassed(const SuiteInfo&, const TestInfo& test) override {
         ++passed;
-        retryMetadataReceived = test.options.retryCount() == 2;
+        retryMetadataReceived = test.options.maxAttempts() == 3;
     }
 
     void onTestFailed(const SuiteInfo&, const TestInfo& test) override {
         ++failed;
-        retryMetadataReceived = retryMetadataReceived && test.options.retryCount() == 2;
+        retryMetadataReceived = retryMetadataReceived && test.options.maxAttempts() == 3;
     }
 
     void onTestSkipped(const SuiteInfo&, const TestInfo& test) override {
@@ -41,29 +41,29 @@ int main() {
     int flakyExecutions = 0;
     int failingExecutions = 0;
 
-    auto suite = Testament::makeSuite(
+    auto suite = Testament::Suite(
         "test option execution",
-        Testament::makeTest(
+        Testament::Test(
             "disabled",
-            [&disabledExecutions] { ++disabledExecutions; },
-            Testament::TestOptions{}.disabled()
+            Testament::TestOptions{}.disabled(),
+            [&disabledExecutions] { ++disabledExecutions; }
         ),
-        Testament::makeTest(
+        Testament::Test(
             "flaky",
+            Testament::TestOptions{}.maxAttempts(3),
             [&flakyExecutions] {
                 if (++flakyExecutions < 3) {
                     throw 1;
                 }
-            },
-            Testament::TestOptions{}.retries(2)
+            }
         ),
-        Testament::makeTest(
+        Testament::Test(
             "always failing",
+            Testament::TestOptions{}.maxAttempts(3),
             [&failingExecutions] {
                 ++failingExecutions;
                 throw 1;
-            },
-            Testament::TestOptions{}.retries(2)
+            }
         )
     );
 

@@ -53,14 +53,14 @@ public:
     TestOptions& tag(std::string value);
     TestOptions& attribute(std::string key, std::string value);
     TestOptions& disabled(bool value = true);
-    TestOptions& retries(unsigned int value);
+    TestOptions& maxAttempts(unsigned int value);
 
     [[nodiscard]] std::optional<int> order() const noexcept;
     [[nodiscard]] std::span<const std::string> tags() const noexcept;
     [[nodiscard]] std::span<const Attribute> attributes() const noexcept;
     [[nodiscard]] std::optional<std::string_view> attribute(std::string_view key) const noexcept;
     [[nodiscard]] bool isDisabled() const noexcept;
-    [[nodiscard]] unsigned int retryCount() const noexcept;
+    [[nodiscard]] unsigned int maxAttempts() const noexcept;
 
 private:
     class Impl;

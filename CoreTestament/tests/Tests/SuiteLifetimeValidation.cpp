@@ -10,8 +10,10 @@ int main() {
 
     bool registeredWhileHandleLives = false;
     {
-        auto test = Testament::makeTest("lifetime test", [] {});
-        auto suite = Testament::makeSuite("lifetime suite", std::move(test));
+        auto suite = Testament::Suite(
+            "lifetime suite",
+            Testament::Test("lifetime test", [] {})
+        );
         registeredWhileHandleLives = static_cast<bool>(suite)
             && registry.getAllSuites().size() == initialSuiteCount + 1;
     }

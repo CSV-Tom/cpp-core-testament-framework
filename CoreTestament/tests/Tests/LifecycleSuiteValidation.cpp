@@ -54,13 +54,14 @@ private:
     std::vector<std::string> lifecycleLog;
 };
 
-static auto suite = makeSuite<LifecycleSuiteValidation>("Lifecycle Validation Suite",
-makeTest<LifecycleSuiteValidation>("Basic Test", [](LifecycleSuiteValidation& s) {
-    s.incrementTestCounter();
-}),
-makeTest<LifecycleSuiteValidation>("Additional Test", [](LifecycleSuiteValidation& s) {
-    s.incrementTestCounter();
-})
-                                                       );
+inline const auto suite = Suite<LifecycleSuiteValidation>(
+    "Lifecycle Validation Suite",
+    Test("Basic Test", [](LifecycleSuiteValidation& fixture) {
+        fixture.incrementTestCounter();
+    }),
+    Test("Additional Test", [](LifecycleSuiteValidation& fixture) {
+        fixture.incrementTestCounter();
+    })
+);
 
 }

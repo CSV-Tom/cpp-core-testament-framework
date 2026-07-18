@@ -48,66 +48,48 @@ int main() {
     auto movedSuiteOptions = std::move(copiedSuiteOptions);
     movedSuiteOptions.tag("moved-only");
     Testament::TestOptions originalTestOptions;
-    originalTestOptions.disabled().retries(2);
+    originalTestOptions.disabled().maxAttempts(2);
     auto movedTestOptions = std::move(originalTestOptions);
-    movedTestOptions.retries(3);
+    movedTestOptions.maxAttempts(3);
     const bool movedOptionsRemainValid = copiedSuiteOptions.tags().size() == 2
         && movedSuiteOptions.tags().size() == 3
         && originalTestOptions.isDisabled()
-        && originalTestOptions.retryCount() == 2
-        && movedTestOptions.retryCount() == 3;
+        && originalTestOptions.maxAttempts() == 2
+        && movedTestOptions.maxAttempts() == 3;
 
-    auto zeta = Testament::makeSuite(
+    auto zeta = Testament::Suite(
         "zeta",
-        Testament::makeTest("only", [] {})
+        Testament::Test("only", [] {})
     );
-    auto alpha = Testament::makeSuite(
+    auto alpha = Testament::Suite(
         "alpha",
         reusableSuiteOptions,
-        Testament::makeTest("late", [] {}, Testament::TestOptions{}.order(20)),
-        Testament::makeTest("first default", [] {}),
-        Testament::makeTest(
+        Testament::Test("late", Testament::TestOptions{}.order(20), [] {}),
+        Testament::Test("first default", [] {}),
+        Testament::Test(
             "early",
-            [] {},
             Testament::TestOptions{}
                 .order(-5)
                 .tag("trace")
-                .attribute("operation", "insert")
+                .attribute("operation", "insert"),
+            [] {}
         ),
-        Testament::makeTest("second default", [] {})
+        Testament::Test("second default", [] {})
     );
-    auto early = Testament::makeSuite(
+    auto early = Testament::Suite(
         "early suite",
         Testament::SuiteOptions{}.order(-10),
-        Testament::makeTest("only", [] {})
+        Testament::Test("only", [] {})
     );
 
     std::string suiteNameStorage = "[view suite]";
     std::string testNameStorage = "[view test]";
-    auto viewed = Testament::makeSuite(
+    auto viewed = Testament::Suite(
         std::string_view{suiteNameStorage}.substr(1, 10),
-        Testament::makeTest(std::string_view{testNameStorage}.substr(1, 9), [] {})
+        Testament::Test(std::string_view{testNameStorage}.substr(1, 9), [] {})
     );
     suiteNameStorage.clear();
     testNameStorage.clear();
-
-    bool duplicateSuiteRejected = false;
-    try {
-        static_cast<void>(Testament::makeSuite("alpha"));
-    } catch (const std::logic_error&) {
-        duplicateSuiteRejected = true;
-    }
-
-    bool duplicateTestRejected = false;
-    try {
-        static_cast<void>(Testament::makeSuite(
-            "duplicate tests",
-            Testament::makeTest("same", [] {}),
-            Testament::makeTest("same", [] {})
-        ));
-    } catch (const std::logic_error&) {
-        duplicateTestRejected = true;
-    }
 
     auto handler = std::make_unique<RecordingHandler>();
     auto* result = handler.get();
@@ -119,8 +101,6 @@ int main() {
         && exitCode == 0
         && optionsAreIndependent
         && movedOptionsRemainValid
-        && duplicateSuiteRejected
-        && duplicateTestRejected
         && result->suiteMetadataReceived
         && result->testMetadataReceived
         && result->suites == std::vector<std::string>{

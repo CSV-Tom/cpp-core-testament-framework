@@ -33,15 +33,14 @@ public:
 
 int main() {
     const std::expected<int, int> cxx23Value{23};
-    auto test = Testament::makeTest(
-        "installed consumer test",
-        [] {},
-        Testament::TestOptions{}.attribute("operation", "install-check")
-    );
-    auto suite = Testament::makeSuite(
+    auto suite = Testament::Suite(
         "installed consumer suite",
         Testament::SuiteOptions{}.attribute("component", "consumer"),
-        std::move(test)
+        Testament::Test(
+            "installed consumer test",
+            Testament::TestOptions{}.attribute("operation", "install-check"),
+            [] {}
+        )
     );
 
     auto handler = std::make_unique<ConsumerHandler>();

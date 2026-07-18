@@ -19,8 +19,8 @@ int main() {
     auto suite = Testament::InternalRegistry::getInstance().registerSuite(
         std::make_shared<Testament::InternalSuite>("suite <&>")
     );
-    suite->addTest(Testament::makeTest("passing test", [] {}));
-    suite->addTest(Testament::makeTest("failing \"test\"", [] {
+    suite->addTest(Testament::detail::makeRuntimeTest("passing test", {}, [] {}));
+    suite->addTest(Testament::detail::makeRuntimeTest("failing \"test\"", {}, [] {
         throw std::runtime_error("failure <reason> & details");
     }));
 
@@ -30,7 +30,19 @@ int main() {
     lifecycleSuite->setBeforeEach([] {
         throw std::runtime_error("setup <failed>");
     });
-    lifecycleSuite->addTest(Testament::makeTest("lifecycle test", [] {}));
+    lifecycleSuite->addTest(Testament::detail::makeRuntimeTest("lifecycle test", {}, [] {}));
+
+    auto parameterSuite = Testament::Suite(
+        "parameter suite",
+        Testament::ParameterizedTest(
+            "values",
+            Testament::Cases(
+                Testament::TestCase("one", 1),
+                Testament::TestCase("two", 2)
+            ),
+            [](int) {}
+        )
+    );
 
     std::string executable = "JUnitReporterValidation";
     std::string missingPathOption = "--junit";
@@ -47,11 +59,14 @@ int main() {
 
     return invalidArgumentsExitCode == 2
         && exitCode == 1
-        && xml.contains("<testsuites tests=\"3\" failures=\"1\" errors=\"1\" skipped=\"0\"")
+        && parameterSuite
+        && xml.contains("<testsuites tests=\"5\" failures=\"1\" errors=\"1\" skipped=\"0\"")
         && xml.contains("<testsuite name=\"suite &lt;&amp;&gt;\"")
         && xml.contains("name=\"failing &quot;test&quot;\"")
         && xml.contains("failure &lt;reason&gt; &amp; details")
         && xml.contains("<error message=\"Error in beforeEach: setup &lt;failed&gt;\"")
+        && xml.contains("name=\"values / one\"")
+        && xml.contains("name=\"values / two\"")
         ? 0
         : 1;
 }

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.23)
 
-project(CoreTestamentFramework LANGUAGES CXX VERSION 1.0.0)
+project(CoreTestamentFramework LANGUAGES CXX VERSION 0.1.0)
 
 if(PROJECT_IS_TOP_LEVEL)
     include(CTest)
@@ -36,12 +36,12 @@ target_sources(${PROJECT_NAME}
         FILES
             include/Testament/Asserts.hpp
             include/Testament/AssertionFailure.hpp
+            include/Testament/Definitions.hpp
             include/Testament/LifecycleSuite.hpp
             include/Testament/Options.hpp
             include/Testament/Runner.hpp
             include/Testament/Reporters.hpp
-            include/Testament/Suite.hpp
-            include/Testament/Test.hpp
+            include/Testament/SuiteRegistration.hpp
             include/Testament/TestEventHandler.hpp
             include/Testament/Testament.hpp
 )
@@ -125,6 +125,13 @@ if(BUILD_TESTING)
     )
 
     add_testament_test(
+        MultiTranslationUnitValidation MultiTranslationUnit
+        tests/multi-tu/FirstSuite.cpp
+        tests/multi-tu/SecondSuite.cpp
+        tests/multi-tu/main.cpp
+    )
+
+    add_testament_internal_test(
         LifecycleSuiteNameValidation LifecycleSuiteName
         tests/Tests/LifecycleSuiteNameValidation.cpp
     )
@@ -132,6 +139,16 @@ if(BUILD_TESTING)
     add_testament_test(
         FixtureTypeValidation FixtureType
         tests/Tests/FixtureTypeValidation.cpp
+    )
+
+    add_testament_test(
+        ParameterizedBehaviorValidation ParameterizedBehavior
+        tests/Tests/ParameterizedBehaviorValidation.cpp
+    )
+
+    add_testament_internal_test(
+        ConfigurationErrorValidation ConfigurationError
+        tests/Tests/ConfigurationErrorValidation.cpp
     )
 
     add_testament_test(
@@ -165,11 +182,6 @@ if(BUILD_TESTING)
     )
 
     add_testament_test(
-        TestHandleValidation TestHandle
-        tests/Tests/TestHandleValidation.cpp
-    )
-
-    add_testament_test(
         HandlerArgumentsValidation HandlerArguments
         tests/Tests/HandlerArgumentsValidation.cpp
     )
@@ -185,6 +197,19 @@ if(BUILD_TESTING)
     )
 
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang|MSVC")
+        function(add_testament_compile_failure test_name source)
+            add_test(
+                NAME ${test_name}
+                COMMAND ${CMAKE_COMMAND}
+                    -DCXX_COMPILER=${CMAKE_CXX_COMPILER}
+                    -DCOMPILER_ID=${CMAKE_CXX_COMPILER_ID}
+                    -DINCLUDE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/include
+                    -DSOURCE_FILE=${CMAKE_CURRENT_SOURCE_DIR}/${source}
+                    -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/cmake/CompileFailureTest.cmake
+            )
+            set_tests_properties(${test_name} PROPERTIES LABELS compile-fail)
+        endfunction()
+
         add_test(
             NAME DiscardedHandles
             COMMAND ${CMAKE_COMMAND}
@@ -195,6 +220,9 @@ if(BUILD_TESTING)
                 -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/cmake/DiscardedHandlesTest.cmake
         )
         set_tests_properties(DiscardedHandles PROPERTIES LABELS compile-fail)
+        add_testament_compile_failure(InvalidFixtureDefinition tests/compile-fail/InvalidFixture.cpp)
+        add_testament_compile_failure(InvalidParameterDefinition tests/compile-fail/InvalidParameters.cpp)
+        add_testament_compile_failure(MixedCaseDefinition tests/compile-fail/MixedCases.cpp)
     endif()
 
     add_testament_internal_test(

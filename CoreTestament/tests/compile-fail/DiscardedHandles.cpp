@@ -1,11 +1,19 @@
 #include <Testament/Testament.hpp>
 
 void discardTest() {
-    Testament::makeTest("discarded test", [] {});
+    Testament::Test("discarded test", [] {});
 }
 
 void discardSuite() {
-    Testament::makeSuite("discarded suite");
+    Testament::Suite("discarded suite");
+}
+
+void discardParameterizedTest() {
+    Testament::ParameterizedTest(
+        "discarded parameterized test",
+        Testament::Cases(Testament::TestCase("case", 1)),
+        [](int) {}
+    );
 }
 
 void discardConfiguredRunnerResult() {
