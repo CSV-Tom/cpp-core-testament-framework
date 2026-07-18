@@ -7,7 +7,9 @@
 #include <utility>
 #include <vector>
 
-class TestEventHandlerChain : public Testament::TestEventHandler {
+namespace Testament::detail {
+
+class TestEventHandlerChain final : public TestEventHandler {
 public:
     void add(TestEventHandler* handler) {
         if (handler) handlers.push_back(handler);
@@ -122,3 +124,5 @@ private:
     std::vector<TestEventHandler*> handlers;
     std::vector<std::string> errors;
 };
+
+}

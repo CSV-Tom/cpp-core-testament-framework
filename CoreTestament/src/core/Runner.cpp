@@ -74,7 +74,7 @@ int Runner::run(int argc, char** argv) {
     const std::scoped_lock runLock(testRunMutex);
     if (!impl) impl = std::make_unique<Impl>();
 
-    TestEventHandlerChain chain;
+    detail::TestEventHandlerChain chain;
     for (const auto& handler : impl->handlers) {
         chain.add(handler.get());
     }
@@ -124,17 +124,17 @@ int Runner::run(int argc, char** argv) {
 }
 
 std::unique_ptr<TestEventHandler> makeConsoleHandler() {
-    return std::make_unique<ConsoleTestEventHandler>();
+    return std::make_unique<detail::ConsoleTestEventHandler>();
 }
 
 std::unique_ptr<TestEventHandler> makeJUnitHandler(std::filesystem::path outputPath) {
-    return std::make_unique<JUnitTestEventHandler>(std::move(outputPath));
+    return std::make_unique<detail::JUnitTestEventHandler>(std::move(outputPath));
 }
 
 int run(int argc, char** argv) {
     Runner runner;
     runner.addHandler(makeConsoleHandler());
-    runner.addHandler(std::make_unique<JUnitTestEventHandler>());
+    runner.addHandler(std::make_unique<detail::JUnitTestEventHandler>());
     return runner.run(argc, argv);
 }
 

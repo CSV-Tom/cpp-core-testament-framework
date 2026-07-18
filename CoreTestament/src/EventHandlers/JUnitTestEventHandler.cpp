@@ -10,6 +10,8 @@
 #include <system_error>
 #include <utility>
 
+namespace Testament::detail {
+
 namespace {
 
 struct DecodedCharacter {
@@ -115,7 +117,7 @@ std::string exceptionMessage(const std::exception_ptr& exception) {
     }
 }
 
-double durationSeconds(const Testament::TestEventHandler::TestInfo& test) {
+double durationSeconds(const TestEventHandler::TestInfo& test) {
     return test.duration.count();
 }
 
@@ -299,4 +301,6 @@ void JUnitTestEventHandler::writeReport() {
         return;
     }
     reportWritten = true;
+}
+
 }

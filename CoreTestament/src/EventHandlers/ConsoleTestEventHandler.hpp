@@ -8,7 +8,9 @@
 #include <string_view>
 #include "Testament/TestEventHandler.hpp"
 
-class ConsoleTestEventHandler : public Testament::TestEventHandler {
+namespace Testament::detail {
+
+class ConsoleTestEventHandler final : public TestEventHandler {
 public:
     static std::string formatDuration(std::chrono::duration<double> d) {
         std::ostringstream os;
@@ -71,3 +73,5 @@ public:
                   << "Skipped: " << skipped << std::endl;
     }
 };
+
+}

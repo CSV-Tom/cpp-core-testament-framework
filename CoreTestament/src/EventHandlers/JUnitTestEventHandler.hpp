@@ -8,7 +8,9 @@
 #include <string_view>
 #include <vector>
 
-class JUnitTestEventHandler final : public Testament::TestEventHandler {
+namespace Testament::detail {
+
+class JUnitTestEventHandler final : public TestEventHandler {
 public:
     JUnitTestEventHandler() = default;
     explicit JUnitTestEventHandler(std::filesystem::path outputPath);
@@ -55,3 +57,5 @@ private:
     bool reportWritten{false};
     std::string writeError;
 };
+
+}
