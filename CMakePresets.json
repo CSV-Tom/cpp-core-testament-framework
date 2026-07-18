@@ -1,0 +1,201 @@
+{
+  "version": 4,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 23,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "BUILD_TESTING": "ON"
+      }
+    },
+    {
+      "name": "debug",
+      "displayName": "Debug",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "release",
+      "displayName": "Release",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "coverage",
+      "displayName": "GCC coverage",
+      "inherits": "debug",
+      "toolchainFile": "${sourceDir}/toolchains/gcc-toolchain.cmake",
+      "cacheVariables": {
+        "CMAKE_CXX_FLAGS": "--coverage",
+        "CMAKE_EXE_LINKER_FLAGS": "--coverage",
+        "CMAKE_SHARED_LINKER_FLAGS": "--coverage"
+      }
+    },
+    {
+      "name": "sanitizers",
+      "displayName": "GCC address and undefined behavior sanitizers",
+      "inherits": "debug",
+      "toolchainFile": "${sourceDir}/toolchains/gcc-toolchain.cmake",
+      "cacheVariables": {
+        "CMAKE_CXX_FLAGS": "-fsanitize=address,undefined -fno-omit-frame-pointer",
+        "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address,undefined",
+        "CMAKE_SHARED_LINKER_FLAGS": "-fsanitize=address,undefined"
+      }
+    },
+    {
+      "name": "gcc14-debug",
+      "displayName": "GCC 14 Debug",
+      "inherits": "debug",
+      "toolchainFile": "${sourceDir}/toolchains/gcc14-toolchain.cmake"
+    },
+    {
+      "name": "gcc15-debug",
+      "displayName": "GCC 15 Debug",
+      "inherits": "debug",
+      "toolchainFile": "${sourceDir}/toolchains/gcc15-toolchain.cmake"
+    },
+    {
+      "name": "gcc16-debug",
+      "displayName": "GCC 16 Debug",
+      "inherits": "debug",
+      "toolchainFile": "${sourceDir}/toolchains/gcc16-toolchain.cmake"
+    },
+    {
+      "name": "clang19-debug",
+      "displayName": "Clang 19 with libstdc++ Debug",
+      "inherits": "debug",
+      "toolchainFile": "${sourceDir}/toolchains/clang19-toolchain.cmake"
+    },
+    {
+      "name": "clang19-libcxx-debug",
+      "displayName": "Clang 19 with libc++ Debug",
+      "inherits": "debug",
+      "toolchainFile": "${sourceDir}/toolchains/clang19-libcxx-toolchain.cmake"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "debug",
+      "configurePreset": "debug",
+      "jobs": 2
+    },
+    {
+      "name": "release",
+      "configurePreset": "release",
+      "jobs": 2
+    },
+    {
+      "name": "coverage",
+      "configurePreset": "coverage",
+      "jobs": 2
+    },
+    {
+      "name": "sanitizers",
+      "configurePreset": "sanitizers",
+      "jobs": 2
+    },
+    {
+      "name": "gcc14-debug",
+      "configurePreset": "gcc14-debug",
+      "jobs": 2
+    },
+    {
+      "name": "gcc15-debug",
+      "configurePreset": "gcc15-debug",
+      "jobs": 2
+    },
+    {
+      "name": "gcc16-debug",
+      "configurePreset": "gcc16-debug",
+      "jobs": 2
+    },
+    {
+      "name": "clang19-debug",
+      "configurePreset": "clang19-debug",
+      "jobs": 2
+    },
+    {
+      "name": "clang19-libcxx-debug",
+      "configurePreset": "clang19-libcxx-debug",
+      "jobs": 2
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "debug",
+      "configurePreset": "debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "release",
+      "configurePreset": "release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "coverage",
+      "configurePreset": "coverage",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "sanitizers",
+      "configurePreset": "sanitizers",
+      "output": {
+        "outputOnFailure": true
+      },
+      "environment": {
+        "ASAN_OPTIONS": "detect_leaks=0"
+      }
+    },
+    {
+      "name": "gcc14-debug",
+      "configurePreset": "gcc14-debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "gcc15-debug",
+      "configurePreset": "gcc15-debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "gcc16-debug",
+      "configurePreset": "gcc16-debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "clang19-debug",
+      "configurePreset": "clang19-debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "clang19-libcxx-debug",
+      "configurePreset": "clang19-libcxx-debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ]
+}

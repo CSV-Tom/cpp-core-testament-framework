@@ -58,6 +58,15 @@ endif()
 if(TEST_TOOLCHAIN_FILE)
     list(APPEND configure_command "-DCMAKE_TOOLCHAIN_FILE=${TEST_TOOLCHAIN_FILE}")
 endif()
+if(TEST_CXX_FLAGS)
+    list(APPEND configure_command "-DCMAKE_CXX_FLAGS=${TEST_CXX_FLAGS}")
+endif()
+if(TEST_EXE_LINKER_FLAGS)
+    list(APPEND configure_command "-DCMAKE_EXE_LINKER_FLAGS=${TEST_EXE_LINKER_FLAGS}")
+endif()
+if(TEST_SHARED_LINKER_FLAGS)
+    list(APPEND configure_command "-DCMAKE_SHARED_LINKER_FLAGS=${TEST_SHARED_LINKER_FLAGS}")
+endif()
 
 execute_process(
     COMMAND ${configure_command}
