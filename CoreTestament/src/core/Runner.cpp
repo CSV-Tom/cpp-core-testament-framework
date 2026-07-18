@@ -58,6 +58,7 @@ Runner& Runner::operator=(Runner&&) noexcept = default;
 
 Runner& Runner::addHandler(std::unique_ptr<TestEventHandler> handler) {
     if (handler) {
+        if (!impl) impl = std::make_unique<Impl>();
         impl->handlers.push_back(std::move(handler));
     }
     return *this;
@@ -71,6 +72,7 @@ int Runner::run(int argc, char** argv) {
     }
 
     const std::scoped_lock runLock(testRunMutex);
+    if (!impl) impl = std::make_unique<Impl>();
 
     TestEventHandlerChain chain;
     for (const auto& handler : impl->handlers) {

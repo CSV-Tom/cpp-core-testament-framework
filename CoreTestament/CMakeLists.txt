@@ -218,6 +218,11 @@ if(BUILD_TESTING)
     target_link_libraries(ConcurrentRunnerValidation PRIVATE Threads::Threads)
 
     add_testament_test(
+        RunnerMoveValidation RunnerMove
+        tests/Tests/RunnerMoveValidation.cpp
+    )
+
+    add_testament_test(
         OptionsValidation Options
         tests/Tests/OptionsValidation.cpp
     )

@@ -18,6 +18,7 @@ public:
     Runner(const Runner&) = delete;
     Runner& operator=(const Runner&) = delete;
 
+    // Moving transfers all handlers. A moved-from Runner remains reusable as an empty Runner.
     Runner& addHandler(std::unique_ptr<TestEventHandler> handler);
     // Concurrent calls are serialized. Complete suite registration before starting a run.
     [[nodiscard("propagate the test exit code, e.g. return runner.run(argc, argv)")]]
