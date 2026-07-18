@@ -41,9 +41,9 @@ RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc | \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# build-essential pulls in Ubuntu's default gcc/g++ (currently 15); point the
-# unversioned compiler names at g++-16 since the CMake toolchain files
-# invoke "gcc"/"g++".
+# build-essential also pulls in Ubuntu's default gcc/g++; point the unversioned
+# compiler names at g++-16 so local builds and the generic GCC
+# toolchain use the selected compiler consistently.
 RUN ln -sf /usr/bin/gcc-16 /usr/bin/gcc && \
     ln -sf /usr/bin/g++-16 /usr/bin/g++ && \
     ln -sf /usr/bin/gcc-16 /usr/bin/cc && \

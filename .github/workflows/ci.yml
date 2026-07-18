@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  unix:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: GCC with libstdc++
+            os: ubuntu-24.04
+            toolchain: toolchains/gcc-toolchain.cmake
+            packages: ""
+          - name: Clang with libstdc++
+            os: ubuntu-24.04
+            toolchain: toolchains/clang-toolchain.cmake
+            packages: ""
+          - name: Clang with libc++
+            os: ubuntu-24.04
+            toolchain: toolchains/clang-libcxx-toolchain.cmake
+            packages: libc++-dev libc++abi-dev
+          - name: AppleClang with libc++
+            os: macos-latest
+            toolchain: toolchains/clang-toolchain.cmake
+            packages: ""
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install standard library
+        if: matrix.packages != ''
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes ${{ matrix.packages }}
+
+      - name: Configure
+        env:
+          CXXFLAGS: -Werror
+        run: >-
+          cmake -S . -B build
+          -DBUILD_TESTING=ON
+          -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }}
+
+      - name: Build
+        run: cmake --build build --parallel 2
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+  msvc:
+    name: MSVC
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Configure
+        env:
+          CXXFLAGS: /WX
+        run: cmake -S . -B build -DBUILD_TESTING=ON
+
+      - name: Build
+        run: cmake --build build --config Debug --parallel 2
+
+      - name: Test
+        run: ctest --test-dir build --build-config Debug --output-on-failure
