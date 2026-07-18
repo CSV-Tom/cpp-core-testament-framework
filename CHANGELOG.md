@@ -69,6 +69,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- The unused `ServiceBase` helper and `IService::getTypeIndex()` type identity; service lookup identity is now selected explicitly by `registerService<T>()`.
 - `FunctionVariant`, `Test::create`, `Suite::create`, and `Suite::addTest` from the public API; test construction now goes through `makeTest` and `makeSuite`.
 - The unused legacy event dispatcher, event types, event manager, duplicate service locator, and log handler implementation.
 - The unused `onLogEvent` callback from the active reporter interface.

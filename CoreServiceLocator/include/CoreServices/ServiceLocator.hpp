@@ -1,6 +1,7 @@
 #ifndef CORE_SERVICELOCATOR_HPP
 #define CORE_SERVICELOCATOR_HPP
 
+#include <concepts>
 #include <memory>
 #include <typeindex>
 
@@ -14,29 +15,6 @@ namespace Core::Services {
 class IService {
 public:
     virtual ~IService() = default;
-
-    /**
-     * @brief Retrieves the type index of the derived service.
-     * @return A unique identifier (`std::type_index`) for the service type.
-     */
-    virtual std::type_index getTypeIndex() const noexcept = 0;
-};
-
-/**
- * @brief A helper template that provides a base class for type-safe service registration.
- *
- * @tparam T The derived service type.
- */
-template<typename T>
-class ServiceBase : public T {
-public:
-    /**
-     * @brief Returns the type index of the registered service.
-     * @return The `std::type_index` corresponding to the derived service type.
-     */
-    std::type_index getTypeIndex() const noexcept override {
-        return std::type_index(typeid(T));
-    }
 };
 
 /**
@@ -50,12 +28,16 @@ public:
     /**
      * @brief Registers a new service instance.
      *
-     * @tparam T The service type, which must inherit from `IService`.
+     * Specify an interface explicitly to register an implementation under that interface:
+     * `registerService<ILogger>(std::make_shared<Logger>())`.
+     *
+     * @tparam T The lookup type, which must inherit from `IService`.
      * @param service A shared pointer to the service instance.
      * @throws std::invalid_argument If the service pointer is null.
      * @throws std::runtime_error If the service is already registered.
      */
     template<typename T>
+    requires std::derived_from<T, IService>
     void registerService(std::shared_ptr<T> service);
 
     /**
@@ -65,6 +47,7 @@ public:
      * @throws std::runtime_error If the service is not found.
      */
     template<typename T>
+    requires std::derived_from<T, IService>
     void unregisterService();
 
     /**
@@ -75,6 +58,7 @@ public:
      * @throws std::runtime_error If the service is not found.
      */
     template<typename T>
+    requires std::derived_from<T, IService>
     [[nodiscard]] std::shared_ptr<T> getService() const;
 
     /**

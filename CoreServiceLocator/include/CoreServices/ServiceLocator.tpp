@@ -3,23 +3,24 @@
 
 #include "CoreServices/ServiceLocator.hpp"
 
-#include <type_traits>
 #include <utility>
 
 namespace Core::Services {
 
 template<typename T>
+requires std::derived_from<T, IService>
 void ServiceLocator::registerService(std::shared_ptr<T> service) {
-    static_assert(std::is_base_of_v<IService, T>, "T must inherit from IService");
     registerServiceImpl(std::type_index(typeid(T)), std::move(service));
 }
 
 template<typename T>
+requires std::derived_from<T, IService>
 void ServiceLocator::unregisterService() {
     unregisterServiceImpl(std::type_index(typeid(T)));
 }
 
 template<typename T>
+requires std::derived_from<T, IService>
 [[nodiscard]] std::shared_ptr<T> ServiceLocator::getService() const {
     return std::static_pointer_cast<T>(getServiceImpl(std::type_index(typeid(T))));
 }

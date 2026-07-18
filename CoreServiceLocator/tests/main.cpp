@@ -11,9 +11,6 @@ public:
         std::cout << "[StandardOut] " << message << std::endl;
     }
 
-    std::type_index getTypeIndex() const noexcept override {
-        return std::type_index(typeid(StandardOutService));
-    }
 };
 
 // StandardErrorService: Writes messages to std::cerr
@@ -23,9 +20,16 @@ public:
         std::cerr << "[StandardError] " << errorMessage << std::endl;
     }
 
-    std::type_index getTypeIndex() const noexcept override {
-        return std::type_index(typeid(StandardErrorService));
-    }
+};
+
+class ILogger : public Core::Services::IService {
+public:
+    virtual void log() = 0;
+};
+
+class Logger final : public ILogger {
+public:
+    void log() override {}
 };
 
 
@@ -35,10 +39,13 @@ int main() {
     bool missingServiceRejected = false;
     bool unknownUnregistrationRejected = false;
     bool nullServiceRejected = false;
+    bool concreteLookupRejected = false;
 
     // Register services
     locator.registerService(std::make_shared<StandardOutService>());
     locator.registerService(std::make_shared<StandardErrorService>());
+    auto logger = std::make_shared<Logger>();
+    locator.registerService<ILogger>(logger);
 
     // Retrieve and use StandardOutService
     auto outService = locator.getService<StandardOutService>();
@@ -47,6 +54,13 @@ int main() {
     // Retrieve and use StandardErrorService
     auto errService = locator.getService<StandardErrorService>();
     errService->logError("This is a test error.");
+
+    const bool interfaceLookupSucceeded = locator.getService<ILogger>() == logger;
+    try {
+        static_cast<void>(locator.getService<Logger>());
+    } catch (const std::runtime_error&) {
+        concreteLookupRejected = true;
+    }
 
     try {
         locator.registerService(std::make_shared<StandardErrorService>());
@@ -90,6 +104,8 @@ int main() {
         && unknownUnregistrationRejected
         && movePreservedService
         && nullServiceRejected
+        && interfaceLookupSucceeded
+        && concreteLookupRejected
         ? 0
         : 1;
 }
