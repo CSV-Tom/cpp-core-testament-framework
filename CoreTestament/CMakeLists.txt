@@ -201,6 +201,11 @@ if(BUILD_TESTING)
     )
 
     add_testament_test(
+        NonStandardExceptionValidation NonStandardException
+        tests/Tests/NonStandardExceptionValidation.cpp
+    )
+
+    add_testament_test(
         OptionsValidation Options
         tests/Tests/OptionsValidation.cpp
     )

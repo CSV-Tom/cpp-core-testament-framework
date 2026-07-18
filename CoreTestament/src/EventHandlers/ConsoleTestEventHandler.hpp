@@ -51,6 +51,8 @@ public:
                 std::rethrow_exception(test.exception);
             } catch (const std::exception& e) {
                 std::cout << ".\n\n[ERROR]\n" << e.what();
+            } catch (...) {
+                std::cout << ".\n\n[ERROR]\nUnknown non-standard exception";
             }
         }
         std::cout << "\n" << std::endl;
