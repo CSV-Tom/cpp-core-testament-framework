@@ -19,7 +19,7 @@ namespace Testament {
 
 InternalSuite::InternalSuite(std::string name_, SuiteOptions options_)
     : name(std::move(name_)), options(std::move(options_)),
-      hookManager(hookTimer), testManager(testTimer, statistic) {
+      testManager(statistic) {
     if (name.empty()) {
         throw std::logic_error("Suite name cannot be empty!");
     }
@@ -79,8 +79,6 @@ void InternalSuite::setHandler(TestEventHandler* h) {
 bool InternalSuite::run() {
     statistic.reset();
     totalTimer.reset();
-    hookTimer.reset();
-    testTimer.reset();
     hookManager.resetErrors();
 
     std::ranges::stable_sort(tests, {}, [](const auto& test) {

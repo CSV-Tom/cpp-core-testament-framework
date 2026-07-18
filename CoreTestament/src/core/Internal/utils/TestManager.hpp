@@ -1,7 +1,6 @@
 #ifndef TESTFRAMEWORK_TESTAMENT_TESTMANAGER_HPP
 #define TESTFRAMEWORK_TESTAMENT_TESTMANAGER_HPP
 
-#include "ExecutionTimer.hpp"
 #include "TestStatistics.hpp"
 #include <chrono>
 #include <expected>
@@ -20,8 +19,7 @@ class TestManager {
 public:
     using Result = std::expected<void, std::exception_ptr>;
 
-    TestManager(ExecutionTimer& timer, TestStatistics<unsigned int>& statistic_)
-        : testTimer(timer), statistic(statistic_) {}
+    explicit TestManager(TestStatistics<unsigned int>& statistic_) : statistic(statistic_) {}
 
     void reportStart(const TestEventHandler::SuiteInfo& suiteInfo,
                      const std::unique_ptr<InternalTest>& test,
@@ -35,10 +33,7 @@ public:
     }
 
     Result executeAttempt(LifecycleSuite* fixture, std::unique_ptr<InternalTest>& test) {
-        testTimer.start();
-        auto result = test->execute(fixture);
-        testTimer.stop();
-        return result;
+        return test->execute(fixture);
     }
 
     void reportResult(TestEventHandler::SuiteInfo suiteInfo,
@@ -74,7 +69,6 @@ public:
     }
 
 private:
-    ExecutionTimer& testTimer;
     TestStatistics<unsigned int>& statistic;
 };
 

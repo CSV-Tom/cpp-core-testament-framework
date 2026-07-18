@@ -63,8 +63,6 @@ private:
     std::vector<std::unique_ptr<InternalTest>> tests;
 
     ExecutionTimer totalTimer;
-    ExecutionTimer hookTimer;
-    ExecutionTimer testTimer;
 
     HookManager hookManager;
     TestManager testManager;

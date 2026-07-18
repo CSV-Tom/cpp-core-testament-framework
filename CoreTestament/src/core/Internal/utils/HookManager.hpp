@@ -1,8 +1,6 @@
 #ifndef TESTFRAMEWORK_TESTAMENT_HOOKMANAGER_HPP
 #define TESTFRAMEWORK_TESTAMENT_HOOKMANAGER_HPP
 
-#include "ExecutionTimer.hpp"
-
 #include <exception>
 #include <functional>
 #include <sstream>
@@ -16,8 +14,6 @@ namespace Testament {
 class HookManager {
 public:
     using Callback = std::move_only_function<void()>;
-
-    explicit HookManager(ExecutionTimer& timer) : hookTimer(timer) {}
 
     void setBeforeSuite(Callback callback) {
         beforeSuiteHook = std::move(callback);
@@ -54,7 +50,6 @@ public:
     }
 
 private:
-    ExecutionTimer& hookTimer;
     std::vector<std::string> errors;
 
     Callback beforeSuiteHook;
@@ -65,18 +60,14 @@ private:
     bool invokeHook(Callback& hook, std::string_view hookName) {
         if (hook) {
             try {
-                hookTimer.start();
                 hook();
-                hookTimer.stop();
                 return true;
             } catch (const std::exception& e) {
-                hookTimer.stop();
                 std::ostringstream oss;
                 oss << "Error in " << hookName << ": " << e.what();
                 errors.push_back(oss.str());
                 return false;
             } catch (...) {
-                hookTimer.stop();
                 std::ostringstream oss;
                 oss << "Unknown error in " << hookName;
                 errors.push_back(oss.str());
