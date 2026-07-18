@@ -67,20 +67,13 @@ int Runner::run(int argc, char** argv) {
         return 2;
     }
 
-    bool handlersConfigured = true;
-    for (const auto& handler : impl->handlers) {
-        if (const auto result = handler->configure(*arguments); !result) {
-            std::cerr << result.error() << '\n';
-            handlersConfigured = false;
-        }
-    }
-    if (!handlersConfigured) {
-        return 2;
-    }
-
     TestEventHandlerChain chain;
     for (const auto& handler : impl->handlers) {
         chain.add(handler.get());
+    }
+    if (const auto result = chain.configure(*arguments); !result) {
+        std::cerr << result.error() << '\n';
+        return 2;
     }
 
     auto& registry = InternalRegistry::getInstance();
@@ -115,15 +108,12 @@ int Runner::run(int argc, char** argv) {
         total.getSkippedTests()
     );
 
-    bool handlersSucceeded = true;
-    for (const auto& handler : impl->handlers) {
-        if (const auto error = handler->errorMessage(); !error.empty()) {
-            std::cerr << error << '\n';
-            handlersSucceeded = false;
-        }
+    const auto handlerError = chain.errorMessage();
+    if (!handlerError.empty()) {
+        std::cerr << handlerError << '\n';
     }
 
-    return total.getFailedTests() == 0 && hooksSucceeded && handlersSucceeded ? 0 : 1;
+    return total.getFailedTests() == 0 && hooksSucceeded && handlerError.empty() ? 0 : 1;
 }
 
 std::unique_ptr<TestEventHandler> makeConsoleHandler() {

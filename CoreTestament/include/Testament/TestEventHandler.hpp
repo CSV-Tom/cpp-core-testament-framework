@@ -44,6 +44,8 @@ public:
 
     virtual ~TestEventHandler() = default;
 
+    // Runner contains exceptions thrown by handlers, continues dispatching to the remaining
+    // handlers and reports a failed test run.
     // Return an error message to reject the configuration before tests execute.
     [[nodiscard]] virtual std::expected<void, std::string> configure(Arguments) { return {}; }
     virtual void onStartReport(unsigned int) {}

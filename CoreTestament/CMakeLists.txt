@@ -206,6 +206,11 @@ if(BUILD_TESTING)
     )
 
     add_testament_test(
+        HandlerFailureIsolationValidation HandlerFailureIsolation
+        tests/Tests/HandlerFailureIsolationValidation.cpp
+    )
+
+    add_testament_test(
         OptionsValidation Options
         tests/Tests/OptionsValidation.cpp
     )
