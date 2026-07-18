@@ -30,6 +30,8 @@ public:
     Test(const Test&) = delete;
     Test& operator=(const Test&) = delete;
 
+    [[nodiscard]] explicit operator bool() const noexcept;
+
 private:
     class Impl;
 

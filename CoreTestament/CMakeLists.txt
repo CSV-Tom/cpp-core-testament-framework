@@ -165,6 +165,11 @@ if(BUILD_TESTING)
     )
 
     add_testament_test(
+        TestHandleValidation TestHandle
+        tests/Tests/TestHandleValidation.cpp
+    )
+
+    add_testament_test(
         HandlerArgumentsValidation HandlerArguments
         tests/Tests/HandlerArgumentsValidation.cpp
     )

@@ -6,6 +6,7 @@
 #include "Internal/InternalTest.hpp"
 #include "Internal/TestAccess.hpp"
 
+#include <stdexcept>
 #include <string>
 #include <utility>
 
@@ -34,6 +35,9 @@ Test detail::makeTest(std::string_view name, TestOptions options,
 }
 
 std::unique_ptr<InternalTest> detail::TestAccess::release(Test&& test) {
+    if (!test.impl || !test.impl->test) {
+        throw std::invalid_argument("Cannot add an empty or moved-from test");
+    }
     return std::move(test.impl->test);
 }
 
@@ -41,5 +45,9 @@ Test::Test(std::unique_ptr<Impl> impl_) : impl(std::move(impl_)) {}
 Test::~Test() = default;
 Test::Test(Test&&) noexcept = default;
 Test& Test::operator=(Test&&) noexcept = default;
+
+Test::operator bool() const noexcept {
+    return impl && impl->test;
+}
 
 }

@@ -47,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Adding an empty or moved-from `Test` handle now throws `invalid_argument` instead of dereferencing an empty implementation.
 - Moved-from assertion failures and option values now retain valid readable state.
 - Factory constraints now match stored callable invocation, reject unsupported fixtures early, and support move-only parameter values.
 - Discarding a `Test` or `Suite` handle now produces a compiler warning instead of silently losing the test or deregistering the suite.
