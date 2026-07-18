@@ -228,7 +228,7 @@ if(BUILD_TESTING)
     )
 
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang|MSVC")
-        function(add_testament_compile_failure test_name source)
+        function(add_testament_compile_failure test_name source expected_diagnostic)
             add_test(
                 NAME ${test_name}
                 COMMAND ${CMAKE_COMMAND}
@@ -236,6 +236,7 @@ if(BUILD_TESTING)
                     -DCOMPILER_ID=${CMAKE_CXX_COMPILER_ID}
                     -DINCLUDE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/include
                     -DSOURCE_FILE=${CMAKE_CURRENT_SOURCE_DIR}/${source}
+                    -DEXPECTED_DIAGNOSTIC=${expected_diagnostic}
                     -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/cmake/CompileFailureTest.cmake
             )
             set_tests_properties(${test_name} PROPERTIES LABELS compile-fail)
@@ -251,9 +252,15 @@ if(BUILD_TESTING)
                 -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/cmake/DiscardedHandlesTest.cmake
         )
         set_tests_properties(DiscardedHandles PROPERTIES LABELS compile-fail)
-        add_testament_compile_failure(InvalidFixtureDefinition tests/compile-fail/InvalidFixture.cpp)
-        add_testament_compile_failure(InvalidParameterDefinition tests/compile-fail/InvalidParameters.cpp)
-        add_testament_compile_failure(MixedCaseDefinition tests/compile-fail/MixedCases.cpp)
+        add_testament_compile_failure(
+            InvalidFixtureDefinition tests/compile-fail/InvalidFixture.cpp DefinitionFor
+        )
+        add_testament_compile_failure(
+            InvalidParameterDefinition tests/compile-fail/InvalidParameters.cpp DefinitionFor
+        )
+        add_testament_compile_failure(
+            MixedCaseDefinition tests/compile-fail/MixedCases.cpp NamedTestCase
+        )
     endif()
 
     add_testament_internal_test(
