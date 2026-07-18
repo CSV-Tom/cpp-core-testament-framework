@@ -122,9 +122,33 @@ double durationSeconds(const Testament::TestEventHandler::TestInfo& test) {
 }
 
 JUnitTestEventHandler::JUnitTestEventHandler(std::filesystem::path outputPath_)
-    : outputPath(std::move(outputPath_)) {}
+    : outputPath(std::move(outputPath_)), outputPathIsFixed(true) {}
+
+std::expected<void, std::string> JUnitTestEventHandler::configure(Arguments arguments) {
+    if (outputPathIsFixed) return {};
+
+    outputPath.reset();
+    suiteResults.clear();
+    reportWritten = false;
+    writeError.clear();
+    for (std::size_t index = 0; index < arguments.size(); ++index) {
+        const auto argument = arguments[index];
+        if (argument == "--junit") {
+            if (++index >= arguments.size() || arguments[index].empty()) {
+                return std::unexpected("--junit requires an output path");
+            }
+            outputPath = arguments[index];
+        } else if (argument.starts_with("--junit=")) {
+            const auto path = argument.substr(std::string_view{"--junit="}.size());
+            if (path.empty()) return std::unexpected("--junit requires an output path");
+            outputPath = path;
+        }
+    }
+    return {};
+}
 
 void JUnitTestEventHandler::onStartReport(unsigned int suiteCount) {
+    if (!outputPath) return;
     suiteResults.clear();
     suiteResults.reserve(suiteCount);
     reportWritten = false;
@@ -132,18 +156,22 @@ void JUnitTestEventHandler::onStartReport(unsigned int suiteCount) {
 }
 
 void JUnitTestEventHandler::onSuiteStart(const SuiteInfo& suite) {
+    if (!outputPath) return;
     suiteResults.push_back({suite.name, {}, {}});
 }
 
 void JUnitTestEventHandler::onSuiteAbort(const SuiteInfo& suite, std::string_view message) {
+    if (!outputPath) return;
     suiteResult(suite).lifecycleErrors.emplace_back(message);
 }
 
 void JUnitTestEventHandler::onTestPassed(const SuiteInfo& suite, const TestInfo& test) {
+    if (!outputPath) return;
     suiteResult(suite).tests.push_back({test, Status::Passed, {}});
 }
 
 void JUnitTestEventHandler::onTestFailed(const SuiteInfo& suite, const TestInfo& test) {
+    if (!outputPath) return;
     const auto status = test.status == TestResultStatus::LifecycleError
         ? Status::Error
         : Status::Failed;
@@ -151,10 +179,12 @@ void JUnitTestEventHandler::onTestFailed(const SuiteInfo& suite, const TestInfo&
 }
 
 void JUnitTestEventHandler::onTestSkipped(const SuiteInfo& suite, const TestInfo& test) {
+    if (!outputPath) return;
     suiteResult(suite).tests.push_back({test, Status::Skipped, {}});
 }
 
 void JUnitTestEventHandler::onFinalReport(unsigned int, unsigned int, unsigned int, unsigned int) {
+    if (!outputPath) return;
     writeReport();
 }
 
@@ -174,6 +204,7 @@ JUnitTestEventHandler::SuiteResult& JUnitTestEventHandler::suiteResult(const Sui
 }
 
 void JUnitTestEventHandler::writeReport() {
+    if (!outputPath) return;
     std::size_t testCount = 0;
     std::size_t failureCount = 0;
     std::size_t skippedCount = 0;
@@ -192,7 +223,7 @@ void JUnitTestEventHandler::writeReport() {
     }
 
     std::error_code directoryError;
-    if (const auto parent = outputPath.parent_path(); !parent.empty()) {
+    if (const auto parent = outputPath->parent_path(); !parent.empty()) {
         std::filesystem::create_directories(parent, directoryError);
     }
     if (directoryError) {
@@ -200,9 +231,9 @@ void JUnitTestEventHandler::writeReport() {
         return;
     }
 
-    std::ofstream output(outputPath);
+    std::ofstream output(*outputPath);
     if (!output) {
-        writeError = "Cannot open JUnit output file: " + outputPath.string();
+        writeError = "Cannot open JUnit output file: " + outputPath->string();
         return;
     }
 
@@ -264,7 +295,7 @@ void JUnitTestEventHandler::writeReport() {
 
     output.close();
     if (!output) {
-        writeError = "Failed while writing JUnit output file: " + outputPath.string();
+        writeError = "Failed while writing JUnit output file: " + outputPath->string();
         return;
     }
     reportWritten = true;

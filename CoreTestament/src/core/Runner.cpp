@@ -130,36 +130,9 @@ std::unique_ptr<TestEventHandler> makeJUnitHandler(std::filesystem::path outputP
 }
 
 int run(int argc, char** argv) {
-    const auto arguments = commandLineArguments(argc, argv);
-    if (!arguments) {
-        std::cerr << "Invalid command-line arguments\n";
-        return 2;
-    }
-
-    std::optional<std::filesystem::path> junitOutput;
-    for (std::size_t index = 0; index < arguments->size(); ++index) {
-        const auto argument = (*arguments)[index];
-        if (argument == "--junit") {
-            if (++index >= arguments->size() || (*arguments)[index].empty()) {
-                std::cerr << "--junit requires an output path\n";
-                return 2;
-            }
-            junitOutput = (*arguments)[index];
-        } else if (argument.starts_with("--junit=")) {
-            const auto path = argument.substr(std::string_view{"--junit="}.size());
-            if (path.empty()) {
-                std::cerr << "--junit requires an output path\n";
-                return 2;
-            }
-            junitOutput = path;
-        }
-    }
-
     Runner runner;
     runner.addHandler(makeConsoleHandler());
-    if (junitOutput) {
-        runner.addHandler(makeJUnitHandler(*junitOutput));
-    }
+    runner.addHandler(std::make_unique<JUnitTestEventHandler>());
     return runner.run(argc, argv);
 }
 

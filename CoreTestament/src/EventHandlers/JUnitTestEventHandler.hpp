@@ -3,14 +3,17 @@
 #include "Testament/TestEventHandler.hpp"
 
 #include <filesystem>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
 
 class JUnitTestEventHandler final : public Testament::TestEventHandler {
 public:
+    JUnitTestEventHandler() = default;
     explicit JUnitTestEventHandler(std::filesystem::path outputPath);
 
+    [[nodiscard]] std::expected<void, std::string> configure(Arguments arguments) override;
     void onStartReport(unsigned int suiteCount) override;
     void onSuiteStart(const SuiteInfo& suite) override;
     void onSuiteAbort(const SuiteInfo& suite, std::string_view message) override;
@@ -46,7 +49,8 @@ private:
     SuiteResult& suiteResult(const SuiteInfo& suite);
     void writeReport();
 
-    std::filesystem::path outputPath;
+    std::optional<std::filesystem::path> outputPath;
+    bool outputPathIsFixed{false};
     std::vector<SuiteResult> suiteResults;
     bool reportWritten{false};
     std::string writeError;
