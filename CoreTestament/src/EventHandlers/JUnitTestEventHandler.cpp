@@ -3,6 +3,7 @@
 #include <exception>
 #include <fstream>
 #include <iomanip>
+#include <optional>
 #include <sstream>
 #include <string>
 #include <string_view>
@@ -11,11 +12,73 @@
 
 namespace {
 
+struct DecodedCharacter {
+    char32_t codePoint;
+    std::size_t length;
+};
+
+std::optional<DecodedCharacter> decodeUtf8(std::string_view value, std::size_t offset) {
+    const auto first = static_cast<unsigned char>(value[offset]);
+    if (first <= 0x7f) return DecodedCharacter{first, 1};
+
+    std::size_t length{};
+    char32_t codePoint{};
+    char32_t minimum{};
+    if ((first & 0xe0) == 0xc0) {
+        length = 2;
+        codePoint = first & 0x1f;
+        minimum = 0x80;
+    } else if ((first & 0xf0) == 0xe0) {
+        length = 3;
+        codePoint = first & 0x0f;
+        minimum = 0x800;
+    } else if ((first & 0xf8) == 0xf0) {
+        length = 4;
+        codePoint = first & 0x07;
+        minimum = 0x10000;
+    } else {
+        return std::nullopt;
+    }
+
+    if (offset + length > value.size()) return std::nullopt;
+    for (std::size_t index = 1; index < length; ++index) {
+        const auto continuation = static_cast<unsigned char>(value[offset + index]);
+        if ((continuation & 0xc0) != 0x80) return std::nullopt;
+        codePoint = (codePoint << 6) | (continuation & 0x3f);
+    }
+
+    if (codePoint < minimum || codePoint > 0x10ffff
+        || (codePoint >= 0xd800 && codePoint <= 0xdfff)) {
+        return std::nullopt;
+    }
+    return DecodedCharacter{codePoint, length};
+}
+
+bool isXmlCharacter(char32_t codePoint) {
+    return codePoint == 0x09 || codePoint == 0x0a || codePoint == 0x0d
+        || (codePoint >= 0x20 && codePoint <= 0xd7ff)
+        || (codePoint >= 0xe000 && codePoint <= 0xfffd)
+        || (codePoint >= 0x10000 && codePoint <= 0x10ffff);
+}
+
 std::string escapeXml(std::string_view value) {
+    constexpr std::string_view replacementCharacter{"\xef\xbf\xbd"};
     std::string escaped;
     escaped.reserve(value.size());
-    for (const char character : value) {
-        switch (character) {
+    for (std::size_t offset = 0; offset < value.size();) {
+        const auto decoded = decodeUtf8(value, offset);
+        if (!decoded) {
+            escaped += replacementCharacter;
+            ++offset;
+            continue;
+        }
+        if (!isXmlCharacter(decoded->codePoint)) {
+            escaped += replacementCharacter;
+            offset += decoded->length;
+            continue;
+        }
+
+        switch (decoded->codePoint) {
         case '&':
             escaped += "&amp;";
             break;
@@ -32,8 +95,9 @@ std::string escapeXml(std::string_view value) {
             escaped += "&apos;";
             break;
         default:
-            escaped += character;
+            escaped += value.substr(offset, decoded->length);
         }
+        offset += decoded->length;
     }
     return escaped;
 }

@@ -16,12 +16,13 @@ int main() {
     std::error_code removeError;
     std::filesystem::remove(reportPath, removeError);
 
+    auto suiteName = std::string{"suite <&>"} + '\x01';
     auto suite = Testament::InternalRegistry::getInstance().registerSuite(
-        std::make_shared<Testament::InternalSuite>("suite <&>")
+        std::make_shared<Testament::InternalSuite>(suiteName)
     );
     suite->addTest(Testament::detail::RuntimeBridge::makeTest("passing test", {}, [] {}));
     suite->addTest(Testament::detail::RuntimeBridge::makeTest("failing \"test\"", {}, [] {
-        throw std::runtime_error("failure <reason> & details");
+        throw std::runtime_error(std::string{"failure <reason> & details"} + '\x01' + "\xc3\x28");
     }));
 
     auto lifecycleSuite = Testament::InternalRegistry::getInstance().registerSuite(
@@ -61,9 +62,10 @@ int main() {
         && exitCode == 1
         && parameterSuite
         && xml.contains("<testsuites tests=\"5\" failures=\"1\" errors=\"1\" skipped=\"0\"")
-        && xml.contains("<testsuite name=\"suite &lt;&amp;&gt;\"")
+        && xml.contains("<testsuite name=\"suite &lt;&amp;&gt;\xef\xbf\xbd\"")
         && xml.contains("name=\"failing &quot;test&quot;\"")
-        && xml.contains("failure &lt;reason&gt; &amp; details")
+        && xml.contains("failure &lt;reason&gt; &amp; details\xef\xbf\xbd\xef\xbf\xbd(")
+        && !xml.contains('\x01')
         && xml.contains("<error message=\"Error in beforeEach: setup &lt;failed&gt;\"")
         && xml.contains("name=\"values / one\"")
         && xml.contains("name=\"values / two\"")
