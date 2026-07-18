@@ -29,9 +29,9 @@ public:
 
     template <FixtureSelection Fixture>
     requires ParameterBodyCompatible<Fixture, Callable, Args...>::value
-        && std::copy_constructible<Callable>
     std::vector<TestHandle> materialize() && {
         auto cases = std::move(cases_).release();
+        auto callable = std::make_shared<Callable>(std::move(callable_));
         std::vector<TestHandle> tests;
         tests.reserve(cases.size());
         for (auto& testCase : cases) {
@@ -40,25 +40,24 @@ public:
             auto values = std::make_shared<const std::tuple<Args...>>(
                 std::move(testCase).releaseValues()
             );
-            auto callable = callable_;
             if constexpr (std::same_as<Fixture, void>) {
                 tests.push_back(RuntimeBridge::makeTest(
-                    testName, options_, std::function<void()>{
-                        [callable = std::move(callable), values = std::move(values)]() mutable {
-                            std::apply(callable, *values);
+                    testName, options_, std::move_only_function<void()>{
+                        [callable, values = std::move(values)] {
+                            std::apply(*callable, *values);
                         }
                     }
                 ));
             } else {
                 tests.push_back(RuntimeBridge::makeTest(
                     testName, options_, std::type_index(typeid(Fixture)),
-                    std::function<void(LifecycleSuite&)>{
-                        [callable = std::move(callable), values = std::move(values)]
+                    std::move_only_function<void(LifecycleSuite&)>{
+                        [callable, values = std::move(values)]
                         (LifecycleSuite& fixture) mutable {
                             auto* typedFixture = dynamic_cast<Fixture*>(&fixture);
                             if (!typedFixture) throw std::logic_error("Internal fixture type mismatch");
                             std::apply([&](const Args&... args) {
-                                std::invoke(callable, *typedFixture, args...);
+                                std::invoke(*callable, *typedFixture, args...);
                             }, *values);
                         }
                     }

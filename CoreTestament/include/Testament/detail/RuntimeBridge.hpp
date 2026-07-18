@@ -22,10 +22,10 @@ namespace detail {
 class RuntimeBridge {
 public:
     static TestHandle makeTest(std::string_view name, TestOptions options,
-                               std::function<void()> function);
+                               std::move_only_function<void()> function);
     static TestHandle makeTest(std::string_view name, TestOptions options,
                                std::type_index fixtureType,
-                               std::function<void(LifecycleSuite&)> function);
+                               std::move_only_function<void(LifecycleSuite&)> function);
 
     static SuiteRegistration registerSuite(std::string_view name, SuiteOptions options,
                                            std::vector<TestHandle> tests);

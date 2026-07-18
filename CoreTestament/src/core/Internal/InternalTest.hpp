@@ -2,10 +2,10 @@
 #define TESTFRAMEWORK_TESTAMENT_INTERNALTEST_HPP
 
 #include <exception>
+#include <expected>
 #include <optional>
 #include <string>
 #include <typeindex>
-#include <variant>
 
 #include "Testament/TestOptions.hpp"
 #include "FunctionVariant.hpp"
@@ -23,7 +23,9 @@ public:
     InternalTest& operator=(InternalTest&&) noexcept = default;
     ~InternalTest();
 
-    std::variant<std::monostate, std::exception_ptr> execute(LifecycleSuite* fixture = nullptr);
+    [[nodiscard]] std::expected<void, std::exception_ptr> execute(
+        LifecycleSuite* fixture = nullptr
+    );
 
     const std::string& getName() const;
     const TestOptions& getOptions() const;

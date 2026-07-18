@@ -22,18 +22,18 @@ public:
         : name_(std::move(name)), options_(std::move(options)), callable_(std::move(callable)) {}
 
     template <FixtureSelection Fixture>
-    requires TestBodyCompatible<Fixture, Callable>::value && std::copy_constructible<Callable>
+    requires TestBodyCompatible<Fixture, Callable>::value
     std::vector<TestHandle> materialize() && {
         std::vector<TestHandle> tests;
         tests.reserve(1);
         if constexpr (std::same_as<Fixture, void>) {
             tests.push_back(RuntimeBridge::makeTest(
-                name_, std::move(options_), std::function<void()>{std::move(callable_)}
+                name_, std::move(options_), std::move_only_function<void()>{std::move(callable_)}
             ));
         } else {
             tests.push_back(RuntimeBridge::makeTest(
                 name_, std::move(options_), std::type_index(typeid(Fixture)),
-                std::function<void(LifecycleSuite&)>{
+                std::move_only_function<void(LifecycleSuite&)>{
                     [callable = std::move(callable_)](LifecycleSuite& fixture) mutable {
                         auto* typedFixture = dynamic_cast<Fixture*>(&fixture);
                         if (!typedFixture) throw std::logic_error("Internal fixture type mismatch");

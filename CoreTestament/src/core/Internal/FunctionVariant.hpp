@@ -8,7 +8,10 @@ namespace Testament {
 
 class LifecycleSuite;
 
-using FunctionVariant = std::variant<std::function<void()>, std::function<void(LifecycleSuite&)>>;
+using FunctionVariant = std::variant<
+    std::move_only_function<void()>,
+    std::move_only_function<void(LifecycleSuite&)>
+>;
 
 }
 

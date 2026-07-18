@@ -29,7 +29,7 @@ class TestHandle;
 
 class InternalSuite {
 public:
-    using Callback = std::function<void()>;
+    using Callback = HookManager::Callback;
     using TestFilter = std::function<bool(std::string_view)>;
 
     explicit InternalSuite(std::string name, SuiteOptions options = {});

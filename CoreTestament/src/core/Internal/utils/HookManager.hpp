@@ -15,7 +15,7 @@ namespace Testament {
 
 class HookManager {
 public:
-    using Callback = std::function<void()>;
+    using Callback = std::move_only_function<void()>;
 
     explicit HookManager(ExecutionTimer& timer) : hookTimer(timer) {}
 
@@ -62,7 +62,7 @@ private:
     Callback afterEachHook;
     Callback afterSuiteHook;
 
-    bool invokeHook(const Callback& hook, std::string_view hookName) {
+    bool invokeHook(Callback& hook, std::string_view hookName) {
         if (hook) {
             try {
                 hookTimer.start();

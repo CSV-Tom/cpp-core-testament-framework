@@ -9,7 +9,7 @@ int main() {
     bool firstExecution = true;
     Testament::InternalTest test(
         "throwing test",
-        Testament::FunctionVariant{std::function<void()>([&firstExecution] {
+        Testament::FunctionVariant{std::move_only_function<void()>([&firstExecution] {
             if (firstExecution) {
                 firstExecution = false;
                 throw std::runtime_error("expected failure");
@@ -23,8 +23,8 @@ int main() {
     const auto durationAfterWaiting = test.getExecutionTimer().getDuration();
     const auto secondResult = test.execute();
 
-    const bool firstRunFailed = std::holds_alternative<std::exception_ptr>(firstResult);
-    const bool secondRunPassed = std::holds_alternative<std::monostate>(secondResult)
+    const bool firstRunFailed = !firstResult;
+    const bool secondRunPassed = secondResult
         && test.getStatus().isPassed() && !test.getException();
     const bool failedTimerStopped = durationAfterExecution == durationAfterWaiting;
 

@@ -12,9 +12,10 @@ class ArgumentHandler final : public Testament::TestEventHandler {
 public:
     explicit ArgumentHandler(bool reject_) : reject(reject_) {}
 
-    std::string configure(Arguments arguments) override {
+    std::expected<void, std::string> configure(Arguments arguments) override {
         receivedArguments.assign(arguments.begin(), arguments.end());
-        return reject ? "handler rejected arguments" : std::string{};
+        if (reject) return std::unexpected("handler rejected arguments");
+        return {};
     }
 
     void onTestPassed(const SuiteInfo&, const TestInfo&) override {

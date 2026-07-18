@@ -146,7 +146,7 @@ bool InternalSuite::run() {
             const bool beforeEachSucceeded = hookManager.invokeBeforeEachHook();
             if (!beforeEachSucceeded) lifecycleError = hookManager.getErrors().back();
 
-            TestManager::Result result{std::monostate{}};
+            TestManager::Result result{};
             if (beforeEachSucceeded) {
                 result = testManager.executeAttempt(fixture.get(), test);
                 duration += test->getExecutionTimer().getDuration();
@@ -160,9 +160,9 @@ bool InternalSuite::run() {
             if (!lifecycleError.empty()) {
                 status = TestEventHandler::TestResultStatus::LifecycleError;
                 exception = std::make_exception_ptr(std::runtime_error(lifecycleError));
-            } else if (std::holds_alternative<std::exception_ptr>(result)) {
+            } else if (!result) {
                 status = TestEventHandler::TestResultStatus::Failed;
-                exception = std::get<std::exception_ptr>(result);
+                exception = result.error();
             } else {
                 status = TestEventHandler::TestResultStatus::Passed;
                 exception = {};

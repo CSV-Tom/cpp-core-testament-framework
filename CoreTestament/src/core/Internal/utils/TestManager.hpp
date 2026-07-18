@@ -4,9 +4,9 @@
 #include "ExecutionTimer.hpp"
 #include "TestStatistics.hpp"
 #include <chrono>
+#include <expected>
 #include <memory>
 #include <utility>
-#include <variant>
 #include <exception>
 
 #include "../InternalTest.hpp"
@@ -18,7 +18,7 @@ class LifecycleSuite;
 
 class TestManager {
 public:
-    using Result = std::variant<std::monostate, std::exception_ptr>;
+    using Result = std::expected<void, std::exception_ptr>;
 
     TestManager(ExecutionTimer& timer, TestStatistics<unsigned int>& statistic_)
         : testTimer(timer), statistic(statistic_) {}

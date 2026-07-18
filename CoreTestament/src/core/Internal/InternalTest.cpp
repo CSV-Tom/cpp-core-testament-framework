@@ -24,9 +24,9 @@ InternalTest::InternalTest(std::string name_, TestOptions options_, FunctionVari
 
 InternalTest::~InternalTest() = default;
 
-std::variant<std::monostate, std::exception_ptr> InternalTest::execute(LifecycleSuite* fixture) {
+std::expected<void, std::exception_ptr> InternalTest::execute(LifecycleSuite* fixture) {
     if (status == TestStatus::Status::Skipped) {
-        return std::monostate{}; // Neither success nor exception
+        return {};
     }
 
     exception = nullptr;
@@ -36,9 +36,11 @@ std::variant<std::monostate, std::exception_ptr> InternalTest::execute(Lifecycle
     try {
         std::visit([fixture](auto&& func) {
             using T = std::decay_t<decltype(func)>;
-            if constexpr (std::is_same_v<T, std::function<void()>>) {
+            if constexpr (std::is_same_v<T, std::move_only_function<void()>>) {
                 func();
-            } else if constexpr (std::is_same_v<T, std::function<void(LifecycleSuite&)>>) {
+            } else if constexpr (
+                std::is_same_v<T, std::move_only_function<void(LifecycleSuite&)>>
+            ) {
                 if (!fixture) {
                     throw std::logic_error("Suite context is required for this test");
                 }
@@ -49,12 +51,12 @@ std::variant<std::monostate, std::exception_ptr> InternalTest::execute(Lifecycle
         }, function);
         executionTimer.stop();
         status = TestStatus::Status::Passed;
-        return std::monostate{}; // Successful execution
+        return {};
     } catch (...) {
         executionTimer.stop();
         status = TestStatus::Status::Failed;
         exception = std::current_exception();
-        return exception; // Return the exception
+        return std::unexpected(exception);
     }
 }
 

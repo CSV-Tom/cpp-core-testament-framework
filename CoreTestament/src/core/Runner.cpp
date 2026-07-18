@@ -69,8 +69,8 @@ int Runner::run(int argc, char** argv) {
 
     bool handlersConfigured = true;
     for (const auto& handler : impl->handlers) {
-        if (const auto error = handler->configure(*arguments); !error.empty()) {
-            std::cerr << error << '\n';
+        if (const auto result = handler->configure(*arguments); !result) {
+            std::cerr << result.error() << '\n';
             handlersConfigured = false;
         }
     }

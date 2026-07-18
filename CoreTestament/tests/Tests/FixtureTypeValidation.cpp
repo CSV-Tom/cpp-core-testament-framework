@@ -31,6 +31,10 @@ public:
 inline const auto suite = Testament::Suite<Fixture>(
     "fixture definition validation",
     Testament::Test("normal", [](Fixture&) { ++sum; }),
+    Testament::Test(
+        "move-only callable",
+        [value = std::make_unique<int>(5)](Fixture&) { sum += *value; }
+    ),
     Testament::ParameterizedTest(
         "values",
         Testament::Cases(
@@ -46,6 +50,11 @@ inline const auto suite = Testament::Suite<Fixture>(
             Testament::TestCase("owned", std::make_unique<int>(4))
         ),
         [](Fixture&, const std::unique_ptr<int>& value) { sum += *value; }
+    ),
+    Testament::ParameterizedTest(
+        "move-only parameter callable",
+        Testament::Cases(Testament::TestCase("value", 2)),
+        [base = std::make_unique<int>(5)](Fixture&, int value) { sum += *base + value; }
     )
 );
 
@@ -59,13 +68,14 @@ int main() {
 
     return suite
         && runner.run(0, nullptr) == 0
-        && sum == 11
+        && sum == 23
         && beforeAllCalls == 1
         && afterAllCalls == 1
-        && beforeEachCalls == 5
-        && afterEachCalls == 5
+        && beforeEachCalls == 7
+        && afterEachCalls == 7
         && result->names == std::vector<std::string>{
-            "normal", "values / one", "values / two", "values / three", "move-only / owned"
+            "normal", "move-only callable", "values / one", "values / two",
+            "values / three", "move-only / owned", "move-only parameter callable / value"
         }
         ? 0
         : 1;

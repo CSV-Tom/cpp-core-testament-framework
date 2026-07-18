@@ -10,7 +10,7 @@ namespace {
 
 class ConsumerHandler final : public Testament::TestEventHandler {
 public:
-    std::string configure(Arguments arguments) override {
+    std::expected<void, std::string> configure(Arguments arguments) override {
         configured = arguments.size() == 1 && arguments.front() == "--consumer";
         return {};
     }

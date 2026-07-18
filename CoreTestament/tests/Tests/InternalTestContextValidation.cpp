@@ -5,13 +5,12 @@
 
 #include <exception>
 #include <stdexcept>
-#include <variant>
 
 int main() {
     bool testBodyEntered = false;
     Testament::InternalTest test(
         "missing suite context",
-        Testament::FunctionVariant{std::function<void(Testament::LifecycleSuite&)>(
+        Testament::FunctionVariant{std::move_only_function<void(Testament::LifecycleSuite&)>(
             [&testBodyEntered](Testament::LifecycleSuite&) {
                 testBodyEntered = true;
             }
@@ -19,12 +18,12 @@ int main() {
     );
 
     const auto result = test.execute();
-    if (!std::holds_alternative<std::exception_ptr>(result)) {
+    if (result) {
         return 1;
     }
 
     try {
-        std::rethrow_exception(std::get<std::exception_ptr>(result));
+        std::rethrow_exception(result.error());
     } catch (const std::logic_error&) {
         return !testBodyEntered && test.getStatus().isFailed() ? 0 : 1;
     } catch (...) {

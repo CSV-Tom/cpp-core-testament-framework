@@ -3,6 +3,7 @@
 
 #include <chrono>
 #include <exception>
+#include <expected>
 #include <span>
 #include <string>
 #include <string_view>
@@ -44,7 +45,7 @@ public:
     virtual ~TestEventHandler() = default;
 
     // Return an error message to reject the configuration before tests execute.
-    [[nodiscard]] virtual std::string configure(Arguments) { return {}; }
+    [[nodiscard]] virtual std::expected<void, std::string> configure(Arguments) { return {}; }
     virtual void onStartReport(unsigned int) {}
     virtual void onSuiteStart(const SuiteInfo&) {}
     virtual void onSuiteEnd(const SuiteInfo&) {}

@@ -20,7 +20,7 @@ public:
 };
 
 detail::TestHandle detail::RuntimeBridge::makeTest(std::string_view name, TestOptions options,
-                                                  std::function<void()> function) {
+                                                  std::move_only_function<void()> function) {
     return TestHandle{std::make_unique<TestHandle::Impl>(
         std::make_unique<InternalTest>(std::string{name}, std::move(options),
                                        FunctionVariant{std::move(function)})
@@ -29,7 +29,7 @@ detail::TestHandle detail::RuntimeBridge::makeTest(std::string_view name, TestOp
 
 detail::TestHandle detail::RuntimeBridge::makeTest(
     std::string_view name, TestOptions options, std::type_index fixtureType,
-    std::function<void(LifecycleSuite&)> function
+    std::move_only_function<void(LifecycleSuite&)> function
 ) {
     return TestHandle{std::make_unique<TestHandle::Impl>(
         std::make_unique<InternalTest>(std::string{name}, std::move(options),
