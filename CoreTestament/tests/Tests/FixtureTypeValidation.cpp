@@ -74,8 +74,8 @@ int main() {
         && beforeEachCalls == 7
         && afterEachCalls == 7
         && result->names == std::vector<std::string>{
-            "normal", "move-only callable", "values / one", "values / two",
-            "values / three", "move-only / owned", "move-only parameter callable / value"
+            "move-only / owned", "move-only callable", "move-only parameter callable / value",
+            "normal", "values / one", "values / three", "values / two"
         }
         ? 0
         : 1;
