@@ -4,6 +4,7 @@
 #include "Testament/TestEventHandler.hpp"
 
 #include "EventHandlers/ConsoleTestEventHandler.hpp"
+#include "EventHandlers/BufferedTestEventHandler.hpp"
 #include "EventHandlers/JUnitTestEventHandler.hpp"
 #include "EventHandlers/TestEventHandlerChain.hpp"
 #include "Internal/InternalRegistry.hpp"
@@ -12,6 +13,7 @@
 
 #include <algorithm>
 #include <filesystem>
+#include <future>
 #include <iostream>
 #include <mutex>
 #include <optional>
@@ -50,6 +52,7 @@ public:
     std::vector<std::unique_ptr<TestEventHandler>> handlers;
     std::optional<std::string> suiteFilter;
     std::optional<std::string> testFilter;
+    std::size_t maxParallelSuites{1};
 };
 
 Runner::Runner() : impl(std::make_unique<Impl>()) {}
@@ -87,6 +90,13 @@ Runner& Runner::clearFilters() noexcept {
         impl->suiteFilter.reset();
         impl->testFilter.reset();
     }
+    return *this;
+}
+
+Runner& Runner::maxParallelSuites(std::size_t count) {
+    if (count == 0) throw std::invalid_argument("Maximum parallel suites must be greater than zero");
+    if (!impl) impl = std::make_unique<Impl>();
+    impl->maxParallelSuites = count;
     return *this;
 }
 
@@ -131,12 +141,38 @@ int Runner::run(int argc, char** argv) {
 
     chain.onStartReport(static_cast<unsigned int>(suites.size()));
 
+    struct SuiteResult {
+        bool hooksSucceeded;
+        TestStatistics<unsigned int> statistics;
+        detail::BufferedTestEventHandler events;
+    };
+    const std::string testFilter = impl->testFilter.value_or("");
+    const auto executeSuite = [&testFilter](const auto& suite) {
+        SuiteResult result;
+        result.hooksSucceeded = suite->run(&result.events, testFilter);
+        result.statistics = suite->getStatistics();
+        return result;
+    };
+
+    std::vector<std::future<SuiteResult>> running;
+    running.reserve(suites.size());
+    const auto parallelism = std::min(impl->maxParallelSuites, suites.size());
+    for (std::size_t index = 0; index < parallelism; ++index) {
+        running.push_back(std::async(std::launch::async, executeSuite, suites[index]));
+    }
+
     TestStatistics<unsigned int> total;
     bool hooksSucceeded = true;
-    for (auto& suite : suites) {
-        const std::string_view testFilter = impl->testFilter ? *impl->testFilter : std::string_view{};
-        hooksSucceeded = suite->run(&chain, testFilter) && hooksSucceeded;
-        total += suite->getStatistics();
+    for (std::size_t index = 0; index < suites.size(); ++index) {
+        auto result = running[index].get();
+        result.events.replay(chain);
+        hooksSucceeded = result.hooksSucceeded && hooksSucceeded;
+        total += result.statistics;
+
+        const auto next = index + parallelism;
+        if (next < suites.size()) {
+            running.push_back(std::async(std::launch::async, executeSuite, suites[next]));
+        }
     }
 
     chain.onFinalReport(

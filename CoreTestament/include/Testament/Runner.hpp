@@ -2,6 +2,7 @@
 #define TESTFRAMEWORK_TESTAMENT_RUNNER_HPP
 
 #include <memory>
+#include <cstddef>
 #include <string_view>
 
 namespace Testament {
@@ -25,6 +26,8 @@ public:
     Runner& filterSuite(std::string_view name);
     Runner& filterTest(std::string_view name);
     Runner& clearFilters() noexcept;
+    // Suites may execute concurrently; tests and lifecycle hooks within a suite remain serial.
+    Runner& maxParallelSuites(std::size_t count);
     // Concurrent calls are serialized. Complete suite registration before starting a run.
     [[nodiscard("propagate the test exit code, e.g. return runner.run(argc, argv)")]]
     int run(int argc, char** argv);
