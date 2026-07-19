@@ -1,5 +1,7 @@
 #include "Testament/Asserts.hpp"
 
+#include <exception>
+#include <string>
 #include <utility>
 
 namespace Testament::Asserts {
@@ -10,6 +12,20 @@ void failAssertion(std::string assertion, std::string expected, std::string actu
                    std::string_view message, std::source_location location) {
     throw AssertionFailure(std::move(assertion), std::move(expected), std::move(actual),
                            std::string{message}, location);
+}
+
+void failUnexpectedException(std::string assertion, std::string expected,
+                             std::exception_ptr exception, std::string_view message,
+                             std::source_location location) {
+    try {
+        std::rethrow_exception(exception);
+    } catch (const std::exception& error) {
+        failAssertion(std::move(assertion), std::move(expected),
+                      "exception: " + std::string{error.what()}, message, location);
+    } catch (...) {
+        failAssertion(std::move(assertion), std::move(expected),
+                      "non-standard exception", message, location);
+    }
 }
 
 }
