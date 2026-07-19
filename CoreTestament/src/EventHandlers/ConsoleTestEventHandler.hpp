@@ -35,10 +35,11 @@ public:
 
     void onSuiteEnd(const SuiteInfo& suite) override {
         std::cout << "\n📊 [RESULTS] Suite Summary: "
-                  << "Total: " << (suite.passed + suite.failed + suite.skipped) << ", "
+                  << "Total Results: " << (suite.passed + suite.failed + suite.skipped + suite.errors) << ", "
                   << "Passed: " << suite.passed << ", "
                   << "Failed: " << suite.failed << ", "
-                  << "Skipped: " << suite.skipped << "\n" << std::endl;
+                  << "Skipped: " << suite.skipped << ", "
+                  << "Errors: " << suite.errors << "\n" << std::endl;
     }
 
     void onSuiteAbort(const SuiteInfo& suite, std::string_view message) override {
@@ -76,13 +77,15 @@ public:
         std::cout << "⏩ SKIPPED: " << test.name << formatDuration(test.duration) << std::endl;
     }
 
-    void onFinalReport(unsigned int suites, unsigned int passed, unsigned int failed, unsigned int skipped) override {
+    void onFinalReport(unsigned int suites, unsigned int passed, unsigned int failed,
+                       unsigned int skipped, unsigned int errors) override {
         std::cout << "\n📊 [FINAL REPORT]\n"
                   << "    Suites Executed: " << suites << ", "
-                  << "Total Tests: " << (passed + failed + skipped) << ", "
+                  << "Total Results: " << (passed + failed + skipped + errors) << ", "
                   << "Passed: " << passed << ", "
                   << "Failed: " << failed << ", "
-                  << "Skipped: " << skipped << std::endl;
+                  << "Skipped: " << skipped << ", "
+                  << "Errors: " << errors << std::endl;
     }
 };
 

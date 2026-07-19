@@ -23,8 +23,8 @@ public:
     void onTestPassed(const SuiteInfo& suite, const TestInfo& test) override;
     void onTestFailed(const SuiteInfo& suite, const TestInfo& test) override;
     void onTestSkipped(const SuiteInfo& suite, const TestInfo& test) override;
-    void onFinalReport(unsigned int suites, unsigned int passed,
-                       unsigned int failed, unsigned int skipped) override;
+    void onFinalReport(unsigned int suites, unsigned int passed, unsigned int failed,
+                       unsigned int skipped, unsigned int errors) override;
 
     [[nodiscard]] bool writeSucceeded() const noexcept;
     [[nodiscard]] std::string errorMessage() const override;

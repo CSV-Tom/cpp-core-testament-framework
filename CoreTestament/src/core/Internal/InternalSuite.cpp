@@ -98,7 +98,7 @@ bool InternalSuite::run(TestEventHandler* handler) {
     totalTimer.start();
 
     if (handler) {
-        handler->onSuiteStart({name, location, 0, 0, 0, options});
+        handler->onSuiteStart({name, location, 0, 0, 0, 0, options});
     }
 
     const auto suiteInfo = [this] {
@@ -108,6 +108,7 @@ bool InternalSuite::run(TestEventHandler* handler) {
             statistic.getPassedTests(),
             statistic.getFailedTests(),
             statistic.getSkippedTests(),
+            statistic.getErrors(),
             options
         };
     };
@@ -134,6 +135,7 @@ bool InternalSuite::run(TestEventHandler* handler) {
         };
         if (!hookManager.invoke(createFixture, "fixture construction")) {
             const auto error = hookManager.getErrors().back();
+            statistic.incrementErrors();
             skipSelectedTests();
             totalTimer.stop();
             reportSuiteError(error);
@@ -148,6 +150,7 @@ bool InternalSuite::run(TestEventHandler* handler) {
     if (!hookManager.invokeBeforeSuiteHook()
         || !hookManager.invoke(beforeAll, "beforeAll")) {
         const auto error = hookManager.getErrors().back();
+        statistic.incrementErrors();
         skipSelectedTests();
         totalTimer.stop();
         reportSuiteError(error);
@@ -221,6 +224,7 @@ bool InternalSuite::run(TestEventHandler* handler) {
     if (!hookManager.invoke(afterAll, "afterAll")
         || !hookManager.invokeAfterSuiteHook()) {
         hooksSucceeded = false;
+        statistic.incrementErrors();
         reportSuiteError(hookManager.getErrors().back());
     }
 

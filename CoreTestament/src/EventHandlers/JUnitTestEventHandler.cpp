@@ -185,7 +185,8 @@ void JUnitTestEventHandler::onTestSkipped(const SuiteInfo& suite, const TestInfo
     suiteResult(suite).tests.push_back({test, Status::Skipped, {}});
 }
 
-void JUnitTestEventHandler::onFinalReport(unsigned int, unsigned int, unsigned int, unsigned int) {
+void JUnitTestEventHandler::onFinalReport(unsigned int, unsigned int, unsigned int,
+                                          unsigned int, unsigned int) {
     if (!outputPath) return;
     writeReport();
 }

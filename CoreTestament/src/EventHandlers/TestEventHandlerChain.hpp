@@ -72,9 +72,10 @@ public:
             handler.onTestSkipped(suite, test);
         });
     }
-    void onFinalReport(unsigned int suites, unsigned int passed, unsigned int failed, unsigned int skipped) override {
+    void onFinalReport(unsigned int suites, unsigned int passed, unsigned int failed,
+                       unsigned int skipped, unsigned int lifecycleErrors) override {
         dispatch("onFinalReport", [=](auto& handler) {
-            handler.onFinalReport(suites, passed, failed, skipped);
+            handler.onFinalReport(suites, passed, failed, skipped, lifecycleErrors);
         });
     }
 

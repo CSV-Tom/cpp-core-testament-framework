@@ -59,9 +59,13 @@ public:
             if (handler) handler->onTestSkipped(suiteInfo, testInfo);
             break;
         case TestEventHandler::TestResultStatus::Failed:
-        case TestEventHandler::TestResultStatus::LifecycleError:
             statistic.incrementFailedTests();
             suiteInfo.failed = statistic.getFailedTests();
+            if (handler) handler->onTestFailed(suiteInfo, testInfo);
+            break;
+        case TestEventHandler::TestResultStatus::LifecycleError:
+            statistic.incrementErrors();
+            suiteInfo.errors = statistic.getErrors();
             if (handler) handler->onTestFailed(suiteInfo, testInfo);
             break;
         case TestEventHandler::TestResultStatus::NotRun:

@@ -111,7 +111,8 @@ int Runner::run(int argc, char** argv) {
         static_cast<unsigned int>(suites.size()),
         total.getPassedTests(),
         total.getFailedTests(),
-        total.getSkippedTests()
+        total.getSkippedTests(),
+        total.getErrors()
     );
 
     const auto handlerError = chain.errorMessage();
@@ -119,7 +120,8 @@ int Runner::run(int argc, char** argv) {
         std::cerr << handlerError << '\n';
     }
 
-    return total.getFailedTests() == 0 && hooksSucceeded && handlerError.empty() ? 0 : 1;
+    return total.getFailedTests() == 0 && total.getErrors() == 0
+        && hooksSucceeded && handlerError.empty() ? 0 : 1;
 }
 
 std::unique_ptr<TestEventHandler> makeConsoleHandler() {

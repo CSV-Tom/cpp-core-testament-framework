@@ -9,7 +9,7 @@ class RecordingHandler final : public Testament::TestEventHandler {
 public:
     explicit RecordingHandler(unsigned int& reports_) : reports(reports_) {}
 
-    void onFinalReport(unsigned int, unsigned int, unsigned int, unsigned int) override {
+    void onFinalReport(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int) override {
         ++reports;
     }
 
