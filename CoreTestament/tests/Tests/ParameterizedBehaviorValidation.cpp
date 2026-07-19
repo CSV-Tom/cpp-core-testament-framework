@@ -1,5 +1,7 @@
 #include "Testament/Testament.hpp"
 
+#include "../TestCheck.hpp"
+
 #include <array>
 #include <memory>
 #include <stdexcept>
@@ -72,19 +74,25 @@ int main() {
     auto* result = handler.get();
     Testament::Runner runner;
     runner.addHandler(std::move(handler));
+    const auto exitCode = runner.run(0, nullptr);
 
-    return suite
-        && runner.run(0, nullptr) == 0
-        && attempts == std::array<unsigned int, 2>{2, 1}
-        && callableState == std::array<unsigned int, 2>{1, 1}
-        && beforeAllCalls == 1
-        && afterAllCalls == 1
-        && beforeEachCalls == 5
-        && afterEachCalls == 5
-        && result->names == std::vector<std::string>{
+    Testament::TestSupport::Checks checks;
+    checks.expect(static_cast<bool>(suite), "suite registration remains active");
+    checks.expect(exitCode == 0, "runner succeeds");
+    checks.expect(attempts == std::array<unsigned int, 2>{2, 1},
+                  "only the flaky case is retried");
+    checks.expect(callableState == std::array<unsigned int, 2>{1, 1},
+                  "copyable callables have independent state per case");
+    checks.expect(beforeAllCalls == 1, "beforeAll runs once");
+    checks.expect(afterAllCalls == 1, "afterAll runs once");
+    checks.expect(beforeEachCalls == 5, "beforeEach runs for every attempt");
+    checks.expect(afterEachCalls == 5, "afterEach runs for every attempt");
+    checks.expect(
+        result->names == std::vector<std::string>{
             "independent callable / first", "independent callable / second",
             "retry cases / flaky", "retry cases / stable"
-        }
-        ? 0
-        : 1;
+        },
+        "parameterized cases are reported in deterministic order"
+    );
+    return checks.result();
 }

@@ -1,5 +1,8 @@
 #include "Testament/Testament.hpp"
 
+#include "../TestCheck.hpp"
+
+#include <algorithm>
 #include <memory>
 #include <string>
 #include <vector>
@@ -65,18 +68,24 @@ int main() {
     auto* result = handler.get();
     Testament::Runner runner;
     runner.addHandler(std::move(handler));
+    const auto exitCode = runner.run(0, nullptr);
+    auto names = result->names;
+    std::ranges::sort(names);
 
-    return suite
-        && runner.run(0, nullptr) == 0
-        && sum == 23
-        && beforeAllCalls == 1
-        && afterAllCalls == 1
-        && beforeEachCalls == 7
-        && afterEachCalls == 7
-        && result->names == std::vector<std::string>{
+    Testament::TestSupport::Checks checks;
+    checks.expect(static_cast<bool>(suite), "suite registration remains active");
+    checks.expect(exitCode == 0, "runner succeeds");
+    checks.expect(sum == 23, "all fixture test bodies contribute to the sum");
+    checks.expect(beforeAllCalls == 1, "beforeAll runs once");
+    checks.expect(afterAllCalls == 1, "afterAll runs once");
+    checks.expect(beforeEachCalls == 7, "beforeEach runs for every test case");
+    checks.expect(afterEachCalls == 7, "afterEach runs for every test case");
+    checks.expect(
+        names == std::vector<std::string>{
             "move-only / owned", "move-only callable", "move-only parameter callable / value",
             "normal", "values / one", "values / three", "values / two"
-        }
-        ? 0
-        : 1;
+        },
+        "all expected fixture tests are reported"
+    );
+    return checks.result();
 }
