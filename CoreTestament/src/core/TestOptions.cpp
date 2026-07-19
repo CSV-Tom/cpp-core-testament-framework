@@ -62,6 +62,12 @@ TestOptions& TestOptions::maxAttempts(unsigned int value) {
     return *this;
 }
 
+TestOptions& TestOptions::execution(Execution value) {
+    detach();
+    impl->execution = value;
+    return *this;
+}
+
 std::optional<int> TestOptions::order() const noexcept { return read().order; }
 std::span<const std::string> TestOptions::tags() const noexcept { return read().tags; }
 std::span<const TestOptions::Attribute> TestOptions::attributes() const noexcept {
@@ -72,5 +78,6 @@ std::optional<std::string_view> TestOptions::attribute(std::string_view key) con
 }
 bool TestOptions::isDisabled() const noexcept { return read().disabled; }
 unsigned int TestOptions::maxAttempts() const noexcept { return read().maxAttempts; }
+Execution TestOptions::execution() const noexcept { return read().execution; }
 
 }

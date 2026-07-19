@@ -39,7 +39,9 @@ public:
 
 int main() {
     Testament::SuiteOptions reusableSuiteOptions;
-    reusableSuiteOptions.tag("integration").attribute("component", "database");
+    reusableSuiteOptions.tag("integration")
+        .attribute("component", "database")
+        .execution(Testament::Execution::Parallel);
     auto copiedSuiteOptions = reusableSuiteOptions;
     copiedSuiteOptions.tag("copy-only");
     const bool optionsAreIndependent = reusableSuiteOptions.tags().size() == 1
@@ -48,7 +50,9 @@ int main() {
     auto movedSuiteOptions = std::move(copiedSuiteOptions);
     movedSuiteOptions.tag("moved-only");
     Testament::TestOptions originalTestOptions;
-    originalTestOptions.disabled().maxAttempts(2);
+    originalTestOptions.disabled()
+        .maxAttempts(2)
+        .execution(Testament::Execution::Serial);
     auto movedTestOptions = std::move(originalTestOptions);
     movedTestOptions.maxAttempts(3);
     const bool movedOptionsRemainValid = copiedSuiteOptions.tags().empty()
@@ -56,6 +60,9 @@ int main() {
         && !originalTestOptions.isDisabled()
         && originalTestOptions.maxAttempts() == 1
         && movedTestOptions.maxAttempts() == 3;
+    const bool executionOptionsPreserved = reusableSuiteOptions.execution()
+        == Testament::Execution::Parallel
+        && movedTestOptions.execution() == Testament::Execution::Serial;
 
     auto zeta = Testament::Suite(
         "zeta",
@@ -101,6 +108,7 @@ int main() {
         && exitCode == 0
         && optionsAreIndependent
         && movedOptionsRemainValid
+        && executionOptionsPreserved
         && result->suiteMetadataReceived
         && result->testMetadataReceived
         && result->suites == std::vector<std::string>{

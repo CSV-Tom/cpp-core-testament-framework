@@ -1,6 +1,8 @@
 #ifndef TESTAMENT_INTERNAL_OPTIONSSTORAGE_HPP
 #define TESTAMENT_INTERNAL_OPTIONSSTORAGE_HPP
 
+#include "Testament/Execution.hpp"
+
 #include <algorithm>
 #include <optional>
 #include <string>
@@ -33,6 +35,7 @@ public:
     std::optional<int> order;
     std::vector<std::string> tags;
     std::vector<Attribute> attributes;
+    Execution execution{Execution::Inherit};
 };
 
 }

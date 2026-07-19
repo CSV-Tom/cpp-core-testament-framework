@@ -1,6 +1,8 @@
 #ifndef TESTAMENT_TESTOPTIONS_HPP
 #define TESTAMENT_TESTOPTIONS_HPP
 
+#include "Testament/Execution.hpp"
+
 #include <memory>
 #include <optional>
 #include <span>
@@ -27,6 +29,7 @@ public:
     TestOptions& attribute(std::string key, std::string value);
     TestOptions& disabled(bool value = true);
     TestOptions& maxAttempts(unsigned int value);
+    TestOptions& execution(Execution value);
 
     [[nodiscard]] std::optional<int> order() const noexcept;
     [[nodiscard]] std::span<const std::string> tags() const noexcept;
@@ -34,6 +37,7 @@ public:
     [[nodiscard]] std::optional<std::string_view> attribute(std::string_view key) const noexcept;
     [[nodiscard]] bool isDisabled() const noexcept;
     [[nodiscard]] unsigned int maxAttempts() const noexcept;
+    [[nodiscard]] Execution execution() const noexcept;
 
 private:
     class Impl;

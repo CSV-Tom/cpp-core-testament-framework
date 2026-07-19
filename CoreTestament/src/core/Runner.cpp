@@ -154,24 +154,39 @@ int Runner::run(int argc, char** argv) {
         return result;
     };
 
-    std::vector<std::future<SuiteResult>> running;
-    running.reserve(suites.size());
-    const auto parallelism = std::min(impl->maxParallelSuites, suites.size());
-    for (std::size_t index = 0; index < parallelism; ++index) {
-        running.push_back(std::async(std::launch::async, executeSuite, suites[index]));
-    }
-
     TestStatistics<unsigned int> total;
     bool hooksSucceeded = true;
-    for (std::size_t index = 0; index < suites.size(); ++index) {
-        auto result = running[index].get();
+    const auto consume = [&chain, &hooksSucceeded, &total](SuiteResult result) {
         result.events.replay(chain);
         hooksSucceeded = result.hooksSucceeded && hooksSucceeded;
         total += result.statistics;
+    };
 
-        const auto next = index + parallelism;
-        if (next < suites.size()) {
-            running.push_back(std::async(std::launch::async, executeSuite, suites[next]));
+    std::size_t index{};
+    while (index < suites.size()) {
+        if (suites[index]->getOptions().execution() == Execution::Serial) {
+            consume(executeSuite(suites[index++]));
+            continue;
+        }
+
+        const auto concurrentEnd = std::ranges::find_if(
+            suites.begin() + static_cast<std::ptrdiff_t>(index), suites.end(),
+            [](const auto& suite) {
+                return suite->getOptions().execution() == Execution::Serial;
+            }
+        );
+        const auto endIndex = static_cast<std::size_t>(concurrentEnd - suites.begin());
+        while (index < endIndex) {
+            const auto count = std::min(impl->maxParallelSuites, endIndex - index);
+            std::vector<std::future<SuiteResult>> running;
+            running.reserve(count);
+            for (std::size_t offset = 0; offset < count; ++offset) {
+                running.push_back(std::async(
+                    std::launch::async, executeSuite, suites[index + offset]
+                ));
+            }
+            for (auto& future : running) consume(future.get());
+            index += count;
         }
     }
 
