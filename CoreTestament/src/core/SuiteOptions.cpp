@@ -11,11 +11,8 @@ SuiteOptions::SuiteOptions() : impl(std::make_shared<Impl>()) {}
 SuiteOptions::~SuiteOptions() = default;
 SuiteOptions::SuiteOptions(const SuiteOptions& other) = default;
 SuiteOptions& SuiteOptions::operator=(const SuiteOptions& other) = default;
-SuiteOptions::SuiteOptions(SuiteOptions&& other) noexcept : impl(other.impl) {}
-SuiteOptions& SuiteOptions::operator=(SuiteOptions&& other) noexcept {
-    impl = other.impl;
-    return *this;
-}
+SuiteOptions::SuiteOptions(SuiteOptions&& other) noexcept = default;
+SuiteOptions& SuiteOptions::operator=(SuiteOptions&& other) noexcept = default;
 
 void SuiteOptions::detach() {
     if (!impl) {
@@ -23,6 +20,11 @@ void SuiteOptions::detach() {
     } else if (impl.use_count() != 1) {
         impl = std::make_shared<Impl>(*impl);
     }
+}
+
+const SuiteOptions::Impl& SuiteOptions::read() const noexcept {
+    static const Impl empty;
+    return impl ? *impl : empty;
 }
 
 SuiteOptions& SuiteOptions::order(int value) {
@@ -40,13 +42,13 @@ SuiteOptions& SuiteOptions::attribute(std::string key, std::string value) {
     impl->setAttribute(std::move(key), std::move(value));
     return *this;
 }
-std::optional<int> SuiteOptions::order() const noexcept { return impl->order; }
-std::span<const std::string> SuiteOptions::tags() const noexcept { return impl->tags; }
+std::optional<int> SuiteOptions::order() const noexcept { return read().order; }
+std::span<const std::string> SuiteOptions::tags() const noexcept { return read().tags; }
 std::span<const SuiteOptions::Attribute> SuiteOptions::attributes() const noexcept {
-    return impl->attributes;
+    return read().attributes;
 }
 std::optional<std::string_view> SuiteOptions::attribute(std::string_view key) const noexcept {
-    return impl->findAttribute(key);
+    return read().findAttribute(key);
 }
 
 }

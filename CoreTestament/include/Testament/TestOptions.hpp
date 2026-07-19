@@ -38,6 +38,7 @@ public:
 private:
     class Impl;
     void detach();
+    [[nodiscard]] const Impl& read() const noexcept;
     std::shared_ptr<Impl> impl;
 };
 

@@ -51,10 +51,10 @@ int main() {
     originalTestOptions.disabled().maxAttempts(2);
     auto movedTestOptions = std::move(originalTestOptions);
     movedTestOptions.maxAttempts(3);
-    const bool movedOptionsRemainValid = copiedSuiteOptions.tags().size() == 2
+    const bool movedOptionsRemainValid = copiedSuiteOptions.tags().empty()
         && movedSuiteOptions.tags().size() == 3
-        && originalTestOptions.isDisabled()
-        && originalTestOptions.maxAttempts() == 2
+        && !originalTestOptions.isDisabled()
+        && originalTestOptions.maxAttempts() == 1
         && movedTestOptions.maxAttempts() == 3;
 
     auto zeta = Testament::Suite(

@@ -16,11 +16,8 @@ TestOptions::TestOptions() : impl(std::make_shared<Impl>()) {}
 TestOptions::~TestOptions() = default;
 TestOptions::TestOptions(const TestOptions& other) = default;
 TestOptions& TestOptions::operator=(const TestOptions& other) = default;
-TestOptions::TestOptions(TestOptions&& other) noexcept : impl(other.impl) {}
-TestOptions& TestOptions::operator=(TestOptions&& other) noexcept {
-    impl = other.impl;
-    return *this;
-}
+TestOptions::TestOptions(TestOptions&& other) noexcept = default;
+TestOptions& TestOptions::operator=(TestOptions&& other) noexcept = default;
 
 void TestOptions::detach() {
     if (!impl) {
@@ -28,6 +25,11 @@ void TestOptions::detach() {
     } else if (impl.use_count() != 1) {
         impl = std::make_shared<Impl>(*impl);
     }
+}
+
+const TestOptions::Impl& TestOptions::read() const noexcept {
+    static const Impl empty;
+    return impl ? *impl : empty;
 }
 
 TestOptions& TestOptions::order(int value) {
@@ -60,15 +62,15 @@ TestOptions& TestOptions::maxAttempts(unsigned int value) {
     return *this;
 }
 
-std::optional<int> TestOptions::order() const noexcept { return impl->order; }
-std::span<const std::string> TestOptions::tags() const noexcept { return impl->tags; }
+std::optional<int> TestOptions::order() const noexcept { return read().order; }
+std::span<const std::string> TestOptions::tags() const noexcept { return read().tags; }
 std::span<const TestOptions::Attribute> TestOptions::attributes() const noexcept {
-    return impl->attributes;
+    return read().attributes;
 }
 std::optional<std::string_view> TestOptions::attribute(std::string_view key) const noexcept {
-    return impl->findAttribute(key);
+    return read().findAttribute(key);
 }
-bool TestOptions::isDisabled() const noexcept { return impl->disabled; }
-unsigned int TestOptions::maxAttempts() const noexcept { return impl->maxAttempts; }
+bool TestOptions::isDisabled() const noexcept { return read().disabled; }
+unsigned int TestOptions::maxAttempts() const noexcept { return read().maxAttempts; }
 
 }
