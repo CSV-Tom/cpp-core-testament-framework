@@ -38,8 +38,7 @@ int main() {
     ));
 
     RecordingHandler handler;
-    suite.setHandler(&handler);
-    const bool succeeded = suite.run();
+    const bool succeeded = suite.run(&handler);
 
     return succeeded
         && attempts == 3

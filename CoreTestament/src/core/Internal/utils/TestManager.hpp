@@ -4,7 +4,6 @@
 #include "TestStatistics.hpp"
 #include <chrono>
 #include <expected>
-#include <memory>
 #include <utility>
 #include <exception>
 
@@ -22,30 +21,30 @@ public:
     explicit TestManager(TestStatistics<unsigned int>& statistic_) : statistic(statistic_) {}
 
     void reportStart(const TestEventHandler::SuiteInfo& suiteInfo,
-                     const std::unique_ptr<InternalTest>& test,
+                     const InternalTest& test,
                      TestEventHandler* handler) const {
         if (handler) {
             handler->onTestStart(suiteInfo, {
-                test->getName(), test->getLocation(), std::chrono::duration<double>::zero(),
-                {}, test->getOptions(),
+                test.getName(), test.getLocation(), std::chrono::duration<double>::zero(),
+                {}, test.getOptions(),
                 TestEventHandler::TestResultStatus::NotRun
             });
         }
     }
 
-    Result executeAttempt(LifecycleSuite* fixture, std::unique_ptr<InternalTest>& test) {
-        return test->execute(fixture);
+    Result executeAttempt(LifecycleSuite* fixture, InternalTest& test) {
+        return test.execute(fixture);
     }
 
     void reportResult(TestEventHandler::SuiteInfo suiteInfo,
-                      const std::unique_ptr<InternalTest>& test,
+                      const InternalTest& test,
                       TestEventHandler::TestResultStatus status,
                       std::chrono::duration<double> duration,
                       std::exception_ptr exception,
                       TestEventHandler* handler) {
         TestEventHandler::TestInfo testInfo{
-            test->getName(), test->getLocation(), duration, std::move(exception),
-            test->getOptions(), status
+            test.getName(), test.getLocation(), duration, std::move(exception),
+            test.getOptions(), status
         };
 
         switch (status) {

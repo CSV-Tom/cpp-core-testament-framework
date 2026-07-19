@@ -49,9 +49,8 @@ public:
     void setAfterSuite(Callback callback);
 
     void setTestFilter(std::variant<std::string, std::regex> filter);
-    void setHandler(TestEventHandler* handler);
 
-    [[nodiscard]] bool run();
+    [[nodiscard]] bool run(TestEventHandler* handler = nullptr);
 
     const std::string& getName() const;
     const SuiteOptions& getOptions() const;
@@ -61,7 +60,6 @@ public:
 
 private:
     TestStatistics<unsigned int> statistic;
-    TestEventHandler* handler{nullptr};
 
     std::string name;
     std::source_location location;

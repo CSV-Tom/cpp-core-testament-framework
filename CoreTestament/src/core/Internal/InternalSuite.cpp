@@ -84,12 +84,7 @@ void InternalSuite::setAfterSuite(Callback callback)  {
     hookManager.setAfterSuite(std::move(callback));
 }
 
-void InternalSuite::setHandler(TestEventHandler* h) {
-    handler = h;
-}
-
-
-bool InternalSuite::run() {
+bool InternalSuite::run(TestEventHandler* handler) {
     statistic.reset();
     totalTimer.reset();
     hookManager.resetErrors();
@@ -116,16 +111,16 @@ bool InternalSuite::run() {
             options
         };
     };
-    const auto reportSuiteError = [this, &suiteInfo](std::string_view error) {
+    const auto reportSuiteError = [&handler, &suiteInfo](std::string_view error) {
         if (handler) handler->onSuiteAbort(suiteInfo(), error);
     };
     const auto selected = [this](const auto& test) {
         return !testFilter || testFilter(test->getName());
     };
-    const auto skipSelectedTests = [this, &suiteInfo, &selected] {
+    const auto skipSelectedTests = [this, &handler, &suiteInfo, &selected] {
         for (auto& test : tests | std::views::filter(selected)) {
             testManager.reportResult(
-                suiteInfo(), test, TestEventHandler::TestResultStatus::Skipped,
+                suiteInfo(), *test, TestEventHandler::TestResultStatus::Skipped,
                 std::chrono::duration<double>::zero(), {}, handler
             );
         }
@@ -164,13 +159,13 @@ bool InternalSuite::run() {
     for (auto& test : tests | std::views::filter(selected)) {
         if (test->getOptions().isDisabled()) {
             testManager.reportResult(
-                suiteInfo(), test, TestEventHandler::TestResultStatus::Skipped,
+                suiteInfo(), *test, TestEventHandler::TestResultStatus::Skipped,
                 std::chrono::duration<double>::zero(), {}, handler
             );
             continue;
         }
 
-        testManager.reportStart(suiteInfo(), test, handler);
+        testManager.reportStart(suiteInfo(), *test, handler);
         auto remainingAttempts = test->getOptions().maxAttempts();
         auto duration = std::chrono::duration<double>::zero();
         auto status = TestEventHandler::TestResultStatus::Failed;
@@ -187,7 +182,7 @@ bool InternalSuite::run() {
 
             TestManager::Result result{};
             if (beforeEachSucceeded) {
-                result = testManager.executeAttempt(fixture.get(), test);
+                result = testManager.executeAttempt(fixture.get(), *test);
                 duration += test->getExecutionTimer().getDuration();
             }
 
@@ -217,7 +212,7 @@ bool InternalSuite::run() {
 
         hooksSucceeded = status != TestEventHandler::TestResultStatus::LifecycleError
             && hooksSucceeded;
-        testManager.reportResult(suiteInfo(), test, status, duration, exception, handler);
+        testManager.reportResult(suiteInfo(), *test, status, duration, exception, handler);
     }
 
     Callback afterAll = [&fixture] {

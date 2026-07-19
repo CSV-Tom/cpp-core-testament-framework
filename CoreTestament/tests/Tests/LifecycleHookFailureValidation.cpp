@@ -55,8 +55,7 @@ int main() {
     }));
 
     RecordingHandler handler;
-    suite->setHandler(&handler);
-    const bool suiteSucceeded = suite->run();
+    const bool suiteSucceeded = suite->run(&handler);
 
     Testament::InternalSuite beforeEachSuite("failing before each hook");
     bool beforeEachTestExecuted = false;
@@ -67,8 +66,7 @@ int main() {
         beforeEachTestExecuted = true;
     }));
     RecordingHandler beforeEachHandler;
-    beforeEachSuite.setHandler(&beforeEachHandler);
-    const bool beforeEachSuiteSucceeded = beforeEachSuite.run();
+    const bool beforeEachSuiteSucceeded = beforeEachSuite.run(&beforeEachHandler);
 
     const int exitCode = Testament::run(0, nullptr);
     return !suiteSucceeded

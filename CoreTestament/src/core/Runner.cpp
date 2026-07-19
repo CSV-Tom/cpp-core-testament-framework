@@ -103,8 +103,7 @@ int Runner::run(int argc, char** argv) {
     TestStatistics<unsigned int> total;
     bool hooksSucceeded = true;
     for (auto& suite : suites) {
-        suite->setHandler(&chain);
-        hooksSucceeded = suite->run() && hooksSucceeded;
+        hooksSucceeded = suite->run(&chain) && hooksSucceeded;
         total += suite->getStatistics();
     }
 
