@@ -53,6 +53,7 @@ public:
     std::optional<std::string> suiteFilter;
     std::optional<std::string> testFilter;
     std::size_t maxParallelSuites{1};
+    std::size_t maxParallelTests{1};
 };
 
 Runner::Runner() : impl(std::make_unique<Impl>()) {}
@@ -97,6 +98,13 @@ Runner& Runner::maxParallelSuites(std::size_t count) {
     if (count == 0) throw std::invalid_argument("Maximum parallel suites must be greater than zero");
     if (!impl) impl = std::make_unique<Impl>();
     impl->maxParallelSuites = count;
+    return *this;
+}
+
+Runner& Runner::maxParallelTests(std::size_t count) {
+    if (count == 0) throw std::invalid_argument("Maximum parallel tests must be greater than zero");
+    if (!impl) impl = std::make_unique<Impl>();
+    impl->maxParallelTests = count;
     return *this;
 }
 
@@ -147,9 +155,11 @@ int Runner::run(int argc, char** argv) {
         detail::BufferedTestEventHandler events;
     };
     const std::string testFilter = impl->testFilter.value_or("");
-    const auto executeSuite = [&testFilter](const auto& suite) {
+    const auto executeSuite = [this, &testFilter](const auto& suite) {
         SuiteResult result;
-        result.hooksSucceeded = suite->run(&result.events, testFilter);
+        result.hooksSucceeded = suite->run(
+            &result.events, testFilter, impl->maxParallelTests
+        );
         result.statistics = suite->getStatistics();
         return result;
     };

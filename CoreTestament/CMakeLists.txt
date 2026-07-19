@@ -250,6 +250,11 @@ if(BUILD_TESTING)
     )
 
     add_testament_test(
+        ParallelTestValidation ParallelTest
+        tests/Tests/ParallelTestValidation.cpp
+    )
+
+    add_testament_test(
         OptionsValidation Options
         tests/Tests/OptionsValidation.cpp
     )

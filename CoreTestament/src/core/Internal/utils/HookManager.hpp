@@ -53,6 +53,10 @@ public:
         errors.clear();
     }
 
+    [[nodiscard]] bool hasPerTestHooks() const noexcept {
+        return static_cast<bool>(beforeEachHook) || static_cast<bool>(afterEachHook);
+    }
+
 private:
     std::vector<std::string> errors;
 

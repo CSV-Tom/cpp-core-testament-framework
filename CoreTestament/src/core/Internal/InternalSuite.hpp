@@ -9,6 +9,7 @@
 #include "utils/TestStatistics.hpp"
 
 #include <functional>
+#include <cstddef>
 #include <memory>
 #include <optional>
 #include <regex>
@@ -51,7 +52,8 @@ public:
     void setTestFilter(std::variant<std::string, std::regex> filter);
 
     [[nodiscard]] bool run(TestEventHandler* handler = nullptr,
-                           std::string_view testNameFilter = {});
+                           std::string_view testNameFilter = {},
+                           std::size_t maxParallelTests = 1);
 
     const std::string& getName() const;
     const SuiteOptions& getOptions() const;
