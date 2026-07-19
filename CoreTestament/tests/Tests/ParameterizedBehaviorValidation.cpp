@@ -9,6 +9,7 @@
 namespace {
 
 inline std::array<unsigned int, 2> attempts{};
+inline std::array<unsigned int, 2> callableState{};
 inline unsigned int beforeAllCalls{};
 inline unsigned int afterAllCalls{};
 inline unsigned int beforeEachCalls{};
@@ -30,8 +31,26 @@ public:
     std::vector<std::string> names;
 };
 
+class StatefulCallable {
+public:
+    void operator()(Fixture&, unsigned int index) {
+        callableState[index] = ++calls;
+    }
+
+private:
+    unsigned int calls{};
+};
+
 inline const auto suite = Testament::Suite<Fixture>(
     "parameter behavior",
+    Testament::ParameterizedTest(
+        "independent callable",
+        Testament::Cases(
+            Testament::TestCase("first", 0U),
+            Testament::TestCase("second", 1U)
+        ),
+        StatefulCallable{}
+    ),
     Testament::ParameterizedTest(
         "retry cases",
         Testament::TestOptions{}.maxAttempts(2),
@@ -57,11 +76,13 @@ int main() {
     return suite
         && runner.run(0, nullptr) == 0
         && attempts == std::array<unsigned int, 2>{2, 1}
+        && callableState == std::array<unsigned int, 2>{1, 1}
         && beforeAllCalls == 1
         && afterAllCalls == 1
-        && beforeEachCalls == 3
-        && afterEachCalls == 3
+        && beforeEachCalls == 5
+        && afterEachCalls == 5
         && result->names == std::vector<std::string>{
+            "independent callable / first", "independent callable / second",
             "retry cases / flaky", "retry cases / stable"
         }
         ? 0
