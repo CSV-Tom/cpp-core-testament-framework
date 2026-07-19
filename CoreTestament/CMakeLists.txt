@@ -28,6 +28,7 @@ target_sources(${PROJECT_NAME}
         src/core/Internal/ConfigurationDiagnostics.cpp
         src/core/Internal/SuiteAssembler.cpp
         src/core/Runner.cpp
+        src/core/DefaultRun.cpp
         src/core/SuiteRegistration.cpp
         src/core/LifecycleSuite.cpp
         src/core/TestHandle.cpp
@@ -38,6 +39,7 @@ target_sources(${PROJECT_NAME}
         src/core/SkipRequest.cpp
         src/core/Trace.cpp
         src/EventHandlers/JUnitTestEventHandler.cpp
+        src/EventHandlers/Reporters.cpp
     PUBLIC FILE_SET HEADERS
         BASE_DIRS include
         FILES

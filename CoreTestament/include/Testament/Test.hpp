@@ -5,8 +5,6 @@
 #include "Testament/detail/LocatedName.hpp"
 #include "Testament/detail/TestDefinition.hpp"
 
-#include <string>
-#include <string_view>
 #include <type_traits>
 #include <utility>
 

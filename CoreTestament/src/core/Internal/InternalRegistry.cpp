@@ -54,16 +54,4 @@ std::vector<std::string> InternalRegistry::getConfigurationErrors() const {
     return configurationDiagnostics.errors();
 }
 
-std::function<bool(const std::shared_ptr<InternalSuite>&)> InternalRegistry::createFilter(
-    std::string_view type, std::string_view value
-) {
-    if (type == "name") {
-        return [value = std::string{value}](const std::shared_ptr<InternalSuite>& suite) {
-            return suite->getName() == value;
-        };
-    } else {
-        throw std::invalid_argument("Unknown filter type");
-    }
-}
-
 }

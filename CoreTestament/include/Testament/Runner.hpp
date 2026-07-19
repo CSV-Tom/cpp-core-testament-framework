@@ -24,11 +24,11 @@ public:
     // Moving transfers all handlers. A moved-from Runner remains reusable as an empty Runner.
     Runner& addHandler(std::unique_ptr<TestEventHandler> handler);
     Runner& addEnvironment(std::unique_ptr<GlobalEnvironment> environment);
-    // Filters use exact names and are applied before handlers receive any events.
+    // Filters accept glob patterns (* and ?); a leading '-' negates a pattern.
     Runner& filterSuite(std::string_view name);
     Runner& filterTest(std::string_view name);
     Runner& clearFilters() noexcept;
-    // Suites may execute concurrently; tests and lifecycle hooks within a suite remain serial.
+    // Fixture-less suites and tests may execute concurrently. Lifecycle suites stay serial.
     Runner& maxParallelSuites(std::size_t count);
     Runner& maxParallelTests(std::size_t count);
     // Concurrent calls are serialized. Complete suite registration before starting a run.

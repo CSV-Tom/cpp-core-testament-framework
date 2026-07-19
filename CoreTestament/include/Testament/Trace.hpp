@@ -1,7 +1,6 @@
 #ifndef TESTAMENT_TRACE_HPP
 #define TESTAMENT_TRACE_HPP
 
-#include <memory>
 #include <source_location>
 #include <string_view>
 
@@ -18,9 +17,6 @@ public:
     Trace(Trace&&) = delete;
     Trace& operator=(Trace&&) = delete;
 
-private:
-    class Impl;
-    std::unique_ptr<Impl> impl;
 };
 
 }

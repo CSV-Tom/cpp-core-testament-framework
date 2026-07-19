@@ -2,7 +2,6 @@
 
 #include "core/Internal/InternalSuite.hpp"
 
-#include <regex>
 #include <string>
 
 int main() {
@@ -26,27 +25,24 @@ int main() {
         suite.addTest(std::move(test));
     }
 
-    suite.setTestFilter(std::string{"alpha"});
-    const bool exactRunSucceeded = suite.run();
+    const bool exactRunSucceeded = suite.run(nullptr, {"alpha", {}, 1, {}});
     const bool exactFilterMatched = alphaRuns == 1
         && betaOneRuns == 0
         && betaTwoRuns == 0
         && suite.getStatistics().getPassedTests() == 1;
 
-    suite.setTestFilter(std::regex{"beta-.*"});
-    const bool regexRunSucceeded = suite.run();
+    const bool globRunSucceeded = suite.run(nullptr, {"beta-*", {}, 1, {}});
     const bool regexFilterMatched = alphaRuns == 1
         && betaOneRuns == 1
         && betaTwoRuns == 1
         && suite.getStatistics().getPassedTests() == 2;
 
-    suite.setTestFilter(std::string{"values / two"});
-    const bool parameterFilterSucceeded = suite.run();
+    const bool parameterFilterSucceeded = suite.run(nullptr, {"values / two", {}, 1, {}});
     const bool parameterFilterMatched = betaTwoRuns == 3
         && suite.getStatistics().getPassedTests() == 1;
 
     return exactRunSucceeded && exactFilterMatched
-        && regexRunSucceeded && regexFilterMatched
+        && globRunSucceeded && regexFilterMatched
         && parameterFilterSucceeded && parameterFilterMatched
         ? 0
         : 1;

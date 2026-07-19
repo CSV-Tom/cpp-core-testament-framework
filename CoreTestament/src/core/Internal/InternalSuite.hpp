@@ -8,17 +8,15 @@
 #include "utils/TestManager.hpp"
 #include "utils/TestStatistics.hpp"
 
-#include <functional>
 #include <cstddef>
+#include <functional>
 #include <memory>
 #include <optional>
-#include <regex>
 #include <source_location>
 #include <span>
 #include <string>
 #include <string_view>
 #include <typeindex>
-#include <variant>
 #include <cstdint>
 #include <vector>
 
@@ -35,7 +33,6 @@ class InternalSuite {
 public:
     using Callback = HookManager::Callback;
     using FixtureFactory = std::move_only_function<std::unique_ptr<LifecycleSuite>()>;
-    using TestFilter = std::function<bool(std::string_view)>;
     struct RunConfiguration {
         std::string_view testNameFilter;
         std::string_view filterExpression;
@@ -56,8 +53,6 @@ public:
     void setBeforeEach(Callback callback);
     void setAfterEach(Callback callback);
     void setAfterSuite(Callback callback);
-
-    void setTestFilter(std::variant<std::string, std::regex> filter);
 
     [[nodiscard]] bool run(TestEventHandler* handler = nullptr);
     [[nodiscard]] bool run(TestEventHandler* handler, RunConfiguration configuration);
@@ -81,8 +76,6 @@ private:
 
     HookManager hookManager;
     TestManager testManager;
-    TestFilter testFilter = nullptr;
-
     FixtureFactory fixtureFactory;
     std::optional<std::type_index> fixtureType;
 };

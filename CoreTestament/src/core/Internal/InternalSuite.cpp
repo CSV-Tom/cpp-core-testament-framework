@@ -136,8 +136,7 @@ bool InternalSuite::run(TestEventHandler* handler, RunConfiguration configuratio
                 || detail::matchesTestFilter(
                     name, options.tags(), test->getName(), test->getOptions().tags(),
                     configuration.filterExpression
-                ))
-            && (!testFilter || testFilter(test->getName()));
+                ));
     };
     const auto skipSelectedTests = [this, &handler, &suiteInfo, &selected] {
         for (auto& test : tests | std::views::filter(selected)) {
@@ -374,20 +373,6 @@ const TestStatistics<unsigned int>& InternalSuite::getStatistics() const {
 
 const ExecutionTimer& InternalSuite::getTotalTimer() const {
     return totalTimer;
-}
-
-void InternalSuite::setTestFilter(std::variant<std::string, std::regex> filter) {
-    if (std::holds_alternative<std::string>(filter)) {
-        std::string exactName = std::get<std::string>(filter);
-        testFilter = [exactName](std::string_view testName) {
-            return testName == exactName;
-        };
-    } else if (std::holds_alternative<std::regex>(filter)) {
-        std::regex pattern = std::get<std::regex>(filter);
-        testFilter = [pattern](std::string_view testName) {
-            return std::regex_match(testName.begin(), testName.end(), pattern);
-        };
-    }
 }
 
 }

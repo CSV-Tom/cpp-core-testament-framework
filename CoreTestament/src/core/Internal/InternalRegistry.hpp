@@ -7,7 +7,6 @@
 #include <memory>
 #include <shared_mutex>
 #include <string>
-#include <string_view>
 #include <vector>
 
 namespace Testament {
@@ -40,10 +39,6 @@ public:
         }
         return matchingSuites;
     }
-    static std::function<bool(const std::shared_ptr<InternalSuite>&)> createFilter(
-        std::string_view type, std::string_view value = {}
-    );
-
 private:
     InternalRegistry() = default;
 

@@ -4,7 +4,6 @@
 
 #include <source_location>
 #include <string>
-#include <utility>
 #include <vector>
 
 namespace Testament::detail {
@@ -42,19 +41,13 @@ std::string currentTrace() {
 
 namespace Testament {
 
-class Trace::Impl {
-public:
-    Impl(std::string_view message, std::source_location location) {
-        detail::pushTrace(message, location);
-    }
-    ~Impl() {
-        detail::popTrace();
-    }
-};
-
 Trace::Trace(std::string_view message, std::source_location location)
-    : impl(std::make_unique<Impl>(message, location)) {}
+{
+    detail::pushTrace(message, location);
+}
 
-Trace::~Trace() = default;
+Trace::~Trace() {
+    detail::popTrace();
+}
 
 }
