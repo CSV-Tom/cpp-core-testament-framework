@@ -1,6 +1,7 @@
 #include "CoreServices/ServiceLocator.hpp"
 #include <iostream>
 #include <stdexcept>
+#include <string_view>
 #include <utility>
 
 
@@ -58,14 +59,14 @@ int main() {
     const bool interfaceLookupSucceeded = locator.getService<ILogger>() == logger;
     try {
         static_cast<void>(locator.getService<Logger>());
-    } catch (const std::runtime_error&) {
-        concreteLookupRejected = true;
+    } catch (const std::runtime_error& e) {
+        concreteLookupRejected = std::string_view{e.what()} == "Service not found";
     }
 
     try {
         locator.registerService(std::make_shared<StandardErrorService>());
     } catch (const std::runtime_error& e) {
-        duplicateServiceRejected = true;
+        duplicateServiceRejected = std::string_view{e.what()} == "Service already registered";
         std::cerr << "[Exception Caught] " << e.what() << std::endl;
     }
 
@@ -77,14 +78,14 @@ int main() {
         auto missingService = locator.getService<StandardOutService>();
         missingService->logMessage("This should not print.");
     } catch (const std::runtime_error& e) {
-        missingServiceRejected = true;
+        missingServiceRejected = std::string_view{e.what()} == "Service not found";
         std::cerr << "[Exception Caught] " << e.what() << std::endl;
     }
 
     try {
         locator.unregisterService<StandardOutService>();
     } catch (const std::runtime_error& e) {
-        unknownUnregistrationRejected = true;
+        unknownUnregistrationRejected = std::string_view{e.what()} == "Service not registered";
         std::cerr << "[Exception Caught] " << e.what() << std::endl;
     }
 
@@ -95,7 +96,7 @@ int main() {
     try {
         movedLocator.registerService(std::shared_ptr<StandardOutService>{});
     } catch (const std::invalid_argument& e) {
-        nullServiceRejected = true;
+        nullServiceRejected = std::string_view{e.what()} == "Cannot register a null service";
         std::cerr << "[Exception Caught] " << e.what() << std::endl;
     }
 

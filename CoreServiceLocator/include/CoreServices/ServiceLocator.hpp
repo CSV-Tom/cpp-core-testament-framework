@@ -20,7 +20,7 @@ public:
 /**
  * @brief A thread-safe Service Locator pattern implementation.
  *
- * ServiceLocator is used to register, retrieve, and manage shared service instances globally.
+ * ServiceLocator registers, retrieves, and manages shared services within one locator instance.
  * It ensures **thread-safe** access using `std::shared_mutex`.
  */
 class ServiceLocator {
@@ -91,6 +91,7 @@ public:
     ServiceLocator& operator=(const ServiceLocator&) = delete;
 
 private:
+    class Impl;
 
     /**
      * @brief Registers a service by its type index.
@@ -112,8 +113,10 @@ private:
      */
     [[nodiscard]] std::shared_ptr<IService> getServiceImpl(std::type_index typeIndex) const;
 
+    [[nodiscard]] Impl& implementation();
+    [[nodiscard]] const Impl& implementation() const;
+
     /// @brief Internal implementation details, hidden via PImpl pattern.
-    class Impl;
     std::unique_ptr<Impl> pImpl;
 };
 

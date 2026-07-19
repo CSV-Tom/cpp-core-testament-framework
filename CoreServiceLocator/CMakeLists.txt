@@ -71,8 +71,35 @@ install(
 
 
 if(BUILD_TESTING)
-    add_executable(Test${PROJECT_NAME})
-    target_sources(Test${PROJECT_NAME} PRIVATE tests/main.cpp)
-    target_link_libraries(Test${PROJECT_NAME} PRIVATE ${PROJECT_NAME})
-    add_test(NAME CoreServicesTests COMMAND Test${PROJECT_NAME})
+    find_package(Threads REQUIRED)
+
+    function(add_core_services_test target source)
+        add_executable(${target} ${source})
+        target_link_libraries(${target} PRIVATE ${PROJECT_NAME} Threads::Threads)
+        add_test(NAME ${target} COMMAND ${target})
+    endfunction()
+
+    add_core_services_test(CoreServicesBasicValidation tests/main.cpp)
+    add_core_services_test(CoreServicesLifetimeValidation tests/LifetimeValidation.cpp)
+    add_core_services_test(CoreServicesMoveValidation tests/MoveValidation.cpp)
+    add_core_services_test(CoreServicesConcurrencyValidation tests/ConcurrencyValidation.cpp)
+
+    add_test(
+        NAME CoreServicesInstallConsumer
+        COMMAND ${CMAKE_COMMAND}
+            -DTEST_BINARY_DIR=${CMAKE_BINARY_DIR}
+            -DTEST_CONSUMER_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/tests/consumer
+            -DTEST_ROOT=${CMAKE_CURRENT_BINARY_DIR}/core-services-install-consumer-test
+            -DTEST_GENERATOR=${CMAKE_GENERATOR}
+            -DTEST_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM}
+            -DTEST_GENERATOR_TOOLSET=${CMAKE_GENERATOR_TOOLSET}
+            -DTEST_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
+            -DTEST_CXX_FLAGS=${CMAKE_CXX_FLAGS}
+            -DTEST_EXE_LINKER_FLAGS=${CMAKE_EXE_LINKER_FLAGS}
+            -DTEST_SHARED_LINKER_FLAGS=${CMAKE_SHARED_LINKER_FLAGS}
+            -DTEST_CONFIG=$<CONFIG>
+            -DTEST_CTEST_COMMAND=${CMAKE_CTEST_COMMAND}
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/cmake/InstallConsumerTest.cmake
+    )
+    set_tests_properties(CoreServicesInstallConsumer PROPERTIES LABELS integration)
 endif()

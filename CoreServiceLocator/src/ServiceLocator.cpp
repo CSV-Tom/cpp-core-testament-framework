@@ -12,7 +12,7 @@ namespace Core::Services {
 class ServiceLocator::Impl {
 private:
     std::unordered_map<std::type_index, std::shared_ptr<IService>> services;
-    mutable std::shared_mutex mutex; // Ermöglicht paralleles Lesen
+    mutable std::shared_mutex mutex;
 
 public:
     void registerServiceImpl(std::type_index typeIndex, std::shared_ptr<IService> service) {
@@ -20,7 +20,7 @@ public:
             throw std::invalid_argument("Cannot register a null service");
         }
 
-        std::unique_lock lock(mutex); // Exklusive Sperre für Schreibzugriff
+        std::unique_lock lock(mutex);
         auto [it, inserted] = services.try_emplace(typeIndex, service);
         if (!inserted) {
             throw std::runtime_error("Service already registered");
@@ -28,14 +28,14 @@ public:
     }
 
     void unregisterServiceImpl(std::type_index typeIndex) {
-        std::unique_lock lock(mutex); // Exklusive Sperre für Schreibzugriff
+        std::unique_lock lock(mutex);
         if (services.erase(typeIndex) == 0) {
             throw std::runtime_error("Service not registered");
         }
     }
 
     [[nodiscard]] std::shared_ptr<IService> getServiceImpl(std::type_index typeIndex) const {
-        std::shared_lock lock(mutex); // Shared Lock: Ermöglicht paralleles Lesen
+        std::shared_lock lock(mutex);
         auto it = services.find(typeIndex);
         if (it == services.end()) {
             throw std::runtime_error("Service not found");
@@ -46,15 +46,25 @@ public:
 
 
 void ServiceLocator::registerServiceImpl(std::type_index typeIndex, std::shared_ptr<IService> service) {
-    pImpl->registerServiceImpl(typeIndex, std::move(service));
+    implementation().registerServiceImpl(typeIndex, std::move(service));
 }
 
 void ServiceLocator::unregisterServiceImpl(std::type_index typeIndex) {
-    pImpl->unregisterServiceImpl(typeIndex);
+    implementation().unregisterServiceImpl(typeIndex);
 }
 
 [[nodiscard]] std::shared_ptr<IService> ServiceLocator::getServiceImpl(std::type_index typeIndex) const {
-    return pImpl->getServiceImpl(typeIndex);
+    return implementation().getServiceImpl(typeIndex);
+}
+
+ServiceLocator::Impl& ServiceLocator::implementation() {
+    if (!pImpl) throw std::logic_error("ServiceLocator has been moved from");
+    return *pImpl;
+}
+
+const ServiceLocator::Impl& ServiceLocator::implementation() const {
+    if (!pImpl) throw std::logic_error("ServiceLocator has been moved from");
+    return *pImpl;
 }
 
 
