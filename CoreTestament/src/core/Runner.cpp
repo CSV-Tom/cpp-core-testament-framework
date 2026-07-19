@@ -15,6 +15,8 @@
 #include <iostream>
 #include <mutex>
 #include <optional>
+#include <stdexcept>
+#include <string>
 #include <string_view>
 #include <utility>
 #include <vector>
@@ -46,6 +48,8 @@ std::optional<std::vector<std::string_view>> commandLineArguments(int argc, char
 class Runner::Impl {
 public:
     std::vector<std::unique_ptr<TestEventHandler>> handlers;
+    std::optional<std::string> suiteFilter;
+    std::optional<std::string> testFilter;
 };
 
 Runner::Runner() : impl(std::make_unique<Impl>()) {}
@@ -60,6 +64,28 @@ Runner& Runner::addHandler(std::unique_ptr<TestEventHandler> handler) {
     if (handler) {
         if (!impl) impl = std::make_unique<Impl>();
         impl->handlers.push_back(std::move(handler));
+    }
+    return *this;
+}
+
+Runner& Runner::filterSuite(std::string_view name) {
+    if (name.empty()) throw std::invalid_argument("Suite filter cannot be empty");
+    if (!impl) impl = std::make_unique<Impl>();
+    impl->suiteFilter = name;
+    return *this;
+}
+
+Runner& Runner::filterTest(std::string_view name) {
+    if (name.empty()) throw std::invalid_argument("Test filter cannot be empty");
+    if (!impl) impl = std::make_unique<Impl>();
+    impl->testFilter = name;
+    return *this;
+}
+
+Runner& Runner::clearFilters() noexcept {
+    if (impl) {
+        impl->suiteFilter.reset();
+        impl->testFilter.reset();
     }
     return *this;
 }
@@ -89,6 +115,11 @@ int Runner::run(int argc, char** argv) {
         return 2;
     }
     auto suites = registry.getAllSuites();
+    if (impl->suiteFilter) {
+        std::erase_if(suites, [this](const auto& suite) {
+            return suite->getName() != *impl->suiteFilter;
+        });
+    }
     std::ranges::sort(suites, [](const auto& left, const auto& right) {
         const auto leftOrder = left->getOptions().order().value_or(0);
         const auto rightOrder = right->getOptions().order().value_or(0);
@@ -103,7 +134,8 @@ int Runner::run(int argc, char** argv) {
     TestStatistics<unsigned int> total;
     bool hooksSucceeded = true;
     for (auto& suite : suites) {
-        hooksSucceeded = suite->run(&chain) && hooksSucceeded;
+        const std::string_view testFilter = impl->testFilter ? *impl->testFilter : std::string_view{};
+        hooksSucceeded = suite->run(&chain, testFilter) && hooksSucceeded;
         total += suite->getStatistics();
     }
 

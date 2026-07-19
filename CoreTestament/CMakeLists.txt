@@ -239,6 +239,11 @@ if(BUILD_TESTING)
     )
 
     add_testament_test(
+        RunnerFilterValidation RunnerFilter
+        tests/Tests/RunnerFilterValidation.cpp
+    )
+
+    add_testament_test(
         OptionsValidation Options
         tests/Tests/OptionsValidation.cpp
     )

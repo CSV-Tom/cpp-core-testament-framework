@@ -2,6 +2,7 @@
 #define TESTFRAMEWORK_TESTAMENT_RUNNER_HPP
 
 #include <memory>
+#include <string_view>
 
 namespace Testament {
 
@@ -20,6 +21,10 @@ public:
 
     // Moving transfers all handlers. A moved-from Runner remains reusable as an empty Runner.
     Runner& addHandler(std::unique_ptr<TestEventHandler> handler);
+    // Filters use exact names and are applied before handlers receive any events.
+    Runner& filterSuite(std::string_view name);
+    Runner& filterTest(std::string_view name);
+    Runner& clearFilters() noexcept;
     // Concurrent calls are serialized. Complete suite registration before starting a run.
     [[nodiscard("propagate the test exit code, e.g. return runner.run(argc, argv)")]]
     int run(int argc, char** argv);

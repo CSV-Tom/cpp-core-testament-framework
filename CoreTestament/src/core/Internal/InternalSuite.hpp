@@ -50,7 +50,8 @@ public:
 
     void setTestFilter(std::variant<std::string, std::regex> filter);
 
-    [[nodiscard]] bool run(TestEventHandler* handler = nullptr);
+    [[nodiscard]] bool run(TestEventHandler* handler = nullptr,
+                           std::string_view testNameFilter = {});
 
     const std::string& getName() const;
     const SuiteOptions& getOptions() const;

@@ -84,7 +84,7 @@ void InternalSuite::setAfterSuite(Callback callback)  {
     hookManager.setAfterSuite(std::move(callback));
 }
 
-bool InternalSuite::run(TestEventHandler* handler) {
+bool InternalSuite::run(TestEventHandler* handler, std::string_view testNameFilter) {
     statistic.reset();
     totalTimer.reset();
     hookManager.resetErrors();
@@ -115,8 +115,9 @@ bool InternalSuite::run(TestEventHandler* handler) {
     const auto reportSuiteError = [&handler, &suiteInfo](std::string_view error) {
         if (handler) handler->onSuiteAbort(suiteInfo(), error);
     };
-    const auto selected = [this](const auto& test) {
-        return !testFilter || testFilter(test->getName());
+    const auto selected = [this, testNameFilter](const auto& test) {
+        return (testNameFilter.empty() || test->getName() == testNameFilter)
+            && (!testFilter || testFilter(test->getName()));
     };
     const auto skipSelectedTests = [this, &handler, &suiteInfo, &selected] {
         for (auto& test : tests | std::views::filter(selected)) {
