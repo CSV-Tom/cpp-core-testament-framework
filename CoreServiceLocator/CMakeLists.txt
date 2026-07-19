@@ -1,20 +1,24 @@
 cmake_minimum_required(VERSION 3.23)
 
-project(CoreServices LANGUAGES CXX VERSION 1.0.0)
+project(CoreServices LANGUAGES CXX VERSION 0.1.0)
 
 if(PROJECT_IS_TOP_LEVEL)
     include(CTest)
 endif()
 
 include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+find_package(Threads REQUIRED)
 
 # Allow user to build as SHARED or STATIC
 option(BUILD_SHARED_LIBS "Build CoreServices as a shared library" OFF)
 
 
 add_library(${PROJECT_NAME})
+add_library(CoreServices::CoreServices ALIAS ${PROJECT_NAME})
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_23)
+target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads)
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_EXTENSIONS OFF)
 
 target_sources(${PROJECT_NAME}
@@ -51,13 +55,17 @@ install(
 # Generate a CMake config package
 install(
     EXPORT CoreServicesTargets
-    FILE CoreServicesConfig.cmake
+    FILE CoreServicesTargets.cmake
     NAMESPACE CoreServices::
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/CoreServices
 )
 
-# Add version file
-include(CMakePackageConfigHelpers)
+configure_package_config_file(
+    cmake/CoreServicesConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/CoreServicesConfig.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/CoreServices
+)
+
 write_basic_package_version_file(
     "${CMAKE_CURRENT_BINARY_DIR}/CoreServicesConfigVersion.cmake"
     VERSION ${PROJECT_VERSION}
@@ -65,17 +73,17 @@ write_basic_package_version_file(
 )
 
 install(
-    FILES "${CMAKE_CURRENT_BINARY_DIR}/CoreServicesConfigVersion.cmake"
+    FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/CoreServicesConfig.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/CoreServicesConfigVersion.cmake"
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/CoreServices
 )
 
 
 if(BUILD_TESTING)
-    find_package(Threads REQUIRED)
-
     function(add_core_services_test target source)
         add_executable(${target} ${source})
-        target_link_libraries(${target} PRIVATE ${PROJECT_NAME} Threads::Threads)
+        target_link_libraries(${target} PRIVATE CoreServices::CoreServices)
         add_test(NAME ${target} COMMAND ${target})
     endfunction()
 

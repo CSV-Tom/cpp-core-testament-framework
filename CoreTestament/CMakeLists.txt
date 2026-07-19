@@ -8,9 +8,11 @@ endif()
 
 include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
+find_package(Threads REQUIRED)
 
 add_library(${PROJECT_NAME} STATIC)
 add_library(CoreTestament::CoreTestament ALIAS ${PROJECT_NAME})
+target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads)
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_23)
 set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -226,12 +228,10 @@ if(BUILD_TESTING)
         tests/Tests/HandlerFailureIsolationValidation.cpp
     )
 
-    find_package(Threads REQUIRED)
     add_testament_test(
         ConcurrentRunnerValidation ConcurrentRunner
         tests/Tests/ConcurrentRunnerValidation.cpp
     )
-    target_link_libraries(ConcurrentRunnerValidation PRIVATE Threads::Threads)
 
     add_testament_test(
         RunnerMoveValidation RunnerMove
