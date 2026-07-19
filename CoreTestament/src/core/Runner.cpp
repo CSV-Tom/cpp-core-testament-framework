@@ -20,6 +20,7 @@
 #include <filesystem>
 #include <future>
 #include <iostream>
+#include <limits>
 #include <mutex>
 #include <optional>
 #include <random>
@@ -162,7 +163,8 @@ int Runner::run(int argc, char** argv) {
         }
         if (argument.starts_with("--repeat=")) {
             const auto parsed = parseUnsigned(argument.substr(9));
-            if (!parsed || *parsed == 0) {
+            if (!parsed || *parsed == 0
+                || *parsed > std::numeric_limits<std::size_t>::max()) {
                 std::cerr << "--repeat requires an integer greater than zero\n";
                 return 2;
             }
@@ -280,9 +282,13 @@ int Runner::run(int argc, char** argv) {
     }
 
     const auto registeredSuites = suites;
-    const std::uint64_t baseSeed = requestedSeed.value_or(
-        (static_cast<std::uint64_t>(std::random_device{}()) << 32) ^ std::random_device{}()
-    );
+    std::uint64_t baseSeed{};
+    if (requestedSeed) {
+        baseSeed = *requestedSeed;
+    } else if (shuffle) {
+        baseSeed = (static_cast<std::uint64_t>(std::random_device{}()) << 32)
+            ^ std::random_device{}();
+    }
     bool allRunsSucceeded = true;
     for (std::size_t repetition = 0; repetition < repeat; ++repetition) {
     suites = registeredSuites;
