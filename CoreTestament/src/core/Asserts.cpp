@@ -1,12 +1,70 @@
 #include "Testament/Asserts.hpp"
 
+#include "Internal/AssertionCollection.hpp"
+
 #include <exception>
+#include <sstream>
 #include <string>
 #include <utility>
+#include <vector>
 
 namespace Testament::Asserts {
 
 namespace detail {
+
+namespace {
+
+thread_local bool collectionActive = false;
+thread_local std::vector<AssertionFailure> collectedFailures;
+
+std::exception_ptr combinedFailure() {
+    if (collectedFailures.empty()) return {};
+    if (collectedFailures.size() == 1) {
+        return std::make_exception_ptr(collectedFailures.front());
+    }
+
+    std::ostringstream message;
+    message << collectedFailures.size() << " non-fatal assertions failed:";
+    for (const auto& failure : collectedFailures) {
+        message << "\n\n" << failure.what();
+    }
+    const auto location = collectedFailures.front().location();
+    return std::make_exception_ptr(AssertionFailure{
+        "expect", "all expectations pass",
+        std::to_string(collectedFailures.size()) + " failures", message.str(), location
+    });
+}
+
+}
+
+void beginAssertionCollection() {
+    collectedFailures.clear();
+    collectionActive = true;
+}
+
+std::exception_ptr finishAssertionCollection(std::exception_ptr terminalFailure) {
+    collectionActive = false;
+    if (terminalFailure) {
+        try {
+            std::rethrow_exception(terminalFailure);
+        } catch (const AssertionFailure& failure) {
+            collectedFailures.push_back(failure);
+        } catch (...) {
+            collectedFailures.clear();
+            return terminalFailure;
+        }
+    }
+
+    auto failure = combinedFailure();
+    collectedFailures.clear();
+    return failure;
+}
+
+bool recordNonFatalFailure(const AssertionFailure& failure) {
+    if (!collectionActive) return false;
+    collectedFailures.push_back(failure);
+    return true;
+}
 
 void failAssertion(std::string assertion, std::string expected, std::string actual,
                    std::string_view message, std::source_location location) {

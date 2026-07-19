@@ -1,5 +1,5 @@
 #include "InternalTest.hpp"
-
+#include "AssertionCollection.hpp"
 
 #include "utils/TestStatistics.hpp"
 
@@ -44,6 +44,7 @@ std::expected<void, std::exception_ptr> InternalTest::execute(LifecycleSuite* fi
     exception = nullptr;
     executionTimer.reset();
     executionTimer.start();
+    Asserts::detail::beginAssertionCollection();
 
     try {
         std::visit([fixture](auto&& func) {
@@ -61,15 +62,15 @@ std::expected<void, std::exception_ptr> InternalTest::execute(LifecycleSuite* fi
                 throw std::runtime_error("Invalid FunctionVariant type");
             }
         }, function);
-        executionTimer.stop();
-        status = TestStatus::Status::Passed;
-        return {};
     } catch (...) {
-        executionTimer.stop();
-        status = TestStatus::Status::Failed;
-        exception = std::current_exception();
-        return std::unexpected(exception);
+        exception = Asserts::detail::finishAssertionCollection(std::current_exception());
     }
+
+    if (!exception) exception = Asserts::detail::finishAssertionCollection();
+    executionTimer.stop();
+    status = exception ? TestStatus::Status::Failed : TestStatus::Status::Passed;
+    return exception ? std::expected<void, std::exception_ptr>{std::unexpected(exception)}
+                     : std::expected<void, std::exception_ptr>{};
 }
 
 const std::string& InternalTest::getName() const {

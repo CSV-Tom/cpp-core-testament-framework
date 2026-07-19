@@ -4,10 +4,12 @@
 #include "Testament/AssertionFailure.hpp"
 
 #include <cmath>
+#include <algorithm>
 #include <concepts>
 #include <exception>
 #include <functional>
 #include <ostream>
+#include <ranges>
 #include <sstream>
 #include <source_location>
 #include <string>
@@ -24,8 +26,8 @@ concept Streamable = requires(std::ostream& output, const T& value) {
     output << value;
 };
 
-template <typename T>
-concept EqualityComparable = requires(const T& left, const T& right) {
+template <typename Left, typename Right>
+concept EqualityComparable = requires(const Left& left, const Right& right) {
     { left == right } -> std::convertible_to<bool>;
 };
 
@@ -46,6 +48,21 @@ std::string formatValue(const T& value) {
     }
 }
 
+template <typename Range>
+requires std::ranges::input_range<const Range>
+std::string formatRange(const Range& range) {
+    std::string formatted{"["};
+    bool first = true;
+    for (const auto& value : range) {
+        if (!first) formatted += ", ";
+        first = false;
+        formatted += formatValue(value);
+    }
+    return formatted + ']';
+}
+
+[[nodiscard]] bool recordNonFatalFailure(const AssertionFailure& failure);
+
 [[noreturn]] void failAssertion(std::string assertion, std::string expected,
                                 std::string actual, std::string_view message,
                                 std::source_location location);
@@ -63,9 +80,10 @@ void assertTrue(bool condition, std::string_view message = {},
 void assertFalse(bool condition, std::string_view message = {},
                  std::source_location location = std::source_location::current());
 
-template <typename T>
-requires detail::EqualityComparable<T>
-void assertNotEquals(const T& unexpected, const T& actual, std::string_view message = {},
+template <typename Unexpected, typename Actual>
+requires detail::EqualityComparable<Unexpected, Actual>
+void assertNotEquals(const Unexpected& unexpected, const Actual& actual,
+                     std::string_view message = {},
                      std::source_location location = std::source_location::current()) {
     if (unexpected == actual) {
         detail::failAssertion("assertNotEquals", "not " + detail::formatValue(unexpected),
@@ -73,9 +91,9 @@ void assertNotEquals(const T& unexpected, const T& actual, std::string_view mess
     }
 }
 
-template <typename T>
-requires detail::EqualityComparable<T>
-void assertEquals(const T& expected, const T& actual, std::string_view message = {},
+template <typename Expected, typename Actual>
+requires detail::EqualityComparable<Expected, Actual>
+void assertEquals(const Expected& expected, const Actual& actual, std::string_view message = {},
                   std::source_location location = std::source_location::current()) {
     if (!(expected == actual)) {
         detail::failAssertion("assertEquals", detail::formatValue(expected),
@@ -96,6 +114,57 @@ void assertNull(const T* pointer, std::string_view message = {},
                 std::source_location location = std::source_location::current()) {
     if (pointer) {
         detail::failAssertion("assertNull", "null", "non-null", message, location);
+    }
+}
+
+template <typename Pointer>
+requires (!std::is_pointer_v<std::remove_cvref_t<Pointer>>)
+    && requires(const Pointer& pointer) {
+        { static_cast<bool>(pointer) } -> std::same_as<bool>;
+    }
+void assertNotNull(const Pointer& pointer, std::string_view message = {},
+                   std::source_location location = std::source_location::current()) {
+    if (!pointer) {
+        detail::failAssertion("assertNotNull", "non-null", "null", message, location);
+    }
+}
+
+template <typename Pointer>
+requires (!std::is_pointer_v<std::remove_cvref_t<Pointer>>)
+    && requires(const Pointer& pointer) {
+        { static_cast<bool>(pointer) } -> std::same_as<bool>;
+    }
+void assertNull(const Pointer& pointer, std::string_view message = {},
+                std::source_location location = std::source_location::current()) {
+    if (pointer) {
+        detail::failAssertion("assertNull", "null", "non-null", message, location);
+    }
+}
+
+template <typename Expected, typename Actual>
+requires std::ranges::input_range<const Expected>
+    && std::ranges::input_range<const Actual>
+    && std::indirect_binary_predicate<
+    std::ranges::equal_to, std::ranges::iterator_t<const Expected>,
+    std::ranges::iterator_t<const Actual>
+>
+void assertRangeEquals(const Expected& expected, const Actual& actual,
+                       std::string_view message = {},
+                       std::source_location location = std::source_location::current()) {
+    if (!std::ranges::equal(expected, actual)) {
+        detail::failAssertion("assertRangeEquals", detail::formatRange(expected),
+                              detail::formatRange(actual), message, location);
+    }
+}
+
+template <typename Range, typename Value>
+requires std::ranges::input_range<const Range>
+    && detail::EqualityComparable<std::ranges::range_reference_t<const Range>, Value>
+void assertContains(const Range& range, const Value& value, std::string_view message = {},
+                    std::source_location location = std::source_location::current()) {
+    if (std::ranges::find(range, value) == std::ranges::end(range)) {
+        detail::failAssertion("assertContains", "range containing " + detail::formatValue(value),
+                              detail::formatRange(range), message, location);
     }
 }
 
@@ -199,6 +268,16 @@ void assertDoesNotThrow(Callable&& callable, std::string_view message = {},
         detail::failUnexpectedException(
             "assertDoesNotThrow", "no exception", std::current_exception(), message, location
         );
+    }
+}
+
+template <typename Callable>
+requires std::invocable<Callable>
+void expect(Callable&& assertion) {
+    try {
+        std::invoke(std::forward<Callable>(assertion));
+    } catch (const AssertionFailure& failure) {
+        if (!detail::recordNonFatalFailure(failure)) throw;
     }
 }
 

@@ -1,11 +1,15 @@
 #include "Testament/Asserts.hpp"
 
+#include <array>
 #include <initializer_list>
+#include <list>
 #include <limits>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <string_view>
 #include <utility>
+#include <vector>
 
 namespace {
 
@@ -43,9 +47,22 @@ int main() {
     Testament::Asserts::assertTrue(true, "true succeeds");
     Testament::Asserts::assertFalse(false, "false succeeds");
     Testament::Asserts::assertEquals(2, value, "equals succeeds");
+    Testament::Asserts::assertEquals(
+        std::string_view{"value"}, std::string{"value"}, "heterogeneous equals succeeds"
+    );
     Testament::Asserts::assertNotEquals(3, value, "not-equals succeeds");
     Testament::Asserts::assertNotNull(&value, "not-null succeeds");
     Testament::Asserts::assertNull<int>(nullptr, "null succeeds");
+    const auto shared = std::make_shared<int>(2);
+    const std::unique_ptr<int> empty;
+    Testament::Asserts::assertNotNull(shared, "smart not-null succeeds");
+    Testament::Asserts::assertNull(empty, "smart null succeeds");
+    Testament::Asserts::assertRangeEquals(
+        std::array{1, 2, 3}, std::vector{1, 2, 3}, "range equality succeeds"
+    );
+    Testament::Asserts::assertContains(
+        std::list{1, 2, 3}, 2, "range containment succeeds"
+    );
     Testament::Asserts::assertInRange(value, 1, 3, "range succeeds");
     Testament::Asserts::assertLessThan(value, 3, "less-than succeeds");
     Testament::Asserts::assertLessThanOrEqual(value, 2, "less-than-or-equal succeeds");
@@ -80,6 +97,18 @@ int main() {
         const int nonNull = 1;
         Testament::Asserts::assertNull(&nonNull, "expected-null failure");
     }, {"assertNull failed", "expected: null, actual: non-null", "expected-null failure"});
+    const bool smartNullFailure = failsWith([] {
+        Testament::Asserts::assertNotNull(std::shared_ptr<int>{}, "smart null failure");
+    }, {"assertNotNull failed", "smart null failure"});
+    const bool rangeEqualsFailure = failsWith([] {
+        Testament::Asserts::assertRangeEquals(
+            std::array{1, 2}, std::vector{1, 3}, "range equality failure"
+        );
+    }, {"assertRangeEquals failed", "expected: [1, 2], actual: [1, 3]",
+        "range equality failure"});
+    const bool containsFailure = failsWith([] {
+        Testament::Asserts::assertContains(std::vector{1, 2}, 3, "contains failure");
+    }, {"assertContains failed", "range containing 3", "contains failure"});
     const bool rangeFailure = failsWith([] {
         Testament::Asserts::assertInRange(4, 1, 3, "range failure");
     }, {"assertInRange failed", "expected: [1, 3], actual: 4", "range failure"});
@@ -129,6 +158,11 @@ int main() {
     const bool optionalMessageFailure = failsWith([] {
         Testament::Asserts::assertTrue(false);
     }, {"assertTrue failed", "expected: true, actual: false"});
+    const bool expectationOutsideTestIsFatal = failsWith([] {
+        Testament::Asserts::expect([] {
+            Testament::Asserts::assertTrue(false, "outside-test expectation");
+        });
+    }, {"assertTrue failed", "outside-test expectation"});
 
     const bool unformattableEqualsFailure = failsWith([] {
         Testament::Asserts::assertEquals(ComparableOnly{1}, ComparableOnly{2});
@@ -162,11 +196,13 @@ int main() {
     }
 
     return trueFailure && falseFailure && equalsFailure && notEqualsFailure && nullFailure
-        && expectedNullFailure && rangeFailure && lessThanFailure && lessThanOrEqualFailure
+        && expectedNullFailure && smartNullFailure && rangeEqualsFailure && containsFailure
+        && rangeFailure && lessThanFailure && lessThanOrEqualFailure
         && greaterThanFailure && greaterThanOrEqualFailure && nearFailure
         && invalidToleranceFailure && nanFailure && noExceptionFailure
         && wrongExceptionFailure && nonStandardExceptionFailure && unexpectedExceptionFailure
-        && optionalMessageFailure && unformattableEqualsFailure && unformattableRangeFailure
+        && optionalMessageFailure && expectationOutsideTestIsFatal
+        && unformattableEqualsFailure && unformattableRangeFailure
         && locationFailure && structuredFailure
         ? 0
         : 1;

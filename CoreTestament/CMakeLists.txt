@@ -181,6 +181,11 @@ if(BUILD_TESTING)
         tests/Tests/AssertsValidation.cpp
     )
 
+    add_testament_test(
+        NonFatalAssertionsValidation NonFatalAssertions
+        tests/Tests/NonFatalAssertionsValidation.cpp
+    )
+
     add_testament_internal_test(
         InternalSuiteRepeatRunValidation InternalSuiteRepeatRun
         tests/Tests/InternalSuiteRepeatRunValidation.cpp
