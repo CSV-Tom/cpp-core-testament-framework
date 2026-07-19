@@ -14,7 +14,7 @@ public:
         ++failed;
     }
 
-    void onFinalReport(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int) override {
+    void onFinalReport(const Testament::RunSummary&) override {
         finalReportReceived = true;
     }
 

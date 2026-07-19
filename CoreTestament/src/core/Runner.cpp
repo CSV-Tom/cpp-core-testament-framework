@@ -68,6 +68,53 @@ std::optional<std::uint64_t> parseUnsigned(std::string_view value) {
     return result;
 }
 
+class EnvironmentSession {
+public:
+    EnvironmentSession(
+        const std::vector<std::unique_ptr<GlobalEnvironment>>& registeredEnvironments,
+        TestEventHandler& eventHandler
+    ) : environments(registeredEnvironments), handler(eventHandler) {}
+
+    ~EnvironmentSession() { (void)finish(); }
+
+    [[nodiscard]] bool start() noexcept {
+        try {
+            for (const auto& environment : environments) {
+                environment->setUp();
+                ++active;
+            }
+            return true;
+        } catch (const std::exception& error) {
+            handler.onEnvironmentError("setup", error.what());
+        } catch (...) {
+            handler.onEnvironmentError("setup", "unknown non-standard exception");
+        }
+        (void)finish();
+        return false;
+    }
+
+    [[nodiscard]] bool finish() noexcept {
+        while (active > 0) {
+            try {
+                environments[--active]->tearDown();
+            } catch (const std::exception& error) {
+                handler.onEnvironmentError("teardown", error.what());
+                succeeded = false;
+            } catch (...) {
+                handler.onEnvironmentError("teardown", "unknown non-standard exception");
+                succeeded = false;
+            }
+        }
+        return succeeded;
+    }
+
+private:
+    const std::vector<std::unique_ptr<GlobalEnvironment>>& environments;
+    TestEventHandler& handler;
+    std::size_t active{};
+    bool succeeded{true};
+};
+
 }
 
 class Runner::Impl {
@@ -249,36 +296,8 @@ int Runner::run(int argc, char** argv) {
         return 2;
     }
 
-    std::size_t activeEnvironments{};
-    const auto tearDownEnvironments = [this, &activeEnvironments] {
-        bool succeeded = true;
-        while (activeEnvironments > 0) {
-            try {
-                impl->environments[--activeEnvironments]->tearDown();
-            } catch (const std::exception& error) {
-                std::cerr << "Global environment teardown failed: " << error.what() << '\n';
-                succeeded = false;
-            } catch (...) {
-                std::cerr << "Global environment teardown failed: unknown exception\n";
-                succeeded = false;
-            }
-        }
-        return succeeded;
-    };
-    try {
-        for (const auto& environment : impl->environments) {
-            environment->setUp();
-            ++activeEnvironments;
-        }
-    } catch (const std::exception& error) {
-        std::cerr << "Global environment setup failed: " << error.what() << '\n';
-        tearDownEnvironments();
-        return 1;
-    } catch (...) {
-        std::cerr << "Global environment setup failed: unknown exception\n";
-        tearDownEnvironments();
-        return 1;
-    }
+    EnvironmentSession environmentSession{impl->environments, chain};
+    if (!environmentSession.start()) return 1;
 
     const auto registeredSuites = suites;
     std::uint64_t baseSeed{};
@@ -289,6 +308,9 @@ int Runner::run(int argc, char** argv) {
             ^ std::random_device{}();
     }
     bool allRunsSucceeded = true;
+    TestStatistics<unsigned int> allStatistics;
+    bool allHooksSucceeded = true;
+    chain.onStartReport(static_cast<unsigned int>(suites.size() * repeat));
     for (std::size_t repetition = 0; repetition < repeat; ++repetition) {
     suites = registeredSuites;
     const auto runSeed = baseSeed + repetition;
@@ -301,8 +323,6 @@ int Runner::run(int argc, char** argv) {
                 < right->getOptions().order().value_or(0);
         });
     }
-
-    chain.onStartReport(static_cast<unsigned int>(suites.size()));
 
     struct SuiteResult {
         bool hooksSucceeded;
@@ -358,25 +378,30 @@ int Runner::run(int argc, char** argv) {
         }
     }
 
-    chain.onFinalReport(
-        static_cast<unsigned int>(suites.size()),
-        total.getPassedTests(),
-        total.getFailedTests(),
-        total.getSkippedTests(),
-        total.getErrors()
-    );
+    allStatistics += total;
+    allHooksSucceeded = hooksSucceeded && allHooksSucceeded;
     allRunsSucceeded = total.getFailedTests() == 0 && total.getErrors() == 0
         && hooksSucceeded && allRunsSucceeded;
     }
 
-    const bool environmentsSucceeded = tearDownEnvironments();
+    const bool environmentsSucceeded = environmentSession.finish();
+
+    chain.onFinalReport(RunSummary{
+        static_cast<unsigned int>(registeredSuites.size() * repeat),
+        allStatistics.getPassedTests(),
+        allStatistics.getFailedTests(),
+        allStatistics.getSkippedTests(),
+        allStatistics.getErrors(),
+        environmentsSucceeded ? 0U : 1U,
+        static_cast<unsigned int>(repeat)
+    });
 
     const auto handlerError = chain.errorMessage();
     if (!handlerError.empty()) {
         std::cerr << handlerError << '\n';
     }
 
-    return allRunsSucceeded && environmentsSucceeded && handlerError.empty() ? 0 : 1;
+    return allRunsSucceeded && allHooksSucceeded && environmentsSucceeded && handlerError.empty() ? 0 : 1;
 }
 
 std::unique_ptr<TestEventHandler> makeConsoleHandler() {

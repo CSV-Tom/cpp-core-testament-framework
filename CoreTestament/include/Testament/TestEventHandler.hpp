@@ -11,6 +11,7 @@
 
 #include "Testament/SuiteOptions.hpp"
 #include "Testament/TestOptions.hpp"
+#include "Testament/RunSummary.hpp"
 
 namespace Testament {
 
@@ -60,7 +61,8 @@ public:
     virtual void onTestPassed(const SuiteInfo&, const TestInfo&) {}
     virtual void onTestFailed(const SuiteInfo&, const TestInfo&) {}
     virtual void onTestSkipped(const SuiteInfo&, const TestInfo&) {}
-    virtual void onFinalReport(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int) {}
+    virtual void onEnvironmentError(std::string_view, std::string_view) {}
+    virtual void onFinalReport(const RunSummary&) {}
 
     [[nodiscard]] virtual std::string errorMessage() const { return {}; }
 };

@@ -132,6 +132,7 @@ std::expected<void, std::string> JUnitTestEventHandler::configure(Arguments argu
 
     outputPath.reset();
     suiteResults.clear();
+    environmentErrors.clear();
     reportWritten = false;
     writeError.clear();
     for (std::size_t index = 0; index < arguments.size(); ++index) {
@@ -188,8 +189,11 @@ void JUnitTestEventHandler::onTestSkipped(const SuiteInfo& suite, const TestInfo
     });
 }
 
-void JUnitTestEventHandler::onFinalReport(unsigned int, unsigned int, unsigned int,
-                                          unsigned int, unsigned int) {
+void JUnitTestEventHandler::onEnvironmentError(std::string_view phase, std::string_view message) {
+    if (outputPath) environmentErrors.emplace_back(std::string{phase} + ": " + std::string{message});
+}
+
+void JUnitTestEventHandler::onFinalReport(const RunSummary&) {
     if (!outputPath) return;
     writeReport();
 }
@@ -211,10 +215,10 @@ JUnitTestEventHandler::SuiteResult& JUnitTestEventHandler::suiteResult(const Sui
 
 void JUnitTestEventHandler::writeReport() {
     if (!outputPath) return;
-    std::size_t testCount = 0;
+    std::size_t testCount = environmentErrors.size();
     std::size_t failureCount = 0;
     std::size_t skippedCount = 0;
-    std::size_t errorCount = 0;
+    std::size_t errorCount = environmentErrors.size();
     double totalDuration = 0.0;
 
     for (const auto& suite : suiteResults) {
@@ -301,6 +305,18 @@ void JUnitTestEventHandler::writeReport() {
                    << escapeXml(suite.location.file_name())
                    << "\" line=\"" << suite.location.line()
                    << "\" time=\"0.000000000\"><error message=\""
+                   << escapeXml(error) << "\">" << escapeXml(error)
+                   << "</error></testcase>\n";
+        }
+        output << "  </testsuite>\n";
+    }
+    if (!environmentErrors.empty()) {
+        output << "  <testsuite name=\"global environment\" tests=\""
+               << environmentErrors.size() << "\" failures=\"0\" errors=\""
+               << environmentErrors.size() << "\" skipped=\"0\" time=\"0.000000000\">\n";
+        for (const auto& error : environmentErrors) {
+            output << "    <testcase classname=\"global environment\" name=\"environment\" "
+                      "time=\"0.000000000\"><error message=\""
                    << escapeXml(error) << "\">" << escapeXml(error)
                    << "</error></testcase>\n";
         }

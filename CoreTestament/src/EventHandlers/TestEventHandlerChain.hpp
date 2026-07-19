@@ -74,10 +74,14 @@ public:
             handler.onTestSkipped(suite, test);
         });
     }
-    void onFinalReport(unsigned int suites, unsigned int passed, unsigned int failed,
-                       unsigned int skipped, unsigned int lifecycleErrors) override {
-        dispatch("onFinalReport", [=](auto& handler) {
-            handler.onFinalReport(suites, passed, failed, skipped, lifecycleErrors);
+    void onEnvironmentError(std::string_view phase, std::string_view message) override {
+        dispatch("onEnvironmentError", [=](auto& handler) {
+            handler.onEnvironmentError(phase, message);
+        });
+    }
+    void onFinalReport(const RunSummary& summary) override {
+        dispatch("onFinalReport", [&summary](auto& handler) {
+            handler.onFinalReport(summary);
         });
     }
 

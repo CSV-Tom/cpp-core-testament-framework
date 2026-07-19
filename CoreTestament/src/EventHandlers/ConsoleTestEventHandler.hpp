@@ -85,15 +85,19 @@ public:
         std::cout << std::endl;
     }
 
-    void onFinalReport(unsigned int suites, unsigned int passed, unsigned int failed,
-                       unsigned int skipped, unsigned int errors) override {
+    void onEnvironmentError(std::string_view phase, std::string_view message) override {
+        std::cout << "[ENVIRONMENT " << phase << " ERROR] " << message << std::endl;
+    }
+
+    void onFinalReport(const RunSummary& summary) override {
         std::cout << "\n📊 [FINAL REPORT]\n"
-                  << "    Suites Executed: " << suites << ", "
-                  << "Total Results: " << (passed + failed + skipped + errors) << ", "
-                  << "Passed: " << passed << ", "
-                  << "Failed: " << failed << ", "
-                  << "Skipped: " << skipped << ", "
-                  << "Errors: " << errors << std::endl;
+                  << "    Suites Executed: " << summary.suites << ", "
+                  << "Total Results: " << (summary.passed + summary.failed + summary.skipped + summary.errors) << ", "
+                  << "Passed: " << summary.passed << ", "
+                  << "Failed: " << summary.failed << ", "
+                  << "Skipped: " << summary.skipped << ", "
+                  << "Errors: " << summary.errors << ", "
+                  << "Environment Errors: " << summary.environmentErrors << std::endl;
     }
 };
 

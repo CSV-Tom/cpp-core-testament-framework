@@ -45,6 +45,7 @@ target_sources(${PROJECT_NAME}
             include/Testament/AssertionFailure.hpp
             include/Testament/Execution.hpp
             include/Testament/GlobalEnvironment.hpp
+            include/Testament/RunSummary.hpp
             include/Testament/LifecycleSuite.hpp
             include/Testament/ParameterizedTest.hpp
             include/Testament/Runner.hpp
