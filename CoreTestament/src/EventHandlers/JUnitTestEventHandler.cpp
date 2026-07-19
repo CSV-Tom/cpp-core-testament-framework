@@ -161,7 +161,7 @@ void JUnitTestEventHandler::onStartReport(unsigned int suiteCount) {
 
 void JUnitTestEventHandler::onSuiteStart(const SuiteInfo& suite) {
     if (!outputPath) return;
-    suiteResults.push_back({suite.name, suite.location, {}, {}});
+    (void)suiteResult(suite);
 }
 
 void JUnitTestEventHandler::onSuiteAbort(const SuiteInfo& suite, std::string_view message) {
