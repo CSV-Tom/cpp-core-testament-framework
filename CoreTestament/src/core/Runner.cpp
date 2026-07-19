@@ -5,7 +5,6 @@
 #include "Testament/TestEventHandler.hpp"
 
 #include "EventHandlers/ConsoleTestEventHandler.hpp"
-#include "EventHandlers/BufferedTestEventHandler.hpp"
 #include "EventHandlers/JUnitTestEventHandler.hpp"
 #include "EventHandlers/TestEventHandlerChain.hpp"
 #include "Internal/InternalRegistry.hpp"
@@ -308,14 +307,13 @@ int Runner::run(int argc, char** argv) {
     struct SuiteResult {
         bool hooksSucceeded;
         TestStatistics<unsigned int> statistics;
-        detail::BufferedTestEventHandler events;
     };
-    const auto executeSuite = [this, &testFilter, &cliFilter, shuffle, runSeed](
+    const auto executeSuite = [this, &chain, &testFilter, &cliFilter, shuffle, runSeed](
         const auto& suite
     ) {
         SuiteResult result;
         result.hooksSucceeded = suite->run(
-            &result.events,
+            &chain,
             InternalSuite::RunConfiguration{
                 testFilter, cliFilter, impl->maxParallelTests,
                 shuffle ? std::optional<std::uint64_t>{runSeed} : std::nullopt
@@ -327,8 +325,7 @@ int Runner::run(int argc, char** argv) {
 
     TestStatistics<unsigned int> total;
     bool hooksSucceeded = true;
-    const auto consume = [&chain, &hooksSucceeded, &total](SuiteResult result) {
-        result.events.replay(chain);
+    const auto consume = [&hooksSucceeded, &total](SuiteResult result) {
         hooksSucceeded = result.hooksSucceeded && hooksSucceeded;
         total += result.statistics;
     };

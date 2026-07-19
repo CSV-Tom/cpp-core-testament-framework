@@ -1,5 +1,6 @@
 #include "JUnitTestEventHandler.hpp"
 
+#include <algorithm>
 #include <exception>
 #include <fstream>
 #include <iomanip>
@@ -202,9 +203,9 @@ std::string JUnitTestEventHandler::errorMessage() const {
 }
 
 JUnitTestEventHandler::SuiteResult& JUnitTestEventHandler::suiteResult(const SuiteInfo& suite) {
-    if (suiteResults.empty() || suiteResults.back().name != suite.name) {
-        suiteResults.push_back({suite.name, suite.location, {}, {}});
-    }
+    const auto existing = std::ranges::find(suiteResults, suite.name, &SuiteResult::name);
+    if (existing != suiteResults.end()) return *existing;
+    suiteResults.push_back({suite.name, suite.location, {}, {}});
     return suiteResults.back();
 }
 

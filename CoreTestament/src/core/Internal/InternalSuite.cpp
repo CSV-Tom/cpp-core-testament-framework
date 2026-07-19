@@ -219,9 +219,6 @@ bool InternalSuite::run(TestEventHandler* handler, RunConfiguration configuratio
             }
         };
         const auto consume = [this, &handler, &suiteInfo](InternalTest* test, TestResult result) {
-            if (result.status != TestEventHandler::TestResultStatus::Skipped) {
-                testManager.reportStart(suiteInfo(), *test, handler);
-            }
             testManager.reportResult(
                 suiteInfo(), *test, result.status, result.duration,
                 std::move(result.exception), handler
@@ -236,6 +233,9 @@ bool InternalSuite::run(TestEventHandler* handler, RunConfiguration configuratio
         std::size_t index{};
         while (index < selectedTests.size()) {
             if (selectedTests[index]->getOptions().execution() == Execution::Serial) {
+                if (!selectedTests[index]->getOptions().isDisabled()) {
+                    testManager.reportStart(suiteInfo(), *selectedTests[index], handler);
+                }
                 consume(selectedTests[index], executeTest(selectedTests[index]));
                 ++index;
                 continue;
@@ -252,6 +252,11 @@ bool InternalSuite::run(TestEventHandler* handler, RunConfiguration configuratio
                 std::vector<std::future<TestResult>> running;
                 running.reserve(count);
                 for (std::size_t offset = 0; offset < count; ++offset) {
+                    if (!selectedTests[index + offset]->getOptions().isDisabled()) {
+                        testManager.reportStart(
+                            suiteInfo(), *selectedTests[index + offset], handler
+                        );
+                    }
                     running.push_back(std::async(
                         std::launch::async, executeTest, selectedTests[index + offset]
                     ));

@@ -1,5 +1,6 @@
 #include "Testament/Testament.hpp"
 
+#include <algorithm>
 #include <atomic>
 #include <chrono>
 #include <memory>
@@ -63,12 +64,21 @@ int main() {
         rejectedZero = true;
     }
 
+    const auto suiteEventsAreComplete = [&recording] {
+        if (recording->suites.size() != 3 || recording->suites.front() != "exclusive suite") {
+            return false;
+        }
+        auto parallelSuites = std::vector{
+            recording->suites[1], recording->suites[2]
+        };
+        std::ranges::sort(parallelSuites);
+        return parallelSuites == std::vector<std::string>{"alpha suite", "beta suite"};
+    };
+
     return alpha && beta && exclusive
         && rejectedZero
         && runner.run(0, nullptr) == 0
-        && recording->suites == std::vector<std::string>{
-            "exclusive suite", "alpha suite", "beta suite"
-        }
+        && suiteEventsAreComplete()
         ? 0
         : 1;
 }

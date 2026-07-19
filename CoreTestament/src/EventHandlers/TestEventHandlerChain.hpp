@@ -2,6 +2,7 @@
 #include "Testament/TestEventHandler.hpp"
 #include <exception>
 #include <functional>
+#include <mutex>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -16,6 +17,7 @@ public:
     }
 
     [[nodiscard]] std::expected<void, std::string> configure(Arguments arguments) override {
+        std::scoped_lock lock(mutex);
         errors.clear();
         for (auto* handler : handlers) {
             try {
@@ -80,6 +82,7 @@ public:
     }
 
     [[nodiscard]] std::string errorMessage() const override {
+        std::scoped_lock lock(mutex);
         auto collectedErrors = errors;
         for (auto* handler : handlers) {
             try {
@@ -98,6 +101,7 @@ public:
 private:
     template <typename Callback>
     void dispatch(std::string_view callbackName, Callback&& callback) {
+        std::scoped_lock lock(mutex);
         for (auto* handler : handlers) {
             try {
                 std::invoke(callback, *handler);
@@ -124,6 +128,7 @@ private:
 
     std::vector<TestEventHandler*> handlers;
     std::vector<std::string> errors;
+    mutable std::mutex mutex;
 };
 
 }
