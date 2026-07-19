@@ -65,7 +65,7 @@ int main() {
         "alpha",
         reusableSuiteOptions,
         Testament::Test("late", Testament::TestOptions{}.order(20), [] {}),
-        Testament::Test("first default", [] {}),
+        Testament::Test("second default", [] {}),
         Testament::Test(
             "early",
             Testament::TestOptions{}
@@ -74,7 +74,7 @@ int main() {
                 .attribute("operation", "insert"),
             [] {}
         ),
-        Testament::Test("second default", [] {})
+        Testament::Test("first default", [] {})
     );
     auto early = Testament::Suite(
         "early suite",

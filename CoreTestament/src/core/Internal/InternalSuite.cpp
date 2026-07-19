@@ -77,8 +77,10 @@ bool InternalSuite::run() {
     totalTimer.reset();
     hookManager.resetErrors();
 
-    std::ranges::stable_sort(tests, {}, [](const auto& test) {
-        return test->getOptions().order().value_or(0);
+    std::ranges::stable_sort(tests, [](const auto& left, const auto& right) {
+        const auto leftOrder = left->getOptions().order().value_or(0);
+        const auto rightOrder = right->getOptions().order().value_or(0);
+        return leftOrder != rightOrder ? leftOrder < rightOrder : left->getName() < right->getName();
     });
 
     totalTimer.start();
