@@ -263,6 +263,11 @@ if(BUILD_TESTING)
     )
 
     add_testament_test(
+        ListTestsValidation ListTests
+        tests/Tests/ListTestsValidation.cpp
+    )
+
+    add_testament_test(
         OptionsValidation Options
         tests/Tests/OptionsValidation.cpp
     )

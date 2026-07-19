@@ -347,6 +347,10 @@ const SuiteOptions& InternalSuite::getOptions() const {
     return options;
 }
 
+std::span<const std::unique_ptr<InternalTest>> InternalSuite::getTests() const noexcept {
+    return tests;
+}
+
 std::source_location InternalSuite::getLocation() const noexcept {
     return location;
 }

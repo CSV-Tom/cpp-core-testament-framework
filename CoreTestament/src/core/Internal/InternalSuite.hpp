@@ -14,6 +14,7 @@
 #include <optional>
 #include <regex>
 #include <source_location>
+#include <span>
 #include <string>
 #include <string_view>
 #include <typeindex>
@@ -61,6 +62,7 @@ public:
 
     const std::string& getName() const;
     const SuiteOptions& getOptions() const;
+    [[nodiscard]] std::span<const std::unique_ptr<InternalTest>> getTests() const noexcept;
     [[nodiscard]] std::source_location getLocation() const noexcept;
     const TestStatistics<unsigned int>& getStatistics() const;
     const ExecutionTimer& getTotalTimer() const;

@@ -9,6 +9,7 @@
 #include "EventHandlers/TestEventHandlerChain.hpp"
 #include "Internal/InternalRegistry.hpp"
 #include "Internal/InternalSuite.hpp"
+#include "Internal/InternalTest.hpp"
 #include "Internal/FilterPattern.hpp"
 #include "Internal/utils/TestStatistics.hpp"
 
@@ -18,6 +19,7 @@
 #include <iostream>
 #include <mutex>
 #include <optional>
+#include <span>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -44,6 +46,15 @@ std::optional<std::vector<std::string_view>> commandLineArguments(int argc, char
         arguments.emplace_back(argv[index]);
     }
     return arguments;
+}
+
+void printTags(std::span<const std::string> tags) {
+    std::cout << "tags:";
+    if (tags.empty()) {
+        std::cout << " -";
+    } else {
+        for (const auto& tag : tags) std::cout << ' ' << tag;
+    }
 }
 
 }
@@ -116,7 +127,12 @@ int Runner::run(int argc, char** argv) {
         return 2;
     }
     std::optional<std::string> commandLineFilter;
+    bool listTests{};
     for (const auto argument : *arguments) {
+        if (argument == "--list-tests") {
+            listTests = true;
+            continue;
+        }
         if (!argument.starts_with("--filter=")) continue;
         if (commandLineFilter) {
             std::cerr << "--filter may only be specified once\n";
@@ -132,15 +148,6 @@ int Runner::run(int argc, char** argv) {
 
     const std::scoped_lock runLock(testRunMutex);
     if (!impl) impl = std::make_unique<Impl>();
-
-    detail::TestEventHandlerChain chain;
-    for (const auto& handler : impl->handlers) {
-        chain.add(handler.get());
-    }
-    if (const auto result = chain.configure(*arguments); !result) {
-        std::cerr << result.error() << '\n';
-        return 2;
-    }
 
     auto& registry = InternalRegistry::getInstance();
     if (const auto errors = registry.getConfigurationErrors(); !errors.empty()) {
@@ -162,6 +169,40 @@ int Runner::run(int argc, char** argv) {
         return left->getName() < right->getName();
     });
 
+    const std::string testFilter = impl->testFilter.value_or("");
+    const std::string cliFilter = commandLineFilter.value_or("");
+    if (listTests) {
+        for (const auto& suite : suites) {
+            std::cout << suite->getName() << " [";
+            printTags(suite->getOptions().tags());
+            std::cout << "]\n";
+            for (const auto& test : suite->getTests()) {
+                if ((!testFilter.empty()
+                     && !detail::matchesNameFilter(test->getName(), testFilter))
+                    || (!cliFilter.empty()
+                        && !detail::matchesTestFilter(
+                            suite->getName(), suite->getOptions().tags(),
+                            test->getName(), test->getOptions().tags(), cliFilter
+                        ))) {
+                    continue;
+                }
+                std::cout << "  " << test->getName() << " [";
+                printTags(test->getOptions().tags());
+                std::cout << ", "
+                          << (test->getOptions().isDisabled() ? "disabled" : "enabled")
+                          << "]\n";
+            }
+        }
+        return 0;
+    }
+
+    detail::TestEventHandlerChain chain;
+    for (const auto& handler : impl->handlers) chain.add(handler.get());
+    if (const auto result = chain.configure(*arguments); !result) {
+        std::cerr << result.error() << '\n';
+        return 2;
+    }
+
     chain.onStartReport(static_cast<unsigned int>(suites.size()));
 
     struct SuiteResult {
@@ -169,8 +210,6 @@ int Runner::run(int argc, char** argv) {
         TestStatistics<unsigned int> statistics;
         detail::BufferedTestEventHandler events;
     };
-    const std::string testFilter = impl->testFilter.value_or("");
-    const std::string cliFilter = commandLineFilter.value_or("");
     const auto executeSuite = [this, &testFilter, &cliFilter](const auto& suite) {
         SuiteResult result;
         result.hooksSucceeded = suite->run(
