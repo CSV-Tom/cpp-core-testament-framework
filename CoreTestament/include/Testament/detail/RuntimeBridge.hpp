@@ -36,8 +36,7 @@ public:
                                            > fixtureFactory,
                                            SuiteOptions options,
                                            std::vector<TestHandle> tests);
-    static SuiteRegistration invalidRegistration();
-    static void recordConfigurationError(std::string message);
+    static SuiteRegistration configurationError(std::string message);
 };
 
 }

@@ -7,6 +7,7 @@
 #include "Internal/SuiteAssembler.hpp"
 
 #include <string>
+#include <optional>
 #include <utility>
 
 namespace Testament {
@@ -14,12 +15,17 @@ namespace Testament {
 class SuiteRegistration::Impl {
 public:
     explicit Impl(std::shared_ptr<InternalSuite> suite_) : suite(std::move(suite_)) {}
+    explicit Impl(ConfigurationDiagnostics::Id diagnosticId_) : diagnosticId(diagnosticId_) {}
 
     ~Impl() {
-        InternalRegistry::getInstance().unregisterSuite(suite);
+        if (suite) InternalRegistry::getInstance().unregisterSuite(suite);
+        if (diagnosticId) {
+            InternalRegistry::getInstance().removeConfigurationError(*diagnosticId);
+        }
     }
 
     std::shared_ptr<InternalSuite> suite;
+    std::optional<ConfigurationDiagnostics::Id> diagnosticId;
 };
 
 SuiteRegistration detail::RuntimeBridge::registerSuite(std::string_view name,
@@ -32,8 +38,7 @@ SuiteRegistration detail::RuntimeBridge::registerSuite(std::string_view name,
         );
         return SuiteRegistration{std::make_unique<SuiteRegistration::Impl>(std::move(suite))};
     } catch (const std::logic_error& error) {
-        RuntimeBridge::recordConfigurationError(std::string{name} + ": " + error.what());
-        return RuntimeBridge::invalidRegistration();
+        return RuntimeBridge::configurationError(std::string{name} + ": " + error.what());
     }
 }
 
@@ -49,17 +54,13 @@ SuiteRegistration detail::RuntimeBridge::registerSuite(
         );
         return SuiteRegistration{std::make_unique<SuiteRegistration::Impl>(std::move(suite))};
     } catch (const std::logic_error& error) {
-        RuntimeBridge::recordConfigurationError(std::string{name} + ": " + error.what());
-        return RuntimeBridge::invalidRegistration();
+        return RuntimeBridge::configurationError(std::string{name} + ": " + error.what());
     }
 }
 
-SuiteRegistration detail::RuntimeBridge::invalidRegistration() {
-    return SuiteRegistration{nullptr};
-}
-
-void detail::RuntimeBridge::recordConfigurationError(std::string error) {
-    InternalRegistry::getInstance().recordConfigurationError(std::move(error));
+SuiteRegistration detail::RuntimeBridge::configurationError(std::string error) {
+    const auto id = InternalRegistry::getInstance().recordConfigurationError(std::move(error));
+    return SuiteRegistration{std::make_unique<SuiteRegistration::Impl>(id)};
 }
 
 SuiteRegistration::SuiteRegistration(std::unique_ptr<Impl> impl_) : impl(std::move(impl_)) {}
@@ -68,7 +69,7 @@ SuiteRegistration::SuiteRegistration(SuiteRegistration&&) noexcept = default;
 SuiteRegistration& SuiteRegistration::operator=(SuiteRegistration&&) noexcept = default;
 
 SuiteRegistration::operator bool() const noexcept {
-    return static_cast<bool>(impl);
+    return impl && static_cast<bool>(impl->suite);
 }
 
 }

@@ -22,7 +22,8 @@ public:
     void unregisterSuite(const std::shared_ptr<InternalSuite>& suite);
 
     [[nodiscard]] std::vector<std::shared_ptr<InternalSuite>> getAllSuites() const;
-    void recordConfigurationError(std::string error);
+    [[nodiscard]] ConfigurationDiagnostics::Id recordConfigurationError(std::string error);
+    void removeConfigurationError(ConfigurationDiagnostics::Id id);
     [[nodiscard]] std::vector<std::string> getConfigurationErrors() const;
 
     template <typename Predicate>

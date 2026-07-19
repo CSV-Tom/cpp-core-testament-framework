@@ -56,10 +56,9 @@ requires detail::FixtureSelection<Fixture>
             );
         }
     } catch (const std::logic_error& error) {
-        detail::RuntimeBridge::recordConfigurationError(
+        return detail::RuntimeBridge::configurationError(
             std::string{name} + ": " + error.what()
         );
-        return detail::RuntimeBridge::invalidRegistration();
     }
 }
 

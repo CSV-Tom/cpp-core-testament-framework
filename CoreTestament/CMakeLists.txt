@@ -170,6 +170,11 @@ if(BUILD_TESTING)
         tests/Tests/ConfigurationErrorValidation.cpp
     )
 
+    add_testament_internal_test(
+        ConfigurationErrorLifetimeValidation ConfigurationErrorLifetime
+        tests/Tests/ConfigurationErrorLifetimeValidation.cpp
+    )
+
     add_testament_test(
         AssertsValidation Asserts
         tests/Tests/AssertsValidation.cpp

@@ -42,8 +42,12 @@ std::vector<std::shared_ptr<InternalSuite>> InternalRegistry::getAllSuites() con
     return registeredSuites;
 }
 
-void InternalRegistry::recordConfigurationError(std::string error) {
-    configurationDiagnostics.record(std::move(error));
+ConfigurationDiagnostics::Id InternalRegistry::recordConfigurationError(std::string error) {
+    return configurationDiagnostics.record(std::move(error));
+}
+
+void InternalRegistry::removeConfigurationError(ConfigurationDiagnostics::Id id) {
+    configurationDiagnostics.remove(id);
 }
 
 std::vector<std::string> InternalRegistry::getConfigurationErrors() const {
