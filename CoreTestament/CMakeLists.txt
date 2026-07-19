@@ -156,6 +156,11 @@ if(BUILD_TESTING)
     )
 
     add_testament_test(
+        FixturePerRunValidation FixturePerRun
+        tests/Tests/FixturePerRunValidation.cpp
+    )
+
+    add_testament_test(
         ParameterizedBehaviorValidation ParameterizedBehavior
         tests/Tests/ParameterizedBehaviorValidation.cpp
     )

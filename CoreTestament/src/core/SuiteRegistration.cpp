@@ -27,7 +27,8 @@ SuiteRegistration detail::RuntimeBridge::registerSuite(std::string_view name,
                                                        std::vector<TestHandle> tests) {
     try {
         auto suite = SuiteAssembler::assemble(
-            std::string{name}, nullptr, std::move(options), std::move(tests)
+            std::string{name}, std::type_index(typeid(void)), {},
+            std::move(options), std::move(tests)
         );
         return SuiteRegistration{std::make_unique<SuiteRegistration::Impl>(std::move(suite))};
     } catch (const std::logic_error& error) {
@@ -37,12 +38,14 @@ SuiteRegistration detail::RuntimeBridge::registerSuite(std::string_view name,
 }
 
 SuiteRegistration detail::RuntimeBridge::registerSuite(
-    std::string_view name, std::unique_ptr<LifecycleSuite> fixture,
+    std::string_view name, std::type_index fixtureType,
+    std::move_only_function<std::unique_ptr<LifecycleSuite>()> fixtureFactory,
     SuiteOptions options, std::vector<TestHandle> tests
 ) {
     try {
         auto suite = SuiteAssembler::assemble(
-            std::string{name}, std::move(fixture), std::move(options), std::move(tests)
+            std::string{name}, fixtureType, std::move(fixtureFactory),
+            std::move(options), std::move(tests)
         );
         return SuiteRegistration{std::make_unique<SuiteRegistration::Impl>(std::move(suite))};
     } catch (const std::logic_error& error) {

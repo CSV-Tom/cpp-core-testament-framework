@@ -6,11 +6,13 @@
 #include "Testament/detail/Concepts.hpp"
 #include "Testament/detail/RuntimeBridge.hpp"
 
+#include <functional>
 #include <memory>
 #include <stdexcept>
 #include <string>
 #include <string_view>
 #include <type_traits>
+#include <typeindex>
 #include <utility>
 #include <vector>
 
@@ -46,7 +48,11 @@ requires detail::FixtureSelection<Fixture>
             );
         } else {
             return detail::RuntimeBridge::registerSuite(
-                name, std::make_unique<Fixture>(), std::move(options), std::move(tests)
+                name, std::type_index(typeid(Fixture)),
+                std::move_only_function<std::unique_ptr<LifecycleSuite>()>{[] {
+                    return std::make_unique<Fixture>();
+                }},
+                std::move(options), std::move(tests)
             );
         }
     } catch (const std::logic_error& error) {

@@ -30,7 +30,10 @@ public:
     static SuiteRegistration registerSuite(std::string_view name, SuiteOptions options,
                                            std::vector<TestHandle> tests);
     static SuiteRegistration registerSuite(std::string_view name,
-                                           std::unique_ptr<LifecycleSuite> fixture,
+                                           std::type_index fixtureType,
+                                           std::move_only_function<
+                                               std::unique_ptr<LifecycleSuite>()
+                                           > fixtureFactory,
                                            SuiteOptions options,
                                            std::vector<TestHandle> tests);
     static SuiteRegistration invalidRegistration();

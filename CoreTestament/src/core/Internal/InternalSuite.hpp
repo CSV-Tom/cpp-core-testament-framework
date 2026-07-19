@@ -30,11 +30,12 @@ class TestHandle;
 class InternalSuite {
 public:
     using Callback = HookManager::Callback;
+    using FixtureFactory = std::move_only_function<std::unique_ptr<LifecycleSuite>()>;
     using TestFilter = std::function<bool(std::string_view)>;
 
     explicit InternalSuite(std::string name, SuiteOptions options = {});
-    explicit InternalSuite(std::string name, std::unique_ptr<LifecycleSuite> fixture,
-                           SuiteOptions options = {});
+    explicit InternalSuite(std::string name, std::type_index fixtureType,
+                           FixtureFactory fixtureFactory, SuiteOptions options = {});
     ~InternalSuite();
 
     void addTest(detail::TestHandle test);
@@ -68,7 +69,7 @@ private:
     TestManager testManager;
     TestFilter testFilter = nullptr;
 
-    std::unique_ptr<LifecycleSuite> fixture;
+    FixtureFactory fixtureFactory;
     std::optional<std::type_index> fixtureType;
 };
 

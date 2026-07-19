@@ -41,6 +41,10 @@ public:
         return invokeHook(afterSuiteHook, "afterSuite");
     }
 
+    bool invoke(Callback& hook, std::string_view hookName) {
+        return invokeHook(hook, hookName);
+    }
+
     [[nodiscard]] const std::vector<std::string>& getErrors() const noexcept {
         return errors;
     }

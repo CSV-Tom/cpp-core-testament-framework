@@ -12,11 +12,13 @@
 namespace Testament {
 
 std::shared_ptr<InternalSuite> SuiteAssembler::assemble(
-    std::string name, std::unique_ptr<LifecycleSuite> fixture,
+    std::string name, std::type_index fixtureType,
+    std::move_only_function<std::unique_ptr<LifecycleSuite>()> fixtureFactory,
     SuiteOptions options, std::vector<detail::TestHandle> tests
 ) {
-    auto suite = fixture
-        ? std::make_shared<InternalSuite>(std::move(name), std::move(fixture), std::move(options))
+    auto suite = fixtureFactory
+        ? std::make_shared<InternalSuite>(std::move(name), fixtureType,
+                                          std::move(fixtureFactory), std::move(options))
         : std::make_shared<InternalSuite>(std::move(name), std::move(options));
     for (auto& test : tests) suite->addTest(std::move(test));
     return InternalRegistry::getInstance().registerSuite(std::move(suite));

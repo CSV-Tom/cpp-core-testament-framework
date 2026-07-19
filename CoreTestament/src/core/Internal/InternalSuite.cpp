@@ -25,16 +25,12 @@ InternalSuite::InternalSuite(std::string name_, SuiteOptions options_)
     }
 }
 
-InternalSuite::InternalSuite(std::string name_, std::unique_ptr<LifecycleSuite> fixture_,
-                             SuiteOptions options_)
+InternalSuite::InternalSuite(std::string name_, std::type_index fixtureType_,
+                             FixtureFactory fixtureFactory_, SuiteOptions options_)
     : InternalSuite(std::move(name_), std::move(options_)) {
-    fixture = std::move(fixture_);
-    if (!fixture) throw std::invalid_argument("Lifecycle suite fixture cannot be null");
-    fixtureType = std::type_index(typeid(*fixture));
-    setBeforeSuite([this] { fixture->beforeAll(); });
-    setBeforeEach([this] { fixture->beforeEach(); });
-    setAfterEach([this] { fixture->afterEach(); });
-    setAfterSuite([this] { fixture->afterAll(); });
+    if (!fixtureFactory_) throw std::invalid_argument("Lifecycle suite fixture factory cannot be empty");
+    fixtureFactory = std::move(fixtureFactory_);
+    fixtureType = fixtureType_;
 }
 
 InternalSuite::~InternalSuite() = default;
@@ -107,7 +103,34 @@ bool InternalSuite::run() {
         return !testFilter || testFilter(test->getName());
     };
 
-    if (!hookManager.invokeBeforeSuiteHook()) {
+    std::unique_ptr<LifecycleSuite> fixture;
+    if (fixtureFactory) {
+        Callback createFixture = [this, &fixture] {
+            fixture = fixtureFactory();
+            if (!fixture) throw std::runtime_error("Fixture factory returned null");
+        };
+        if (!hookManager.invoke(createFixture, "fixture construction")) {
+            const auto error = hookManager.getErrors().back();
+            for (auto& test : tests | std::views::filter(selected)) {
+                testManager.reportStart(suiteInfo(), test, handler);
+                testManager.reportResult(
+                    suiteInfo(), test, TestEventHandler::TestResultStatus::LifecycleError,
+                    std::chrono::duration<double>::zero(),
+                    std::make_exception_ptr(std::runtime_error(error)), handler
+                );
+            }
+            totalTimer.stop();
+            reportSuiteError(error);
+            if (handler) handler->onSuiteEnd(suiteInfo());
+            return false;
+        }
+    }
+
+    Callback beforeAll = [&fixture] {
+        if (fixture) fixture->beforeAll();
+    };
+    if (!hookManager.invokeBeforeSuiteHook()
+        || !hookManager.invoke(beforeAll, "beforeAll")) {
         const auto error = hookManager.getErrors().back();
         for (auto& test : tests | std::views::filter(selected)) {
             testManager.reportStart(suiteInfo(), test, handler);
@@ -141,7 +164,11 @@ bool InternalSuite::run() {
 
         while (true) {
             std::string lifecycleError;
-            const bool beforeEachSucceeded = hookManager.invokeBeforeEachHook();
+            Callback beforeEach = [&fixture] {
+                if (fixture) fixture->beforeEach();
+            };
+            const bool beforeEachSucceeded = hookManager.invokeBeforeEachHook()
+                && hookManager.invoke(beforeEach, "beforeEach");
             if (!beforeEachSucceeded) lifecycleError = hookManager.getErrors().back();
 
             TestManager::Result result{};
@@ -150,7 +177,11 @@ bool InternalSuite::run() {
                 duration += test->getExecutionTimer().getDuration();
             }
 
-            if (!hookManager.invokeAfterEachHook()) {
+            Callback afterEach = [&fixture] {
+                if (fixture) fixture->afterEach();
+            };
+            if (!hookManager.invoke(afterEach, "afterEach")
+                || !hookManager.invokeAfterEachHook()) {
                 if (!lifecycleError.empty()) lifecycleError += "; ";
                 lifecycleError += hookManager.getErrors().back();
             }
@@ -175,7 +206,11 @@ bool InternalSuite::run() {
         testManager.reportResult(suiteInfo(), test, status, duration, exception, handler);
     }
 
-    if (!hookManager.invokeAfterSuiteHook()) {
+    Callback afterAll = [&fixture] {
+        if (fixture) fixture->afterAll();
+    };
+    if (!hookManager.invoke(afterAll, "afterAll")
+        || !hookManager.invokeAfterSuiteHook()) {
         hooksSucceeded = false;
         reportSuiteError(hookManager.getErrors().back());
     }
