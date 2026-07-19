@@ -88,6 +88,27 @@ jobs:
       - name: Test
         run: ctest --preset sanitizers -LE integration
 
+  thread-sanitizer:
+    name: GCC TSan
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Configure
+        env:
+          CXXFLAGS: -Werror
+        run: cmake --preset thread-sanitizer
+
+      - name: Build
+        run: cmake --build --preset thread-sanitizer
+
+      - name: Configure TSan address space
+        run: sudo sysctl vm.mmap_rnd_bits=28
+
+      - name: Test
+        run: ctest --preset thread-sanitizer -LE integration
+
   format:
     name: clang-format
     runs-on: ubuntu-24.04

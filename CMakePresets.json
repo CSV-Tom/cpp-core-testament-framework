@@ -53,6 +53,17 @@
       }
     },
     {
+      "name": "thread-sanitizer",
+      "displayName": "GCC thread sanitizer",
+      "inherits": "debug",
+      "toolchainFile": "${sourceDir}/toolchains/gcc-toolchain.cmake",
+      "cacheVariables": {
+        "CMAKE_CXX_FLAGS": "-fsanitize=thread -fno-omit-frame-pointer",
+        "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=thread",
+        "CMAKE_SHARED_LINKER_FLAGS": "-fsanitize=thread"
+      }
+    },
+    {
       "name": "gcc14-debug",
       "displayName": "GCC 14 Debug",
       "inherits": "debug",
@@ -102,6 +113,11 @@
     {
       "name": "sanitizers",
       "configurePreset": "sanitizers",
+      "jobs": 2
+    },
+    {
+      "name": "thread-sanitizer",
+      "configurePreset": "thread-sanitizer",
       "jobs": 2
     },
     {
@@ -160,6 +176,16 @@
       },
       "environment": {
         "ASAN_OPTIONS": "detect_leaks=0"
+      }
+    },
+    {
+      "name": "thread-sanitizer",
+      "configurePreset": "thread-sanitizer",
+      "output": {
+        "outputOnFailure": true
+      },
+      "environment": {
+        "TSAN_OPTIONS": "halt_on_error=1"
       }
     },
     {
