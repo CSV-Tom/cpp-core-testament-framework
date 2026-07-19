@@ -274,6 +274,11 @@ if(BUILD_TESTING)
     )
 
     add_testament_test(
+        RepeatShuffleValidation RepeatShuffle
+        tests/Tests/RepeatShuffleValidation.cpp
+    )
+
+    add_testament_test(
         OptionsValidation Options
         tests/Tests/OptionsValidation.cpp
     )

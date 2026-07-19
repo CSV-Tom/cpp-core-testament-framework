@@ -15,11 +15,14 @@
 #include "Internal/utils/TestStatistics.hpp"
 
 #include <algorithm>
+#include <charconv>
+#include <cstdint>
 #include <filesystem>
 #include <future>
 #include <iostream>
 #include <mutex>
 #include <optional>
+#include <random>
 #include <span>
 #include <stdexcept>
 #include <string>
@@ -56,6 +59,13 @@ void printTags(std::span<const std::string> tags) {
     } else {
         for (const auto& tag : tags) std::cout << ' ' << tag;
     }
+}
+
+std::optional<std::uint64_t> parseUnsigned(std::string_view value) {
+    std::uint64_t result{};
+    const auto [end, error] = std::from_chars(value.data(), value.data() + value.size(), result);
+    if (error != std::errc{} || end != value.data() + value.size()) return std::nullopt;
+    return result;
 }
 
 }
@@ -138,9 +148,34 @@ int Runner::run(int argc, char** argv) {
     }
     std::optional<std::string> commandLineFilter;
     bool listTests{};
+    std::size_t repeat{1};
+    bool shuffle{};
+    std::optional<std::uint64_t> requestedSeed;
     for (const auto argument : *arguments) {
         if (argument == "--list-tests") {
             listTests = true;
+            continue;
+        }
+        if (argument == "--shuffle") {
+            shuffle = true;
+            continue;
+        }
+        if (argument.starts_with("--repeat=")) {
+            const auto parsed = parseUnsigned(argument.substr(9));
+            if (!parsed || *parsed == 0) {
+                std::cerr << "--repeat requires an integer greater than zero\n";
+                return 2;
+            }
+            repeat = static_cast<std::size_t>(*parsed);
+            continue;
+        }
+        if (argument.starts_with("--seed=")) {
+            requestedSeed = parseUnsigned(argument.substr(7));
+            if (!requestedSeed) {
+                std::cerr << "--seed requires an unsigned integer\n";
+                return 2;
+            }
+            shuffle = true;
             continue;
         }
         if (!argument.starts_with("--filter=")) continue;
@@ -244,6 +279,24 @@ int Runner::run(int argc, char** argv) {
         return 1;
     }
 
+    const auto registeredSuites = suites;
+    const std::uint64_t baseSeed = requestedSeed.value_or(
+        (static_cast<std::uint64_t>(std::random_device{}()) << 32) ^ std::random_device{}()
+    );
+    bool allRunsSucceeded = true;
+    for (std::size_t repetition = 0; repetition < repeat; ++repetition) {
+    suites = registeredSuites;
+    const auto runSeed = baseSeed + repetition;
+    if (shuffle) {
+        std::cout << "[SEED] " << runSeed << '\n';
+        std::mt19937_64 random{runSeed};
+        std::ranges::shuffle(suites, random);
+        std::ranges::stable_sort(suites, [](const auto& left, const auto& right) {
+            return left->getOptions().order().value_or(0)
+                < right->getOptions().order().value_or(0);
+        });
+    }
+
     chain.onStartReport(static_cast<unsigned int>(suites.size()));
 
     struct SuiteResult {
@@ -251,12 +304,15 @@ int Runner::run(int argc, char** argv) {
         TestStatistics<unsigned int> statistics;
         detail::BufferedTestEventHandler events;
     };
-    const auto executeSuite = [this, &testFilter, &cliFilter](const auto& suite) {
+    const auto executeSuite = [this, &testFilter, &cliFilter, shuffle, runSeed](
+        const auto& suite
+    ) {
         SuiteResult result;
         result.hooksSucceeded = suite->run(
             &result.events,
             InternalSuite::RunConfiguration{
-                testFilter, cliFilter, impl->maxParallelTests
+                testFilter, cliFilter, impl->maxParallelTests,
+                shuffle ? std::optional<std::uint64_t>{runSeed} : std::nullopt
             }
         );
         result.statistics = suite->getStatistics();
@@ -299,8 +355,6 @@ int Runner::run(int argc, char** argv) {
         }
     }
 
-    const bool environmentsSucceeded = tearDownEnvironments();
-
     chain.onFinalReport(
         static_cast<unsigned int>(suites.size()),
         total.getPassedTests(),
@@ -308,14 +362,18 @@ int Runner::run(int argc, char** argv) {
         total.getSkippedTests(),
         total.getErrors()
     );
+    allRunsSucceeded = total.getFailedTests() == 0 && total.getErrors() == 0
+        && hooksSucceeded && allRunsSucceeded;
+    }
+
+    const bool environmentsSucceeded = tearDownEnvironments();
 
     const auto handlerError = chain.errorMessage();
     if (!handlerError.empty()) {
         std::cerr << handlerError << '\n';
     }
 
-    return total.getFailedTests() == 0 && total.getErrors() == 0
-        && hooksSucceeded && environmentsSucceeded && handlerError.empty() ? 0 : 1;
+    return allRunsSucceeded && environmentsSucceeded && handlerError.empty() ? 0 : 1;
 }
 
 std::unique_ptr<TestEventHandler> makeConsoleHandler() {

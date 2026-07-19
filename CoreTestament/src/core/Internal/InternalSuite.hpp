@@ -19,6 +19,7 @@
 #include <string_view>
 #include <typeindex>
 #include <variant>
+#include <cstdint>
 #include <vector>
 
 namespace Testament {
@@ -39,6 +40,7 @@ public:
         std::string_view testNameFilter;
         std::string_view filterExpression;
         std::size_t maxParallelTests{1};
+        std::optional<std::uint64_t> shuffleSeed;
     };
 
     explicit InternalSuite(std::string name, std::source_location location = {},

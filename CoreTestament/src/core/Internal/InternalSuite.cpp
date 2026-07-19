@@ -11,6 +11,7 @@
 #include <chrono>
 #include <exception>
 #include <future>
+#include <random>
 #include <ranges>
 #include <stdexcept>
 #include <string>
@@ -95,10 +96,17 @@ bool InternalSuite::run(TestEventHandler* handler, RunConfiguration configuratio
     totalTimer.reset();
     hookManager.resetErrors();
 
-    std::ranges::stable_sort(tests, [](const auto& left, const auto& right) {
+    if (configuration.shuffleSeed) {
+        std::mt19937_64 random{*configuration.shuffleSeed};
+        std::ranges::shuffle(tests, random);
+    }
+    std::ranges::stable_sort(tests, [shuffle = configuration.shuffleSeed.has_value()](
+        const auto& left, const auto& right
+    ) {
         const auto leftOrder = left->getOptions().order().value_or(0);
         const auto rightOrder = right->getOptions().order().value_or(0);
-        return leftOrder != rightOrder ? leftOrder < rightOrder : left->getName() < right->getName();
+        if (leftOrder != rightOrder) return leftOrder < rightOrder;
+        return !shuffle && left->getName() < right->getName();
     });
 
     totalTimer.start();
