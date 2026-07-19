@@ -104,6 +104,14 @@ bool InternalSuite::run() {
     const auto selected = [this](const auto& test) {
         return !testFilter || testFilter(test->getName());
     };
+    const auto skipSelectedTests = [this, &suiteInfo, &selected] {
+        for (auto& test : tests | std::views::filter(selected)) {
+            testManager.reportResult(
+                suiteInfo(), test, TestEventHandler::TestResultStatus::Skipped,
+                std::chrono::duration<double>::zero(), {}, handler
+            );
+        }
+    };
 
     std::unique_ptr<LifecycleSuite> fixture;
     if (fixtureFactory) {
@@ -113,14 +121,7 @@ bool InternalSuite::run() {
         };
         if (!hookManager.invoke(createFixture, "fixture construction")) {
             const auto error = hookManager.getErrors().back();
-            for (auto& test : tests | std::views::filter(selected)) {
-                testManager.reportStart(suiteInfo(), test, handler);
-                testManager.reportResult(
-                    suiteInfo(), test, TestEventHandler::TestResultStatus::LifecycleError,
-                    std::chrono::duration<double>::zero(),
-                    std::make_exception_ptr(std::runtime_error(error)), handler
-                );
-            }
+            skipSelectedTests();
             totalTimer.stop();
             reportSuiteError(error);
             if (handler) handler->onSuiteEnd(suiteInfo());
@@ -134,14 +135,7 @@ bool InternalSuite::run() {
     if (!hookManager.invokeBeforeSuiteHook()
         || !hookManager.invoke(beforeAll, "beforeAll")) {
         const auto error = hookManager.getErrors().back();
-        for (auto& test : tests | std::views::filter(selected)) {
-            testManager.reportStart(suiteInfo(), test, handler);
-            testManager.reportResult(
-                suiteInfo(), test, TestEventHandler::TestResultStatus::LifecycleError,
-                std::chrono::duration<double>::zero(),
-                std::make_exception_ptr(std::runtime_error(error)), handler
-            );
-        }
+        skipSelectedTests();
         totalTimer.stop();
         reportSuiteError(error);
         if (handler) handler->onSuiteEnd(suiteInfo());

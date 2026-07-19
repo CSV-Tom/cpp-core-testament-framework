@@ -33,6 +33,15 @@ int main() {
     });
     lifecycleSuite->addTest(Testament::detail::RuntimeBridge::makeTest("lifecycle test", {}, [] {}));
 
+    auto beforeAllSuite = Testament::InternalRegistry::getInstance().registerSuite(
+        std::make_shared<Testament::InternalSuite>("before all suite")
+    );
+    beforeAllSuite->setBeforeSuite([] {
+        throw std::runtime_error("suite setup failed");
+    });
+    beforeAllSuite->addTest(Testament::detail::RuntimeBridge::makeTest("first skipped test", {}, [] {}));
+    beforeAllSuite->addTest(Testament::detail::RuntimeBridge::makeTest("second skipped test", {}, [] {}));
+
     auto parameterSuite = Testament::Suite(
         "parameter suite",
         Testament::ParameterizedTest(
@@ -61,12 +70,16 @@ int main() {
     return invalidArgumentsExitCode == 2
         && exitCode == 1
         && parameterSuite
-        && xml.contains("<testsuites tests=\"5\" failures=\"1\" errors=\"1\" skipped=\"0\"")
+        && xml.contains("<testsuites tests=\"8\" failures=\"1\" errors=\"2\" skipped=\"2\"")
         && xml.contains("<testsuite name=\"suite &lt;&amp;&gt;\xef\xbf\xbd\"")
         && xml.contains("name=\"failing &quot;test&quot;\"")
         && xml.contains("failure &lt;reason&gt; &amp; details\xef\xbf\xbd\xef\xbf\xbd(")
         && !xml.contains('\x01')
         && xml.contains("<error message=\"Error in beforeEach: setup &lt;failed&gt;\"")
+        && xml.contains("<testsuite name=\"before all suite\" tests=\"3\" failures=\"0\" errors=\"1\" skipped=\"2\"")
+        && xml.contains("name=\"first skipped test\"")
+        && xml.contains("name=\"second skipped test\"")
+        && xml.contains("<error message=\"Error in beforeSuite: suite setup failed\"")
         && xml.contains("name=\"values / one\"")
         && xml.contains("name=\"values / two\"")
         ? 0

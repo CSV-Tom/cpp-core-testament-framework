@@ -24,10 +24,18 @@ public:
         status = test.status;
     }
 
+    void onTestSkipped(const SuiteInfo& suite, const TestInfo& test) override {
+        ++skippedTests;
+        reportedSkipped = suite.skipped;
+        status = test.status;
+    }
+
     std::string suiteName;
     std::string error;
     unsigned int failedTests{};
     unsigned int reportedFailures{};
+    unsigned int skippedTests{};
+    unsigned int reportedSkipped{};
     TestResultStatus status{TestResultStatus::NotRun};
 };
 
@@ -68,13 +76,15 @@ int main() {
         && exitCode == 1
         && !testExecuted
         && !beforeEachTestExecuted
-        && suite->getStatistics().getFailedTests() == 1
+        && suite->getStatistics().getFailedTests() == 0
+        && suite->getStatistics().getSkippedTests() == 1
         && beforeEachSuite.getStatistics().getFailedTests() == 1
         && handler.suiteName == "failing lifecycle hook"
         && handler.error == "Error in beforeSuite: expected hook failure"
-        && handler.failedTests == 1
-        && handler.reportedFailures == 1
-        && handler.status == Testament::TestEventHandler::TestResultStatus::LifecycleError
+        && handler.failedTests == 0
+        && handler.skippedTests == 1
+        && handler.reportedSkipped == 1
+        && handler.status == Testament::TestEventHandler::TestResultStatus::Skipped
         && beforeEachHandler.failedTests == 1
         && beforeEachHandler.reportedFailures == 1
         && beforeEachHandler.status == Testament::TestEventHandler::TestResultStatus::LifecycleError
