@@ -10,6 +10,7 @@
 #include <functional>
 #include <memory>
 #include <stdexcept>
+#include <source_location>
 #include <string>
 #include <tuple>
 #include <typeindex>
@@ -22,10 +23,11 @@ template <typename Callable, typename... Args>
 class [[nodiscard("the parameterized test definition must be passed to Suite")]]
 ParameterizedTestDefinition {
 public:
-    ParameterizedTestDefinition(std::string name, TestOptions options,
+    ParameterizedTestDefinition(std::string name, std::source_location location,
+                                TestOptions options,
                                 CaseSet<Args...> cases, Callable callable)
-        : name_(std::move(name)), options_(std::move(options)), cases_(std::move(cases)),
-          callable_(std::move(callable)) {}
+        : name_(std::move(name)), location_(location), options_(std::move(options)),
+          cases_(std::move(cases)), callable_(std::move(callable)) {}
 
     template <FixtureSelection Fixture>
     requires ParameterBodyCompatible<Fixture, Callable, Args...>::value
@@ -46,7 +48,7 @@ public:
                         [callable, values = std::move(values)] {
                             std::apply(*callable, *values);
                         }
-                    }
+                    }, location_
                 ));
             } else {
                 tests.push_back(RuntimeBridge::makeTest(
@@ -60,7 +62,7 @@ public:
                                 std::invoke(*callable, *typedFixture, args...);
                             }, *values);
                         }
-                    }
+                    }, location_
                 ));
             }
         }
@@ -69,6 +71,7 @@ public:
 
 private:
     std::string name_;
+    std::source_location location_;
     TestOptions options_;
     CaseSet<Args...> cases_;
     Callable callable_;

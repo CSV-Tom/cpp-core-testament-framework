@@ -159,7 +159,7 @@ void JUnitTestEventHandler::onStartReport(unsigned int suiteCount) {
 
 void JUnitTestEventHandler::onSuiteStart(const SuiteInfo& suite) {
     if (!outputPath) return;
-    suiteResults.push_back({suite.name, {}, {}});
+    suiteResults.push_back({suite.name, suite.location, {}, {}});
 }
 
 void JUnitTestEventHandler::onSuiteAbort(const SuiteInfo& suite, std::string_view message) {
@@ -200,7 +200,7 @@ std::string JUnitTestEventHandler::errorMessage() const {
 
 JUnitTestEventHandler::SuiteResult& JUnitTestEventHandler::suiteResult(const SuiteInfo& suite) {
     if (suiteResults.empty() || suiteResults.back().name != suite.name) {
-        suiteResults.push_back({suite.name, {}, {}});
+        suiteResults.push_back({suite.name, suite.location, {}, {}});
     }
     return suiteResults.back();
 }
@@ -269,6 +269,8 @@ void JUnitTestEventHandler::writeReport() {
         for (const auto& test : suite.tests) {
             output << "    <testcase classname=\"" << escapeXml(suite.name)
                    << "\" name=\"" << escapeXml(test.info.name)
+                   << "\" file=\"" << escapeXml(test.info.location.file_name())
+                   << "\" line=\"" << test.info.location.line()
                    << "\" time=\"" << durationSeconds(test.info) << "\"";
             if (test.status == Status::Passed) {
                 output << "/>\n";
@@ -287,7 +289,10 @@ void JUnitTestEventHandler::writeReport() {
 
         for (const auto& error : suite.lifecycleErrors) {
             output << "    <testcase classname=\"" << escapeXml(suite.name)
-                   << "\" name=\"lifecycle\" time=\"0.000000000\"><error message=\""
+                   << "\" name=\"lifecycle\" file=\""
+                   << escapeXml(suite.location.file_name())
+                   << "\" line=\"" << suite.location.line()
+                   << "\" time=\"0.000000000\"><error message=\""
                    << escapeXml(error) << "\">" << escapeXml(error)
                    << "</error></testcase>\n";
         }

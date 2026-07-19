@@ -2,6 +2,10 @@
 
 #include "core/Internal/InternalRegistry.hpp"
 
+#include <algorithm>
+#include <ranges>
+#include <string>
+
 namespace {
 
 inline bool executed = false;
@@ -26,11 +30,16 @@ inline const auto duplicateSuite = Testament::Suite(
 
 int main() {
     const auto& registry = Testament::InternalRegistry::getInstance();
+    const auto errors = registry.getConfigurationErrors();
+    const bool locationsReported = std::ranges::all_of(errors, [](const auto& error) {
+        return error.contains("ConfigurationErrorValidation.cpp:");
+    });
     return !invalidSuite
         && validSuite
         && !duplicateSuite
         && registry.getAllSuites().size() == 1
-        && !registry.getConfigurationErrors().empty()
+        && !errors.empty()
+        && locationsReported
         && Testament::run(0, nullptr) == 2
         && !executed
         ? 0

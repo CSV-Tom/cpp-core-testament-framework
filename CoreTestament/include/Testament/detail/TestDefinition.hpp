@@ -8,6 +8,7 @@
 
 #include <functional>
 #include <stdexcept>
+#include <source_location>
 #include <string>
 #include <typeindex>
 #include <utility>
@@ -18,8 +19,10 @@ namespace Testament::detail {
 template <typename Callable>
 class [[nodiscard("the test definition must be passed to Suite")]] TestDefinition {
 public:
-    TestDefinition(std::string name, TestOptions options, Callable callable)
-        : name_(std::move(name)), options_(std::move(options)), callable_(std::move(callable)) {}
+    TestDefinition(std::string name, std::source_location location, TestOptions options,
+                   Callable callable)
+        : name_(std::move(name)), location_(location), options_(std::move(options)),
+          callable_(std::move(callable)) {}
 
     template <FixtureSelection Fixture>
     requires TestBodyCompatible<Fixture, Callable>::value
@@ -28,7 +31,8 @@ public:
         tests.reserve(1);
         if constexpr (std::same_as<Fixture, void>) {
             tests.push_back(RuntimeBridge::makeTest(
-                name_, std::move(options_), std::move_only_function<void()>{std::move(callable_)}
+                name_, std::move(options_),
+                std::move_only_function<void()>{std::move(callable_)}, location_
             ));
         } else {
             tests.push_back(RuntimeBridge::makeTest(
@@ -39,7 +43,7 @@ public:
                         if (!typedFixture) throw std::logic_error("Internal fixture type mismatch");
                         std::invoke(callable, *typedFixture);
                     }
-                }
+                }, location_
             ));
         }
         return tests;
@@ -47,6 +51,7 @@ public:
 
 private:
     std::string name_;
+    std::source_location location_;
     TestOptions options_;
     Callable callable_;
 };

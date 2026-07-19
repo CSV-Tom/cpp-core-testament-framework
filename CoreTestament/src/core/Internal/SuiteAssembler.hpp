@@ -2,6 +2,7 @@
 #define TESTAMENT_INTERNAL_SUITEASSEMBLER_HPP
 
 #include <memory>
+#include <source_location>
 #include <functional>
 #include <string>
 #include <typeindex>
@@ -20,7 +21,7 @@ class TestHandle;
 class SuiteAssembler {
 public:
     [[nodiscard]] static std::shared_ptr<InternalSuite> assemble(
-        std::string name, std::type_index fixtureType,
+        std::string name, std::source_location location, std::type_index fixtureType,
         std::move_only_function<std::unique_ptr<LifecycleSuite>()> fixtureFactory,
         SuiteOptions options, std::vector<detail::TestHandle> tests
     );

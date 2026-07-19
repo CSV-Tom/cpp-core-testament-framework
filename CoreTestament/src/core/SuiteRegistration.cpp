@@ -29,32 +29,39 @@ public:
 };
 
 SuiteRegistration detail::RuntimeBridge::registerSuite(std::string_view name,
+                                                       std::source_location location,
                                                        SuiteOptions options,
                                                        std::vector<TestHandle> tests) {
     try {
         auto suite = SuiteAssembler::assemble(
-            std::string{name}, std::type_index(typeid(void)), {},
+            std::string{name}, location, std::type_index(typeid(void)), {},
             std::move(options), std::move(tests)
         );
         return SuiteRegistration{std::make_unique<SuiteRegistration::Impl>(std::move(suite))};
     } catch (const std::logic_error& error) {
-        return RuntimeBridge::configurationError(std::string{name} + ": " + error.what());
+        return RuntimeBridge::configurationError(
+            std::string{name} + " at " + location.file_name() + ':'
+            + std::to_string(location.line()) + ": " + error.what()
+        );
     }
 }
 
 SuiteRegistration detail::RuntimeBridge::registerSuite(
-    std::string_view name, std::type_index fixtureType,
+    std::string_view name, std::source_location location, std::type_index fixtureType,
     std::move_only_function<std::unique_ptr<LifecycleSuite>()> fixtureFactory,
     SuiteOptions options, std::vector<TestHandle> tests
 ) {
     try {
         auto suite = SuiteAssembler::assemble(
-            std::string{name}, fixtureType, std::move(fixtureFactory),
+            std::string{name}, location, fixtureType, std::move(fixtureFactory),
             std::move(options), std::move(tests)
         );
         return SuiteRegistration{std::make_unique<SuiteRegistration::Impl>(std::move(suite))};
     } catch (const std::logic_error& error) {
-        return RuntimeBridge::configurationError(std::string{name} + ": " + error.what());
+        return RuntimeBridge::configurationError(
+            std::string{name} + " at " + location.file_name() + ':'
+            + std::to_string(location.line()) + ": " + error.what()
+        );
     }
 }
 

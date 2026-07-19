@@ -18,6 +18,11 @@ public:
         return os.str();
     }
 
+    static std::string formatLocation(std::source_location location) {
+        if (std::string_view{location.file_name()}.empty()) return {};
+        return std::string{location.file_name()} + ':' + std::to_string(location.line());
+    }
+
     void onStartReport(unsigned int suiteCount) override {
         std::cout << "[BEGIN] Starting test run for " << suiteCount << " suite(s).\n" << std::endl;
     }
@@ -37,7 +42,11 @@ public:
     }
 
     void onSuiteAbort(const SuiteInfo& suite, std::string_view message) override {
-        std::cout << "[ABORT] Suite '" << suite.name << "' aborted: " << message << std::endl;
+        std::cout << "[ABORT] Suite '" << suite.name << "' aborted: " << message;
+        if (const auto location = formatLocation(suite.location); !location.empty()) {
+            std::cout << "\n[DEFINED AT] " << location;
+        }
+        std::cout << std::endl;
     }
 
     void onTestPassed(const SuiteInfo&, const TestInfo& test) override {
@@ -56,6 +65,9 @@ public:
             } catch (...) {
                 std::cout << ".\n\n[ERROR]\nUnknown non-standard exception";
             }
+        }
+        if (const auto location = formatLocation(test.location); !location.empty()) {
+            std::cout << "\n[DEFINED AT] " << location;
         }
         std::cout << "\n" << std::endl;
     }

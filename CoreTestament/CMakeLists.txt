@@ -53,6 +53,7 @@ target_sources(${PROJECT_NAME}
             include/Testament/Testament.hpp
             include/Testament/detail/CaseSet.hpp
             include/Testament/detail/Concepts.hpp
+            include/Testament/detail/LocatedName.hpp
             include/Testament/detail/NamedTestCase.hpp
             include/Testament/detail/ParameterizedTestDefinition.hpp
             include/Testament/detail/RuntimeBridge.hpp
@@ -235,6 +236,11 @@ if(BUILD_TESTING)
     add_testament_test(
         OptionsValidation Options
         tests/Tests/OptionsValidation.cpp
+    )
+
+    add_testament_test(
+        DefinitionLocationValidation DefinitionLocation
+        tests/Tests/DefinitionLocationValidation.cpp
     )
 
     add_testament_test(

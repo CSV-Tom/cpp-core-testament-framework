@@ -20,6 +20,7 @@ int main() {
     auto suite = Testament::InternalRegistry::getInstance().registerSuite(
         std::make_shared<Testament::InternalSuite>(suiteName)
     );
+    const auto passingTestLine = __LINE__ + 1;
     suite->addTest(Testament::detail::RuntimeBridge::makeTest("passing test", {}, [] {}));
     suite->addTest(Testament::detail::RuntimeBridge::makeTest("failing \"test\"", {}, [] {
         throw std::runtime_error(std::string{"failure <reason> & details"} + '\x01' + "\xc3\x28");
@@ -73,6 +74,10 @@ int main() {
         && xml.contains("<testsuites tests=\"8\" failures=\"1\" errors=\"2\" skipped=\"2\"")
         && xml.contains("<testsuite name=\"suite &lt;&amp;&gt;\xef\xbf\xbd\"")
         && xml.contains("name=\"failing &quot;test&quot;\"")
+        && xml.contains(
+            std::string{"name=\"passing test\" file=\""} + __FILE__
+            + "\" line=\"" + std::to_string(passingTestLine) + "\""
+        )
         && xml.contains("failure &lt;reason&gt; &amp; details\xef\xbf\xbd\xef\xbf\xbd(")
         && !xml.contains('\x01')
         && xml.contains("<error message=\"Error in beforeEach: setup &lt;failed&gt;\"")

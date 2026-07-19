@@ -4,6 +4,7 @@
 
 #include <filesystem>
 #include <optional>
+#include <source_location>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -44,6 +45,7 @@ private:
 
     struct SuiteResult {
         std::string name;
+        std::source_location location;
         std::vector<TestResult> tests;
         std::vector<std::string> lifecycleErrors;
     };

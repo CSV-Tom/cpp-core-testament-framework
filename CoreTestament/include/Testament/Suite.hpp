@@ -4,6 +4,7 @@
 #include "Testament/SuiteOptions.hpp"
 #include "Testament/SuiteRegistration.hpp"
 #include "Testament/detail/Concepts.hpp"
+#include "Testament/detail/LocatedName.hpp"
 #include "Testament/detail/RuntimeBridge.hpp"
 
 #include <functional>
@@ -36,7 +37,7 @@ namespace Testament {
 template <typename Fixture = void, typename... Definitions>
 requires detail::FixtureSelection<Fixture>
     && (detail::DefinitionFor<Fixture, Definitions> && ...)
-[[nodiscard]] SuiteRegistration Suite(std::string_view name, SuiteOptions options,
+[[nodiscard]] SuiteRegistration Suite(detail::LocatedName name, SuiteOptions options,
                                       Definitions&&... definitions) {
     try {
         auto tests = detail::materializeDefinitions(
@@ -44,11 +45,11 @@ requires detail::FixtureSelection<Fixture>
         );
         if constexpr (std::same_as<Fixture, void>) {
             return detail::RuntimeBridge::registerSuite(
-                name, std::move(options), std::move(tests)
+                name.value(), name.location(), std::move(options), std::move(tests)
             );
         } else {
             return detail::RuntimeBridge::registerSuite(
-                name, std::type_index(typeid(Fixture)),
+                name.value(), name.location(), std::type_index(typeid(Fixture)),
                 std::move_only_function<std::unique_ptr<LifecycleSuite>()>{[] {
                     return std::make_unique<Fixture>();
                 }},
@@ -57,7 +58,8 @@ requires detail::FixtureSelection<Fixture>
         }
     } catch (const std::logic_error& error) {
         return detail::RuntimeBridge::configurationError(
-            std::string{name} + ": " + error.what()
+            name.value() + " at " + name.location().file_name() + ':'
+            + std::to_string(name.location().line()) + ": " + error.what()
         );
     }
 }
@@ -65,8 +67,9 @@ requires detail::FixtureSelection<Fixture>
 template <typename Fixture = void, typename... Definitions>
 requires detail::FixtureSelection<Fixture>
     && (detail::DefinitionFor<Fixture, Definitions> && ...)
-[[nodiscard]] SuiteRegistration Suite(std::string_view name, Definitions&&... definitions) {
-    return Suite<Fixture>(name, SuiteOptions{}, std::forward<Definitions>(definitions)...);
+[[nodiscard]] SuiteRegistration Suite(detail::LocatedName name, Definitions&&... definitions) {
+    return Suite<Fixture>(std::move(name), SuiteOptions{},
+                          std::forward<Definitions>(definitions)...);
 }
 
 }

@@ -4,6 +4,7 @@
 #include <exception>
 #include <expected>
 #include <optional>
+#include <source_location>
 #include <string>
 #include <typeindex>
 
@@ -17,7 +18,8 @@ namespace Testament {
 class InternalTest {
 public:
     InternalTest(std::string name, FunctionVariant function);
-    InternalTest(std::string name, TestOptions options, FunctionVariant function,
+    InternalTest(std::string name, std::source_location location, TestOptions options,
+                 FunctionVariant function,
                  std::optional<std::type_index> fixtureType = std::nullopt);
     InternalTest(InternalTest&&) noexcept = default;
     InternalTest& operator=(InternalTest&&) noexcept = default;
@@ -29,6 +31,7 @@ public:
 
     const std::string& getName() const;
     const TestOptions& getOptions() const;
+    [[nodiscard]] std::source_location getLocation() const noexcept;
     [[nodiscard]] std::optional<std::type_index> getFixtureType() const noexcept;
 
     const ExecutionTimer& getExecutionTimer() const;
@@ -37,6 +40,7 @@ public:
 
 private:
     std::string name;
+    std::source_location location;
     TestOptions options;
     FunctionVariant function;
     std::optional<std::type_index> fixtureType;

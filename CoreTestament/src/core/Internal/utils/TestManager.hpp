@@ -26,7 +26,8 @@ public:
                      TestEventHandler* handler) const {
         if (handler) {
             handler->onTestStart(suiteInfo, {
-                test->getName(), std::chrono::duration<double>::zero(), {}, test->getOptions(),
+                test->getName(), test->getLocation(), std::chrono::duration<double>::zero(),
+                {}, test->getOptions(),
                 TestEventHandler::TestResultStatus::NotRun
             });
         }
@@ -43,7 +44,8 @@ public:
                       std::exception_ptr exception,
                       TestEventHandler* handler) {
         TestEventHandler::TestInfo testInfo{
-            test->getName(), duration, std::move(exception), test->getOptions(), status
+            test->getName(), test->getLocation(), duration, std::move(exception),
+            test->getOptions(), status
         };
 
         switch (status) {

@@ -9,14 +9,26 @@
 
 namespace Testament {
 
-InternalTest::InternalTest(std::string name_, FunctionVariant function_)
-    : InternalTest(std::move(name_), TestOptions{}, std::move(function_)) {}
+namespace {
 
-InternalTest::InternalTest(std::string name_, TestOptions options_, FunctionVariant function_,
+std::string definitionLocation(std::source_location location) {
+    return std::string{" at "} + location.file_name() + ':' + std::to_string(location.line());
+}
+
+}
+
+InternalTest::InternalTest(std::string name_, FunctionVariant function_)
+    : InternalTest(std::move(name_), std::source_location::current(), TestOptions{},
+                   std::move(function_)) {}
+
+InternalTest::InternalTest(std::string name_, std::source_location location_,
+                           TestOptions options_, FunctionVariant function_,
                            std::optional<std::type_index> fixtureType_)
-    : name(std::move(name_)), options(std::move(options_)), function(std::move(function_)),
-      fixtureType(fixtureType_) {
-    if (name.empty()) throw std::invalid_argument("Test name cannot be empty");
+    : name(std::move(name_)), location(location_), options(std::move(options_)),
+      function(std::move(function_)), fixtureType(fixtureType_) {
+    if (name.empty()) {
+        throw std::invalid_argument("Test name cannot be empty" + definitionLocation(location));
+    }
     if (options.isDisabled()) {
         status = TestStatus::Status::Skipped;
     }
@@ -66,6 +78,10 @@ const std::string& InternalTest::getName() const {
 
 const TestOptions& InternalTest::getOptions() const {
     return options;
+}
+
+std::source_location InternalTest::getLocation() const noexcept {
+    return location;
 }
 
 std::optional<std::type_index> InternalTest::getFixtureType() const noexcept {

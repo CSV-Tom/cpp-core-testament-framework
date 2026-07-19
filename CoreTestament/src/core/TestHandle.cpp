@@ -19,20 +19,22 @@ public:
     std::unique_ptr<InternalTest> test;
 };
 
-detail::TestHandle detail::RuntimeBridge::makeTest(std::string_view name, TestOptions options,
-                                                  std::move_only_function<void()> function) {
+detail::TestHandle detail::RuntimeBridge::makeTest(
+    std::string_view name, TestOptions options, std::move_only_function<void()> function,
+    std::source_location location
+) {
     return TestHandle{std::make_unique<TestHandle::Impl>(
-        std::make_unique<InternalTest>(std::string{name}, std::move(options),
+        std::make_unique<InternalTest>(std::string{name}, location, std::move(options),
                                        FunctionVariant{std::move(function)})
     )};
 }
 
 detail::TestHandle detail::RuntimeBridge::makeTest(
     std::string_view name, TestOptions options, std::type_index fixtureType,
-    std::move_only_function<void(LifecycleSuite&)> function
+    std::move_only_function<void(LifecycleSuite&)> function, std::source_location location
 ) {
     return TestHandle{std::make_unique<TestHandle::Impl>(
-        std::make_unique<InternalTest>(std::string{name}, std::move(options),
+        std::make_unique<InternalTest>(std::string{name}, location, std::move(options),
                                        FunctionVariant{std::move(function)}, fixtureType)
     )};
 }

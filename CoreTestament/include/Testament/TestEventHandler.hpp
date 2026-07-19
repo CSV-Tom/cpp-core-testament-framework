@@ -5,6 +5,7 @@
 #include <exception>
 #include <expected>
 #include <span>
+#include <source_location>
 #include <string>
 #include <string_view>
 
@@ -28,6 +29,7 @@ public:
 
     struct TestInfo {
         std::string name;
+        std::source_location location;
         std::chrono::duration<double> duration;
         std::exception_ptr exception;
         TestOptions options;
@@ -36,6 +38,7 @@ public:
 
     struct SuiteInfo {
         std::string name;
+        std::source_location location;
         unsigned int passed{};
         unsigned int failed{};
         unsigned int skipped{};

@@ -17,17 +17,27 @@
 
 namespace Testament {
 
-InternalSuite::InternalSuite(std::string name_, SuiteOptions options_)
-    : name(std::move(name_)), options(std::move(options_)),
+namespace {
+
+std::string definitionLocation(std::source_location location) {
+    return std::string{" at "} + location.file_name() + ':' + std::to_string(location.line());
+}
+
+}
+
+InternalSuite::InternalSuite(std::string name_, std::source_location location_,
+                             SuiteOptions options_)
+    : name(std::move(name_)), location(location_), options(std::move(options_)),
       testManager(statistic) {
     if (name.empty()) {
         throw std::logic_error("Suite name cannot be empty!");
     }
 }
 
-InternalSuite::InternalSuite(std::string name_, std::type_index fixtureType_,
+InternalSuite::InternalSuite(std::string name_, std::source_location location_,
+                             std::type_index fixtureType_,
                              FixtureFactory fixtureFactory_, SuiteOptions options_)
-    : InternalSuite(std::move(name_), std::move(options_)) {
+    : InternalSuite(std::move(name_), location_, std::move(options_)) {
     if (!fixtureFactory_) throw std::invalid_argument("Lifecycle suite fixture factory cannot be empty");
     fixtureFactory = std::move(fixtureFactory_);
     fixtureType = fixtureType_;
@@ -40,16 +50,23 @@ void InternalSuite::addTest(detail::TestHandle test) {
     auto internalTest = detail::TestAccess::release(std::move(test));
     if (const auto expectedFixture = internalTest->getFixtureType();
         expectedFixture && expectedFixture != fixtureType) {
-        throw std::invalid_argument("Test fixture type does not match suite fixture type");
+        throw std::invalid_argument(
+            "Test fixture type does not match suite fixture type"
+            + definitionLocation(internalTest->getLocation())
+        );
     }
     if (internalTest->getOptions().maxAttempts() == 0) {
-        throw std::invalid_argument("Test maxAttempts must be greater than zero");
+        throw std::invalid_argument(
+            "Test maxAttempts must be greater than zero"
+            + definitionLocation(internalTest->getLocation())
+        );
     }
     if (std::ranges::any_of(tests, [&internalTest](const auto& registered) {
         return registered->getName() == internalTest->getName();
     })) {
         throw std::logic_error("Test name must be unique within a suite: "
-                               + internalTest->getName());
+                               + internalTest->getName()
+                               + definitionLocation(internalTest->getLocation()));
     }
     tests.push_back(std::move(internalTest));
 }
@@ -86,12 +103,13 @@ bool InternalSuite::run() {
     totalTimer.start();
 
     if (handler) {
-        handler->onSuiteStart({name, 0, 0, 0, options});
+        handler->onSuiteStart({name, location, 0, 0, 0, options});
     }
 
     const auto suiteInfo = [this] {
         return TestEventHandler::SuiteInfo{
             name,
+            location,
             statistic.getPassedTests(),
             statistic.getFailedTests(),
             statistic.getSkippedTests(),
@@ -224,6 +242,10 @@ const std::string& InternalSuite::getName() const {
 
 const SuiteOptions& InternalSuite::getOptions() const {
     return options;
+}
+
+std::source_location InternalSuite::getLocation() const noexcept {
+    return location;
 }
 
 const TestStatistics<unsigned int>& InternalSuite::getStatistics() const {

@@ -6,6 +6,7 @@
 
 #include <functional>
 #include <memory>
+#include <source_location>
 #include <string>
 #include <string_view>
 #include <typeindex>
@@ -21,15 +22,22 @@ namespace detail {
 
 class RuntimeBridge {
 public:
-    static TestHandle makeTest(std::string_view name, TestOptions options,
-                               std::move_only_function<void()> function);
+    static TestHandle makeTest(
+        std::string_view name, TestOptions options,
+        std::move_only_function<void()> function,
+        std::source_location location = std::source_location::current()
+    );
     static TestHandle makeTest(std::string_view name, TestOptions options,
                                std::type_index fixtureType,
-                               std::move_only_function<void(LifecycleSuite&)> function);
+                               std::move_only_function<void(LifecycleSuite&)> function,
+                               std::source_location location = std::source_location::current());
 
-    static SuiteRegistration registerSuite(std::string_view name, SuiteOptions options,
+    static SuiteRegistration registerSuite(std::string_view name,
+                                           std::source_location location,
+                                           SuiteOptions options,
                                            std::vector<TestHandle> tests);
     static SuiteRegistration registerSuite(std::string_view name,
+                                           std::source_location location,
                                            std::type_index fixtureType,
                                            std::move_only_function<
                                                std::unique_ptr<LifecycleSuite>()

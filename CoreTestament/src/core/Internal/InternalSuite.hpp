@@ -12,6 +12,7 @@
 #include <memory>
 #include <optional>
 #include <regex>
+#include <source_location>
 #include <string>
 #include <string_view>
 #include <typeindex>
@@ -33,8 +34,10 @@ public:
     using FixtureFactory = std::move_only_function<std::unique_ptr<LifecycleSuite>()>;
     using TestFilter = std::function<bool(std::string_view)>;
 
-    explicit InternalSuite(std::string name, SuiteOptions options = {});
-    explicit InternalSuite(std::string name, std::type_index fixtureType,
+    explicit InternalSuite(std::string name, std::source_location location = {},
+                           SuiteOptions options = {});
+    explicit InternalSuite(std::string name, std::source_location location,
+                           std::type_index fixtureType,
                            FixtureFactory fixtureFactory, SuiteOptions options = {});
     ~InternalSuite();
 
@@ -52,6 +55,7 @@ public:
 
     const std::string& getName() const;
     const SuiteOptions& getOptions() const;
+    [[nodiscard]] std::source_location getLocation() const noexcept;
     const TestStatistics<unsigned int>& getStatistics() const;
     const ExecutionTimer& getTotalTimer() const;
 
@@ -60,6 +64,7 @@ private:
     TestEventHandler* handler{nullptr};
 
     std::string name;
+    std::source_location location;
     SuiteOptions options;
     std::vector<std::unique_ptr<InternalTest>> tests;
 
