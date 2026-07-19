@@ -5,11 +5,13 @@
 #include <list>
 #include <limits>
 #include <memory>
+#include <map>
 #include <stdexcept>
 #include <string>
 #include <string_view>
 #include <utility>
 #include <vector>
+#include <tuple>
 
 namespace {
 
@@ -195,6 +197,16 @@ int main() {
             && std::string_view{moveSource.what()} == movedFailure.what();
     }
 
+    const bool containerFormatting = Testament::Asserts::detail::formatValue(
+        std::vector{1, 2, 3}
+    ) == "[1, 2, 3]"
+        && Testament::Asserts::detail::formatValue(
+            std::map<std::string, int>{{"one", 1}, {"two", 2}}
+        ) == "[(one, 1), (two, 2)]"
+        && Testament::Asserts::detail::formatValue(
+            std::tuple{1, std::string{"two"}, 3.0}
+        ) == "(1, two, 3)";
+
     return trueFailure && falseFailure && equalsFailure && notEqualsFailure && nullFailure
         && expectedNullFailure && smartNullFailure && rangeEqualsFailure && containsFailure
         && rangeFailure && lessThanFailure && lessThanOrEqualFailure
@@ -203,7 +215,7 @@ int main() {
         && wrongExceptionFailure && nonStandardExceptionFailure && unexpectedExceptionFailure
         && optionalMessageFailure && expectationOutsideTestIsFatal
         && unformattableEqualsFailure && unformattableRangeFailure
-        && locationFailure && structuredFailure
+        && locationFailure && structuredFailure && containerFormatting
         ? 0
         : 1;
 }

@@ -15,6 +15,7 @@
 #include <string>
 #include <string_view>
 #include <type_traits>
+#include <tuple>
 #include <utility>
 
 namespace Testament::Asserts {
@@ -38,15 +39,7 @@ concept RangeComparable = requires(const T& value, const T& boundary) {
 };
 
 template <typename T>
-std::string formatValue(const T& value) {
-    if constexpr (Streamable<T>) {
-        std::ostringstream output;
-        output << value;
-        return output.str();
-    } else {
-        return "<unformattable value>";
-    }
-}
+std::string formatValue(const T& value);
 
 template <typename Range>
 requires std::ranges::input_range<const Range>
@@ -59,6 +52,48 @@ std::string formatRange(const Range& range) {
         formatted += formatValue(value);
     }
     return formatted + ']';
+}
+
+template <typename T>
+struct IsPair : std::false_type {};
+
+template <typename First, typename Second>
+struct IsPair<std::pair<First, Second>> : std::true_type {};
+
+template <typename T>
+struct IsTuple : std::false_type {};
+
+template <typename... Values>
+struct IsTuple<std::tuple<Values...>> : std::true_type {};
+
+template <typename T>
+concept PairOrTuple = IsPair<std::remove_cvref_t<T>>::value
+    || IsTuple<std::remove_cvref_t<T>>::value;
+
+template <PairOrTuple T>
+std::string formatTuple(const T& value) {
+    std::string formatted{"("};
+    bool first = true;
+    std::apply([&](const auto&... elements) {
+        ((formatted += std::exchange(first, false) ? "" : ", ",
+          formatted += formatValue(elements)), ...);
+    }, value);
+    return formatted + ')';
+}
+
+template <typename T>
+std::string formatValue(const T& value) {
+    if constexpr (Streamable<T>) {
+        std::ostringstream output;
+        output << value;
+        return output.str();
+    } else if constexpr (PairOrTuple<T>) {
+        return formatTuple(value);
+    } else if constexpr (std::ranges::input_range<const T>) {
+        return formatRange(value);
+    } else {
+        return "<unformattable value>";
+    }
 }
 
 [[nodiscard]] bool recordNonFatalFailure(const AssertionFailure& failure);
