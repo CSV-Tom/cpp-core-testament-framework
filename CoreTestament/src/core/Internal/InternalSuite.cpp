@@ -191,6 +191,12 @@ bool InternalSuite::run(TestEventHandler* handler, RunConfiguration configuratio
             while (true) {
                 auto result = testManager.executeAttempt(nullptr, *test);
                 duration += test->getExecutionTimer().getDuration();
+                if (test->getStatus().isSkipped()) {
+                    return TestResult{
+                        TestEventHandler::TestResultStatus::Skipped, duration,
+                        test->getException()
+                    };
+                }
                 if (result) {
                     return TestResult{
                         TestEventHandler::TestResultStatus::Passed, duration, {}
@@ -291,6 +297,9 @@ bool InternalSuite::run(TestEventHandler* handler, RunConfiguration configuratio
             if (!lifecycleError.empty()) {
                 status = TestEventHandler::TestResultStatus::LifecycleError;
                 exception = std::make_exception_ptr(std::runtime_error(lifecycleError));
+            } else if (test->getStatus().isSkipped()) {
+                status = TestEventHandler::TestResultStatus::Skipped;
+                exception = test->getException();
             } else if (!result) {
                 status = TestEventHandler::TestResultStatus::Failed;
                 exception = result.error();
@@ -299,7 +308,11 @@ bool InternalSuite::run(TestEventHandler* handler, RunConfiguration configuratio
                 exception = {};
             }
 
-            if (status == TestEventHandler::TestResultStatus::Passed || remainingAttempts <= 1) break;
+            if (status == TestEventHandler::TestResultStatus::Passed
+                || status == TestEventHandler::TestResultStatus::Skipped
+                || remainingAttempts <= 1) {
+                break;
+            }
             --remainingAttempts;
         }
 

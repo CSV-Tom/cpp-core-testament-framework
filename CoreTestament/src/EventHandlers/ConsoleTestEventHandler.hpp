@@ -74,7 +74,15 @@ public:
     }
 
     void onTestSkipped(const SuiteInfo&, const TestInfo& test) override {
-        std::cout << "⏩ SKIPPED: " << test.name << formatDuration(test.duration) << std::endl;
+        std::cout << "⏩ SKIPPED: " << test.name << formatDuration(test.duration);
+        if (test.exception) {
+            try {
+                std::rethrow_exception(test.exception);
+            } catch (const std::exception& error) {
+                std::cout << "- " << error.what();
+            } catch (...) {}
+        }
+        std::cout << std::endl;
     }
 
     void onFinalReport(unsigned int suites, unsigned int passed, unsigned int failed,

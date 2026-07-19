@@ -1,5 +1,6 @@
 #include "InternalTest.hpp"
 #include "AssertionCollection.hpp"
+#include "Testament/SkipRequest.hpp"
 
 #include "utils/TestStatistics.hpp"
 
@@ -37,7 +38,7 @@ InternalTest::InternalTest(std::string name_, std::source_location location_,
 InternalTest::~InternalTest() = default;
 
 std::expected<void, std::exception_ptr> InternalTest::execute(LifecycleSuite* fixture) {
-    if (status == TestStatus::Status::Skipped) {
+    if (options.isDisabled()) {
         return {};
     }
 
@@ -62,6 +63,12 @@ std::expected<void, std::exception_ptr> InternalTest::execute(LifecycleSuite* fi
                 throw std::runtime_error("Invalid FunctionVariant type");
             }
         }, function);
+    } catch (const SkipRequest&) {
+        exception = std::current_exception();
+        (void)Asserts::detail::finishAssertionCollection();
+        executionTimer.stop();
+        status = TestStatus::Status::Skipped;
+        return {};
     } catch (...) {
         exception = Asserts::detail::finishAssertionCollection(std::current_exception());
     }

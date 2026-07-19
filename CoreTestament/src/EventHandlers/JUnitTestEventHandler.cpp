@@ -182,7 +182,9 @@ void JUnitTestEventHandler::onTestFailed(const SuiteInfo& suite, const TestInfo&
 
 void JUnitTestEventHandler::onTestSkipped(const SuiteInfo& suite, const TestInfo& test) {
     if (!outputPath) return;
-    suiteResult(suite).tests.push_back({test, Status::Skipped, {}});
+    suiteResult(suite).tests.push_back({
+        test, Status::Skipped, test.exception ? exceptionMessage(test.exception) : std::string{}
+    });
 }
 
 void JUnitTestEventHandler::onFinalReport(unsigned int, unsigned int, unsigned int,
@@ -276,7 +278,11 @@ void JUnitTestEventHandler::writeReport() {
             if (test.status == Status::Passed) {
                 output << "/>\n";
             } else if (test.status == Status::Skipped) {
-                output << "><skipped/></testcase>\n";
+                output << "><skipped";
+                if (!test.failureMessage.empty()) {
+                    output << " message=\"" << escapeXml(test.failureMessage) << "\"";
+                }
+                output << "/></testcase>\n";
             } else if (test.status == Status::Failed) {
                 output << "><failure message=\"" << escapeXml(test.failureMessage)
                        << "\">" << escapeXml(test.failureMessage)

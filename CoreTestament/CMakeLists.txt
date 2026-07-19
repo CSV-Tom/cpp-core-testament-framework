@@ -35,6 +35,7 @@ target_sources(${PROJECT_NAME}
         src/core/TestOptions.cpp
         src/core/AssertionFailure.cpp
         src/core/Asserts.cpp
+        src/core/SkipRequest.cpp
         src/EventHandlers/JUnitTestEventHandler.cpp
     PUBLIC FILE_SET HEADERS
         BASE_DIRS include
@@ -46,6 +47,8 @@ target_sources(${PROJECT_NAME}
             include/Testament/ParameterizedTest.hpp
             include/Testament/Runner.hpp
             include/Testament/Reporters.hpp
+            include/Testament/Skip.hpp
+            include/Testament/SkipRequest.hpp
             include/Testament/Suite.hpp
             include/Testament/SuiteOptions.hpp
             include/Testament/SuiteRegistration.hpp
@@ -252,6 +255,11 @@ if(BUILD_TESTING)
     add_testament_test(
         ParallelTestValidation ParallelTest
         tests/Tests/ParallelTestValidation.cpp
+    )
+
+    add_testament_test(
+        RuntimeSkipValidation RuntimeSkip
+        tests/Tests/RuntimeSkipValidation.cpp
     )
 
     add_testament_test(

@@ -6,6 +6,8 @@
 #include "Testament/ParameterizedTest.hpp"
 #include "Testament/Reporters.hpp"
 #include "Testament/Runner.hpp"
+#include "Testament/Skip.hpp"
+#include "Testament/SkipRequest.hpp"
 #include "Testament/Suite.hpp"
 #include "Testament/SuiteOptions.hpp"
 #include "Testament/Test.hpp"
