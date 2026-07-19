@@ -9,6 +9,7 @@
 #include "EventHandlers/TestEventHandlerChain.hpp"
 #include "Internal/InternalRegistry.hpp"
 #include "Internal/InternalSuite.hpp"
+#include "Internal/FilterPattern.hpp"
 #include "Internal/utils/TestStatistics.hpp"
 
 #include <algorithm>
@@ -114,6 +115,20 @@ int Runner::run(int argc, char** argv) {
         std::cerr << "Invalid command-line arguments\n";
         return 2;
     }
+    std::optional<std::string> commandLineFilter;
+    for (const auto argument : *arguments) {
+        if (!argument.starts_with("--filter=")) continue;
+        if (commandLineFilter) {
+            std::cerr << "--filter may only be specified once\n";
+            return 2;
+        }
+        const auto value = argument.substr(std::string_view{"--filter="}.size());
+        if (value.empty() || value == "-" || value == "tag:" || value == "-tag:") {
+            std::cerr << "--filter requires a non-empty pattern\n";
+            return 2;
+        }
+        commandLineFilter = value;
+    }
 
     const std::scoped_lock runLock(testRunMutex);
     if (!impl) impl = std::make_unique<Impl>();
@@ -135,7 +150,7 @@ int Runner::run(int argc, char** argv) {
     auto suites = registry.getAllSuites();
     if (impl->suiteFilter) {
         std::erase_if(suites, [this](const auto& suite) {
-            return suite->getName() != *impl->suiteFilter;
+            return !detail::matchesNameFilter(suite->getName(), *impl->suiteFilter);
         });
     }
     std::ranges::sort(suites, [](const auto& left, const auto& right) {
@@ -155,10 +170,14 @@ int Runner::run(int argc, char** argv) {
         detail::BufferedTestEventHandler events;
     };
     const std::string testFilter = impl->testFilter.value_or("");
-    const auto executeSuite = [this, &testFilter](const auto& suite) {
+    const std::string cliFilter = commandLineFilter.value_or("");
+    const auto executeSuite = [this, &testFilter, &cliFilter](const auto& suite) {
         SuiteResult result;
         result.hooksSucceeded = suite->run(
-            &result.events, testFilter, impl->maxParallelTests
+            &result.events,
+            InternalSuite::RunConfiguration{
+                testFilter, cliFilter, impl->maxParallelTests
+            }
         );
         result.statistics = suite->getStatistics();
         return result;

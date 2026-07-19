@@ -34,6 +34,11 @@ public:
     using Callback = HookManager::Callback;
     using FixtureFactory = std::move_only_function<std::unique_ptr<LifecycleSuite>()>;
     using TestFilter = std::function<bool(std::string_view)>;
+    struct RunConfiguration {
+        std::string_view testNameFilter;
+        std::string_view filterExpression;
+        std::size_t maxParallelTests{1};
+    };
 
     explicit InternalSuite(std::string name, std::source_location location = {},
                            SuiteOptions options = {});
@@ -51,9 +56,8 @@ public:
 
     void setTestFilter(std::variant<std::string, std::regex> filter);
 
-    [[nodiscard]] bool run(TestEventHandler* handler = nullptr,
-                           std::string_view testNameFilter = {},
-                           std::size_t maxParallelTests = 1);
+    [[nodiscard]] bool run(TestEventHandler* handler = nullptr);
+    [[nodiscard]] bool run(TestEventHandler* handler, RunConfiguration configuration);
 
     const std::string& getName() const;
     const SuiteOptions& getOptions() const;

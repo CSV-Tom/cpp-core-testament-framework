@@ -1,6 +1,7 @@
 #include "InternalSuite.hpp"
 #include "InternalTest.hpp"
 #include "TestAccess.hpp"
+#include "FilterPattern.hpp"
 
 #include "Testament/LifecycleSuite.hpp"
 #include "Testament/detail/TestHandle.hpp"
@@ -85,8 +86,11 @@ void InternalSuite::setAfterSuite(Callback callback)  {
     hookManager.setAfterSuite(std::move(callback));
 }
 
-bool InternalSuite::run(TestEventHandler* handler, std::string_view testNameFilter,
-                        std::size_t maxParallelTests) {
+bool InternalSuite::run(TestEventHandler* handler) {
+    return run(handler, RunConfiguration{});
+}
+
+bool InternalSuite::run(TestEventHandler* handler, RunConfiguration configuration) {
     statistic.reset();
     totalTimer.reset();
     hookManager.resetErrors();
@@ -117,8 +121,14 @@ bool InternalSuite::run(TestEventHandler* handler, std::string_view testNameFilt
     const auto reportSuiteError = [&handler, &suiteInfo](std::string_view error) {
         if (handler) handler->onSuiteAbort(suiteInfo(), error);
     };
-    const auto selected = [this, testNameFilter](const auto& test) {
-        return (testNameFilter.empty() || test->getName() == testNameFilter)
+    const auto selected = [this, configuration](const auto& test) {
+        return (configuration.testNameFilter.empty()
+                || detail::matchesNameFilter(test->getName(), configuration.testNameFilter))
+            && (configuration.filterExpression.empty()
+                || detail::matchesTestFilter(
+                    name, options.tags(), test->getName(), test->getOptions().tags(),
+                    configuration.filterExpression
+                ))
             && (!testFilter || testFilter(test->getName()));
     };
     const auto skipSelectedTests = [this, &handler, &suiteInfo, &selected] {
@@ -162,7 +172,8 @@ bool InternalSuite::run(TestEventHandler* handler, std::string_view testNameFilt
     }
 
     bool hooksSucceeded = true;
-    if (!fixtureFactory && !hookManager.hasPerTestHooks() && maxParallelTests > 1) {
+    if (!fixtureFactory && !hookManager.hasPerTestHooks()
+        && configuration.maxParallelTests > 1) {
         struct TestResult {
             TestEventHandler::TestResultStatus status;
             std::chrono::duration<double> duration;
@@ -223,7 +234,7 @@ bool InternalSuite::run(TestEventHandler* handler, std::string_view testNameFilt
             );
             const auto endIndex = static_cast<std::size_t>(concurrentEnd - selectedTests.begin());
             while (index < endIndex) {
-                const auto count = std::min(maxParallelTests, endIndex - index);
+                const auto count = std::min(configuration.maxParallelTests, endIndex - index);
                 std::vector<std::future<TestResult>> running;
                 running.reserve(count);
                 for (std::size_t offset = 0; offset < count; ++offset) {

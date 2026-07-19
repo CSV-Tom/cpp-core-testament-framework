@@ -27,6 +27,7 @@ int main() {
     unsigned int excludedRuns{};
     auto selectedSuite = Testament::Suite(
         "selected suite",
+        Testament::SuiteOptions{}.tag("integration"),
         Testament::Test("selected test", [&selectedRuns] { ++selectedRuns; }),
         Testament::Test("excluded test", [&excludedRuns] { ++excludedRuns; })
     );
@@ -39,13 +40,22 @@ int main() {
     auto* recording = handler.get();
     Testament::Runner runner;
     runner.addHandler(std::move(handler))
-        .filterSuite("selected suite")
-        .filterTest("selected test");
+        .filterSuite("selected*")
+        .filterTest("selected ?est");
+
+    const auto filteredRun = runner.run(0, nullptr);
+
+    Testament::Runner cliRunner;
+    std::string executable{"RunnerFilterValidation"};
+    std::string filter{"--filter=tag:integ*"};
+    char* arguments[]{executable.data(), filter.data()};
+    const auto cliRun = cliRunner.run(2, arguments);
 
     return selectedSuite && excludedSuite
-        && runner.run(0, nullptr) == 0
-        && selectedRuns == 1
-        && excludedRuns == 0
+        && filteredRun == 0
+        && cliRun == 0
+        && selectedRuns == 2
+        && excludedRuns == 1
         && recording->suites == std::vector<std::string>{"selected suite"}
         && recording->tests == std::vector<std::string>{"selected test"}
         ? 0
