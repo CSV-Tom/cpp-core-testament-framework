@@ -6,7 +6,7 @@ on:
 
 jobs:
   unix:
-    name: ${{ matrix.name }}
+    name: ${{ matrix.name }} ${{ matrix.build_type }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -16,18 +16,32 @@ jobs:
             os: ubuntu-24.04
             toolchain: toolchains/gcc-toolchain.cmake
             packages: ""
+            build_type: Debug
+          - name: GCC with libstdc++
+            os: ubuntu-24.04
+            toolchain: toolchains/gcc-toolchain.cmake
+            packages: ""
+            build_type: Release
           - name: Clang with libstdc++
             os: ubuntu-24.04
             toolchain: toolchains/clang-toolchain.cmake
             packages: ""
+            build_type: Debug
+          - name: Clang with libstdc++
+            os: ubuntu-24.04
+            toolchain: toolchains/clang-toolchain.cmake
+            packages: ""
+            build_type: Release
           - name: Clang with libc++
             os: ubuntu-24.04
             toolchain: toolchains/clang-libcxx-toolchain.cmake
             packages: libc++-dev libc++abi-dev
+            build_type: Debug
           - name: AppleClang with libc++
             os: macos-latest
             toolchain: toolchains/clang-toolchain.cmake
             packages: ""
+            build_type: Debug
 
     steps:
       - uses: actions/checkout@v6
@@ -44,14 +58,52 @@ jobs:
         run: >-
           cmake -S . -B build
           -DBUILD_TESTING=ON
-          -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
           -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }}
 
       - name: Build
         run: cmake --build build --parallel 2
 
       - name: Test
-        run: ctest --test-dir build --output-on-failure
+        run: ctest --test-dir build --output-on-failure -LE integration
+
+      - name: Install and test consumer
+        run: ctest --test-dir build --output-on-failure -L integration
+
+  sanitizers:
+    name: GCC ASan and UBSan
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Configure
+        env:
+          CXXFLAGS: -Werror
+        run: cmake --preset sanitizers
+
+      - name: Build
+        run: cmake --build --preset sanitizers
+
+      - name: Test
+        run: ctest --preset sanitizers -LE integration
+
+  format:
+    name: clang-format
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install clang-format
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes clang-format
+
+      - name: Check formatting
+        run: |
+          ./scripts/format.sh
+          git diff --exit-code
 
   msvc:
     name: MSVC
@@ -69,4 +121,7 @@ jobs:
         run: cmake --build build --config Debug --parallel 2
 
       - name: Test
-        run: ctest --test-dir build --build-config Debug --output-on-failure
+        run: ctest --test-dir build --build-config Debug --output-on-failure -LE integration
+
+      - name: Install and test consumer
+        run: ctest --test-dir build --build-config Debug --output-on-failure -L integration
