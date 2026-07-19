@@ -1,5 +1,6 @@
 #include "Testament/Runner.hpp"
 
+#include "Testament/GlobalEnvironment.hpp"
 #include "Testament/Reporters.hpp"
 #include "Testament/TestEventHandler.hpp"
 
@@ -62,6 +63,7 @@ void printTags(std::span<const std::string> tags) {
 class Runner::Impl {
 public:
     std::vector<std::unique_ptr<TestEventHandler>> handlers;
+    std::vector<std::unique_ptr<GlobalEnvironment>> environments;
     std::optional<std::string> suiteFilter;
     std::optional<std::string> testFilter;
     std::size_t maxParallelSuites{1};
@@ -80,6 +82,14 @@ Runner& Runner::addHandler(std::unique_ptr<TestEventHandler> handler) {
     if (handler) {
         if (!impl) impl = std::make_unique<Impl>();
         impl->handlers.push_back(std::move(handler));
+    }
+    return *this;
+}
+
+Runner& Runner::addEnvironment(std::unique_ptr<GlobalEnvironment> environment) {
+    if (environment) {
+        if (!impl) impl = std::make_unique<Impl>();
+        impl->environments.push_back(std::move(environment));
     }
     return *this;
 }
@@ -203,6 +213,37 @@ int Runner::run(int argc, char** argv) {
         return 2;
     }
 
+    std::size_t activeEnvironments{};
+    const auto tearDownEnvironments = [this, &activeEnvironments] {
+        bool succeeded = true;
+        while (activeEnvironments > 0) {
+            try {
+                impl->environments[--activeEnvironments]->tearDown();
+            } catch (const std::exception& error) {
+                std::cerr << "Global environment teardown failed: " << error.what() << '\n';
+                succeeded = false;
+            } catch (...) {
+                std::cerr << "Global environment teardown failed: unknown exception\n";
+                succeeded = false;
+            }
+        }
+        return succeeded;
+    };
+    try {
+        for (const auto& environment : impl->environments) {
+            environment->setUp();
+            ++activeEnvironments;
+        }
+    } catch (const std::exception& error) {
+        std::cerr << "Global environment setup failed: " << error.what() << '\n';
+        tearDownEnvironments();
+        return 1;
+    } catch (...) {
+        std::cerr << "Global environment setup failed: unknown exception\n";
+        tearDownEnvironments();
+        return 1;
+    }
+
     chain.onStartReport(static_cast<unsigned int>(suites.size()));
 
     struct SuiteResult {
@@ -258,6 +299,8 @@ int Runner::run(int argc, char** argv) {
         }
     }
 
+    const bool environmentsSucceeded = tearDownEnvironments();
+
     chain.onFinalReport(
         static_cast<unsigned int>(suites.size()),
         total.getPassedTests(),
@@ -272,7 +315,7 @@ int Runner::run(int argc, char** argv) {
     }
 
     return total.getFailedTests() == 0 && total.getErrors() == 0
-        && hooksSucceeded && handlerError.empty() ? 0 : 1;
+        && hooksSucceeded && environmentsSucceeded && handlerError.empty() ? 0 : 1;
 }
 
 std::unique_ptr<TestEventHandler> makeConsoleHandler() {

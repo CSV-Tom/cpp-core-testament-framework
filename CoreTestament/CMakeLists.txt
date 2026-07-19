@@ -43,6 +43,7 @@ target_sources(${PROJECT_NAME}
             include/Testament/Asserts.hpp
             include/Testament/AssertionFailure.hpp
             include/Testament/Execution.hpp
+            include/Testament/GlobalEnvironment.hpp
             include/Testament/LifecycleSuite.hpp
             include/Testament/ParameterizedTest.hpp
             include/Testament/Runner.hpp
@@ -265,6 +266,11 @@ if(BUILD_TESTING)
     add_testament_test(
         ListTestsValidation ListTests
         tests/Tests/ListTestsValidation.cpp
+    )
+
+    add_testament_test(
+        GlobalEnvironmentValidation GlobalEnvironment
+        tests/Tests/GlobalEnvironmentValidation.cpp
     )
 
     add_testament_test(

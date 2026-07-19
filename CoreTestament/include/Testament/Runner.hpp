@@ -8,6 +8,7 @@
 namespace Testament {
 
 class TestEventHandler;
+class GlobalEnvironment;
 
 class Runner {
 public:
@@ -22,6 +23,7 @@ public:
 
     // Moving transfers all handlers. A moved-from Runner remains reusable as an empty Runner.
     Runner& addHandler(std::unique_ptr<TestEventHandler> handler);
+    Runner& addEnvironment(std::unique_ptr<GlobalEnvironment> environment);
     // Filters use exact names and are applied before handlers receive any events.
     Runner& filterSuite(std::string_view name);
     Runner& filterTest(std::string_view name);
