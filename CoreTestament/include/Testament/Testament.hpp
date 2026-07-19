@@ -14,5 +14,6 @@
 #include "Testament/Test.hpp"
 #include "Testament/TestCase.hpp"
 #include "Testament/TestOptions.hpp"
+#include "Testament/Trace.hpp"
 
 #endif

@@ -1,6 +1,7 @@
 #include "Testament/Asserts.hpp"
 
 #include "Internal/AssertionCollection.hpp"
+#include "Internal/TraceContext.hpp"
 
 #include <exception>
 #include <sstream>
@@ -68,8 +69,10 @@ bool recordNonFatalFailure(const AssertionFailure& failure) {
 
 void failAssertion(std::string assertion, std::string expected, std::string actual,
                    std::string_view message, std::source_location location) {
+    auto contextualMessage = std::string{message};
+    contextualMessage += Testament::detail::currentTrace();
     throw AssertionFailure(std::move(assertion), std::move(expected), std::move(actual),
-                           std::string{message}, location);
+                           std::move(contextualMessage), location);
 }
 
 void failUnexpectedException(std::string assertion, std::string expected,

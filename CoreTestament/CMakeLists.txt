@@ -36,6 +36,7 @@ target_sources(${PROJECT_NAME}
         src/core/AssertionFailure.cpp
         src/core/Asserts.cpp
         src/core/SkipRequest.cpp
+        src/core/Trace.cpp
         src/EventHandlers/JUnitTestEventHandler.cpp
     PUBLIC FILE_SET HEADERS
         BASE_DIRS include
@@ -57,6 +58,7 @@ target_sources(${PROJECT_NAME}
             include/Testament/TestCase.hpp
             include/Testament/TestEventHandler.hpp
             include/Testament/TestOptions.hpp
+            include/Testament/Trace.hpp
             include/Testament/Testament.hpp
             include/Testament/detail/CaseSet.hpp
             include/Testament/detail/Concepts.hpp
@@ -276,6 +278,11 @@ if(BUILD_TESTING)
     add_testament_test(
         RepeatShuffleValidation RepeatShuffle
         tests/Tests/RepeatShuffleValidation.cpp
+    )
+
+    add_testament_test(
+        TraceValidation Trace
+        tests/Tests/TraceValidation.cpp
     )
 
     add_testament_test(
