@@ -26,7 +26,11 @@ target_sources(${PROJECT_NAME}
         src/core/Internal/InternalSuite.cpp
         src/core/Internal/InternalRegistry.cpp
         src/core/Internal/ConfigurationDiagnostics.cpp
+        src/core/Internal/CommandLineOptions.cpp
+        src/core/Internal/EnvironmentSession.cpp
         src/core/Internal/SuiteAssembler.cpp
+        src/core/Internal/SuiteScheduler.cpp
+        src/core/Internal/TestCatalog.cpp
         src/core/Runner.cpp
         src/core/DefaultRun.cpp
         src/core/SuiteRegistration.cpp
