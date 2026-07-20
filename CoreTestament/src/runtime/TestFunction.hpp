@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Testament/detail/MoveOnlyFunction.hpp"
-
+#include <functional>
 #include <variant>
 
 namespace Testament {
@@ -11,8 +10,8 @@ class LifecycleSuite;
 namespace detail {
 
 using TestFunction = std::variant<
-    MoveOnlyFunction<void()>,
-    MoveOnlyFunction<void(LifecycleSuite&)>
+    std::move_only_function<void()>,
+    std::move_only_function<void(LifecycleSuite&)>
 >;
 
 }

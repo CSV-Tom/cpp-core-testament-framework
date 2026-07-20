@@ -30,7 +30,7 @@ std::vector<TestHandle> ParameterizedTestDefinition<Callable, Args...>::material
         if constexpr (std::same_as<Fixture, void>) {
             if constexpr (std::copy_constructible<Callable>) {
                 tests.push_back(RuntimeBridge::makeTest(
-                    testName, mOptions, MoveOnlyFunction<void()>{
+                    testName, mOptions, std::move_only_function<void()>{
                         [callable = mCallable, values = std::move(values)] mutable {
                             std::apply(callable, *values);
                         }
@@ -38,7 +38,7 @@ std::vector<TestHandle> ParameterizedTestDefinition<Callable, Args...>::material
                 ));
             } else {
                 tests.push_back(RuntimeBridge::makeTest(
-                    testName, mOptions, MoveOnlyFunction<void()>{
+                    testName, mOptions, std::move_only_function<void()>{
                         [callable = synchronizedCallable, values = std::move(values)] {
                             std::scoped_lock lock(callable->mutex);
                             std::apply(callable->callable, *values);
@@ -49,7 +49,7 @@ std::vector<TestHandle> ParameterizedTestDefinition<Callable, Args...>::material
         } else if constexpr (std::copy_constructible<Callable>) {
             tests.push_back(RuntimeBridge::makeTest(
                 testName, mOptions, std::type_index(typeid(Fixture)),
-                MoveOnlyFunction<void(LifecycleSuite&)>{
+                std::move_only_function<void(LifecycleSuite&)>{
                     [callable = mCallable, values = std::move(values)]
                     (LifecycleSuite& fixture) mutable {
                         auto* typedFixture = dynamic_cast<Fixture*>(&fixture);
@@ -65,7 +65,7 @@ std::vector<TestHandle> ParameterizedTestDefinition<Callable, Args...>::material
         } else {
             tests.push_back(RuntimeBridge::makeTest(
                 testName, mOptions, std::type_index(typeid(Fixture)),
-                MoveOnlyFunction<void(LifecycleSuite&)>{
+                std::move_only_function<void(LifecycleSuite&)>{
                     [callable = synchronizedCallable, values = std::move(values)]
                     (LifecycleSuite& fixture) mutable {
                         auto* typedFixture = dynamic_cast<Fixture*>(&fixture);

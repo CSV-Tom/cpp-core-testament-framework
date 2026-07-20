@@ -15,12 +15,12 @@ std::vector<TestHandle> TestDefinition<Callable>::materialize() && {
     if constexpr (std::same_as<Fixture, void>) {
         tests.push_back(RuntimeBridge::makeTest(
             mName, std::move(mOptions),
-            MoveOnlyFunction<void()>{std::move(mCallable)}, mLocation
+            std::move_only_function<void()>{std::move(mCallable)}, mLocation
         ));
     } else {
         tests.push_back(RuntimeBridge::makeTest(
             mName, std::move(mOptions), std::type_index(typeid(Fixture)),
-            MoveOnlyFunction<void(LifecycleSuite&)>{
+            std::move_only_function<void(LifecycleSuite&)>{
                 [callable = std::move(mCallable)](LifecycleSuite& fixture) mutable {
                     auto* typedFixture = dynamic_cast<Fixture*>(&fixture);
                     if (!typedFixture) {

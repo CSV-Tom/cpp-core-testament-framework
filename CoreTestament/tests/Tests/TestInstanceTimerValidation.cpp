@@ -9,7 +9,7 @@ int main() {
     bool firstExecution = true;
     Testament::detail::TestInstance test(
         "throwing test",
-        Testament::detail::TestFunction{Testament::detail::MoveOnlyFunction<void()>([&firstExecution] {
+        Testament::detail::TestFunction{std::move_only_function<void()>([&firstExecution] {
             if (firstExecution) {
                 firstExecution = false;
                 throw std::runtime_error("expected failure");

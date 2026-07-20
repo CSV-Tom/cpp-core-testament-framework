@@ -2,7 +2,6 @@
 
 #include "Testament/SuiteOptions.hpp"
 #include "Testament/TestEventHandler.hpp"
-#include "Testament/detail/MoveOnlyFunction.hpp"
 
 #include "Stopwatch.hpp"
 #include "HookExecutor.hpp"
@@ -31,7 +30,7 @@ class TestHandle;
 class SuiteInstance {
 public:
     using Callback = HookExecutor::Callback;
-    using FixtureFactory = MoveOnlyFunction<std::unique_ptr<LifecycleSuite>()>;
+    using FixtureFactory = std::move_only_function<std::unique_ptr<LifecycleSuite>()>;
     struct RunConfiguration {
         std::string_view testNameFilter;
         std::string_view filterExpression;

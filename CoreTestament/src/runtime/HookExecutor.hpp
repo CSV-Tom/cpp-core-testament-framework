@@ -1,7 +1,7 @@
 #pragma once
 
 #include <exception>
-#include "Testament/detail/MoveOnlyFunction.hpp"
+#include <functional>
 #include <sstream>
 #include <string>
 #include <string_view>
@@ -12,7 +12,7 @@ namespace Testament::detail {
 
 class HookExecutor {
 public:
-    using Callback = MoveOnlyFunction<void()>;
+    using Callback = std::move_only_function<void()>;
 
     void setBeforeSuite(Callback callback) {
         mBeforeSuiteHook = std::move(callback);

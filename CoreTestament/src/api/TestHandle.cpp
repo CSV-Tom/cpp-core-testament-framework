@@ -21,7 +21,7 @@ public:
 };
 
 detail::TestHandle detail::RuntimeBridge::makeTest(
-    std::string_view name, TestOptions options, detail::MoveOnlyFunction<void()> function,
+    std::string_view name, TestOptions options, std::move_only_function<void()> function,
     std::source_location location
 ) {
     return TestHandle{std::make_unique<TestHandle::Impl>(
@@ -32,7 +32,7 @@ detail::TestHandle detail::RuntimeBridge::makeTest(
 
 detail::TestHandle detail::RuntimeBridge::makeTest(
     std::string_view name, TestOptions options, std::type_index fixtureType,
-    detail::MoveOnlyFunction<void(LifecycleSuite&)> function, std::source_location location
+    std::move_only_function<void(LifecycleSuite&)> function, std::source_location location
 ) {
     return TestHandle{std::make_unique<TestHandle::Impl>(
         std::make_unique<TestInstance>(std::string{name}, location, std::move(options),

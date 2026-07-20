@@ -78,8 +78,6 @@ released yet.
   detected by CMake when invoking the compiler directly.
 - Linux CI uses Ubuntu 26.04 with Clang 22 and matching standard-library packages
   so required C++23 facilities are not taken from an older runner default.
-- Move-only callbacks use the standard C++23 implementation when available and
-  a compatible internal type erasure on Apple libc++ versions that omit it.
 
 ### Removed
 
