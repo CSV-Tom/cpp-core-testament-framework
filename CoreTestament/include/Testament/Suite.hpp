@@ -1,6 +1,7 @@
 #ifndef TESTAMENT_SUITE_HPP
 #define TESTAMENT_SUITE_HPP
 
+#include "Testament/LifecycleSuite.hpp"
 #include "Testament/SuiteOptions.hpp"
 #include "Testament/SuiteRegistration.hpp"
 #include "Testament/detail/Concepts.hpp"

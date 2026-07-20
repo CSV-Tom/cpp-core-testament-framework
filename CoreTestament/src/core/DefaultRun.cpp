@@ -1,6 +1,7 @@
 #include "Testament/Runner.hpp"
 
 #include "Testament/Reporters.hpp"
+#include "Testament/TestEventHandler.hpp"
 
 namespace Testament {
 

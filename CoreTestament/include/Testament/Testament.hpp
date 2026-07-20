@@ -2,6 +2,7 @@
 #define TESTAMENT_TESTAMENT_HPP
 
 #include "Testament/Asserts.hpp"
+#include "Testament/Execution.hpp"
 #include "Testament/GlobalEnvironment.hpp"
 #include "Testament/LifecycleSuite.hpp"
 #include "Testament/ParameterizedTest.hpp"
@@ -13,6 +14,7 @@
 #include "Testament/SuiteOptions.hpp"
 #include "Testament/Test.hpp"
 #include "Testament/TestCase.hpp"
+#include "Testament/TestEventHandler.hpp"
 #include "Testament/TestOptions.hpp"
 #include "Testament/Trace.hpp"
 
