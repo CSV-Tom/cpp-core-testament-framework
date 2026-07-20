@@ -7,9 +7,48 @@ if(PROJECT_IS_TOP_LEVEL)
 endif()
 
 include(CMakePackageConfigHelpers)
+include(CheckCXXSourceCompiles)
 include(GenerateExportHeader)
 include(GNUInstallDirs)
 find_package(Threads REQUIRED)
+
+if(DEFINED CMAKE_CXX_STANDARD)
+    set(CORE_TESTAMENT_SAVED_CXX_STANDARD "${CMAKE_CXX_STANDARD}")
+    set(CORE_TESTAMENT_RESTORE_CXX_STANDARD ON)
+endif()
+if(DEFINED CMAKE_CXX_STANDARD_REQUIRED)
+    set(CORE_TESTAMENT_SAVED_CXX_STANDARD_REQUIRED "${CMAKE_CXX_STANDARD_REQUIRED}")
+    set(CORE_TESTAMENT_RESTORE_CXX_STANDARD_REQUIRED ON)
+endif()
+
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+check_cxx_source_compiles([=[
+    #include <expected>
+
+    int main() {
+        std::expected<int, int> result{42};
+        return result.value() == 42 ? 0 : 1;
+    }
+]=] CORE_TESTAMENT_HAS_STD_EXPECTED)
+
+if(CORE_TESTAMENT_RESTORE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD "${CORE_TESTAMENT_SAVED_CXX_STANDARD}")
+else()
+    unset(CMAKE_CXX_STANDARD)
+endif()
+if(CORE_TESTAMENT_RESTORE_CXX_STANDARD_REQUIRED)
+    set(CMAKE_CXX_STANDARD_REQUIRED "${CORE_TESTAMENT_SAVED_CXX_STANDARD_REQUIRED}")
+else()
+    unset(CMAKE_CXX_STANDARD_REQUIRED)
+endif()
+
+if(NOT CORE_TESTAMENT_HAS_STD_EXPECTED)
+    message(FATAL_ERROR
+        "CoreTestament requires a C++23 standard library with std::expected. "
+        "Upgrade both the compiler and its selected standard library."
+    )
+endif()
 
 # Allow user to build as SHARED or STATIC
 option(BUILD_SHARED_LIBS "Build CoreTestament as a shared library" OFF)

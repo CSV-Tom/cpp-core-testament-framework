@@ -13,29 +13,29 @@ jobs:
       matrix:
         include:
           - name: GCC with libstdc++
-            os: ubuntu-24.04
+            os: ubuntu-26.04
             toolchain: toolchains/gcc-toolchain.cmake
             packages: ""
             build_type: Debug
           - name: GCC with libstdc++
-            os: ubuntu-24.04
+            os: ubuntu-26.04
             toolchain: toolchains/gcc-toolchain.cmake
             packages: ""
             build_type: Release
-          - name: Clang 18 with libstdc++
-            os: ubuntu-24.04
-            toolchain: toolchains/clang18-toolchain.cmake
-            packages: clang-18
+          - name: Clang 22 with libstdc++
+            os: ubuntu-26.04
+            toolchain: toolchains/clang22-toolchain.cmake
+            packages: clang-22
             build_type: Debug
-          - name: Clang 18 with libstdc++
-            os: ubuntu-24.04
-            toolchain: toolchains/clang18-toolchain.cmake
-            packages: clang-18
+          - name: Clang 22 with libstdc++
+            os: ubuntu-26.04
+            toolchain: toolchains/clang22-toolchain.cmake
+            packages: clang-22
             build_type: Release
-          - name: Clang 18 with libc++
-            os: ubuntu-24.04
-            toolchain: toolchains/clang18-libcxx-toolchain.cmake
-            packages: clang-18 libc++-18-dev libc++abi-18-dev
+          - name: Clang 22 with libc++
+            os: ubuntu-26.04
+            toolchain: toolchains/clang22-libcxx-toolchain.cmake
+            packages: clang-22 libc++-22-dev libc++abi-22-dev
             build_type: Debug
           - name: AppleClang with libc++
             os: macos-latest
@@ -72,10 +72,15 @@ jobs:
 
   sanitizers:
     name: Clang ASan, LSan and UBSan
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
 
     steps:
       - uses: actions/checkout@v6
+
+      - name: Install Clang sanitizer toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes clang-22 libclang-rt-22-dev
 
       - name: Configure
         env:
@@ -90,7 +95,7 @@ jobs:
 
   thread-sanitizer:
     name: GCC TSan
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
 
     steps:
       - uses: actions/checkout@v6
@@ -111,7 +116,7 @@ jobs:
 
   arm-linux:
     name: ARM Linux hard-float
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
 
     steps:
       - uses: actions/checkout@v6
@@ -137,7 +142,7 @@ jobs:
 
   format:
     name: clang-format
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
 
     steps:
       - uses: actions/checkout@v6

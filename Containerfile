@@ -16,8 +16,8 @@ RUN apt-get update && \
         build-essential \
         ninja-build \
         g++-16 \
-        clang \
-        libclang-rt-dev \
+        clang-22 \
+        libclang-rt-22-dev \
         clang-format \
         clang-tidy \
         cppcheck \

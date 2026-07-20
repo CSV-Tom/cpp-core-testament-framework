@@ -45,7 +45,7 @@
       "name": "sanitizers",
       "displayName": "Clang address, leak and undefined behavior sanitizers",
       "inherits": "debug",
-      "toolchainFile": "${sourceDir}/toolchains/clang-toolchain.cmake",
+      "toolchainFile": "${sourceDir}/toolchains/clang22-toolchain.cmake",
       "cacheVariables": {
         "CMAKE_CXX_FLAGS": "-fsanitize=address,undefined -fno-omit-frame-pointer",
         "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address,undefined",
