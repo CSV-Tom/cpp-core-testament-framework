@@ -1,8 +1,8 @@
 #include "Testament/Testament.hpp"
 #include "Testament/Runner.hpp"
 
-#include "core/Internal/InternalRegistry.hpp"
-#include "core/Internal/InternalSuite.hpp"
+#include "runtime/SuiteRegistry.hpp"
+#include "runtime/SuiteInstance.hpp"
 
 #include <memory>
 #include <stdexcept>
@@ -45,8 +45,8 @@ public:
 }
 
 int main() {
-    auto suite = Testament::InternalRegistry::instance().registerSuite(
-        std::make_shared<Testament::InternalSuite>("failing lifecycle hook")
+    auto suite = Testament::detail::SuiteRegistry::instance().registerSuite(
+        std::make_shared<Testament::detail::SuiteInstance>("failing lifecycle hook")
     );
     bool testExecuted = false;
 
@@ -60,7 +60,7 @@ int main() {
     RecordingHandler handler;
     const bool suiteSucceeded = suite->run(&handler);
 
-    Testament::InternalSuite beforeEachSuite("failing before each hook");
+    Testament::detail::SuiteInstance beforeEachSuite("failing before each hook");
     bool beforeEachTestExecuted = false;
     beforeEachSuite.setBeforeEach([] {
         throw std::runtime_error("expected before each failure");

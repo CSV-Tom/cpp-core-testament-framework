@@ -3,12 +3,9 @@
 
 #include <memory>
 
-namespace Testament {
+namespace Testament::detail {
 
-class InternalTest;
-
-namespace detail {
-
+class TestInstance;
 class TestAccess;
 
 class TestHandle {
@@ -31,7 +28,6 @@ private:
     std::unique_ptr<Impl> pImpl;
 };
 
-}
 }
 
 #endif

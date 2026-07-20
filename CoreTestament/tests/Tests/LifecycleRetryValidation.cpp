@@ -1,6 +1,6 @@
 #include "Testament/Testament.hpp"
 
-#include "core/Internal/InternalSuite.hpp"
+#include "runtime/SuiteInstance.hpp"
 
 #include <stdexcept>
 
@@ -22,7 +22,7 @@ public:
 }
 
 int main() {
-    Testament::InternalSuite suite("lifecycle retry");
+    Testament::detail::SuiteInstance suite("lifecycle retry");
     unsigned int beforeEachCalls = 0;
     unsigned int afterEachCalls = 0;
     unsigned int attempts = 0;

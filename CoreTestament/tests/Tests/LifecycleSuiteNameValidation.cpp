@@ -1,6 +1,6 @@
 #include "Testament/Testament.hpp"
 
-#include "core/Internal/InternalRegistry.hpp"
+#include "runtime/SuiteRegistry.hpp"
 
 namespace {
 
@@ -15,7 +15,7 @@ inline const auto invalidSuite = Testament::Suite<EmptyNameLifecycleSuite>(
 
 int main() {
     return !invalidSuite
-        && Testament::InternalRegistry::instance().suites().empty()
+        && Testament::detail::SuiteRegistry::instance().suites().empty()
         && Testament::run(0, nullptr) == 2
         ? 0
         : 1;

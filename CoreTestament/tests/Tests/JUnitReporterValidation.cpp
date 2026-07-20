@@ -1,8 +1,8 @@
 #include "Testament/Runner.hpp"
 #include "Testament/Testament.hpp"
 
-#include "core/Internal/InternalRegistry.hpp"
-#include "core/Internal/InternalSuite.hpp"
+#include "runtime/SuiteRegistry.hpp"
+#include "runtime/SuiteInstance.hpp"
 
 #include <filesystem>
 #include <fstream>
@@ -17,8 +17,8 @@ int main() {
     std::filesystem::remove(reportPath, removeError);
 
     auto suiteName = std::string{"suite <&>"} + '\x01';
-    auto suite = Testament::InternalRegistry::instance().registerSuite(
-        std::make_shared<Testament::InternalSuite>(suiteName)
+    auto suite = Testament::detail::SuiteRegistry::instance().registerSuite(
+        std::make_shared<Testament::detail::SuiteInstance>(suiteName)
     );
     const auto passingTestLine = __LINE__ + 1;
     suite->addTest(Testament::detail::RuntimeBridge::makeTest("passing test", {}, [] {}));
@@ -26,16 +26,16 @@ int main() {
         throw std::runtime_error(std::string{"failure <reason> & details"} + '\x01' + "\xc3\x28");
     }));
 
-    auto lifecycleSuite = Testament::InternalRegistry::instance().registerSuite(
-        std::make_shared<Testament::InternalSuite>("lifecycle suite")
+    auto lifecycleSuite = Testament::detail::SuiteRegistry::instance().registerSuite(
+        std::make_shared<Testament::detail::SuiteInstance>("lifecycle suite")
     );
     lifecycleSuite->setBeforeEach([] {
         throw std::runtime_error("setup <failed>");
     });
     lifecycleSuite->addTest(Testament::detail::RuntimeBridge::makeTest("lifecycle test", {}, [] {}));
 
-    auto beforeAllSuite = Testament::InternalRegistry::instance().registerSuite(
-        std::make_shared<Testament::InternalSuite>("before all suite")
+    auto beforeAllSuite = Testament::detail::SuiteRegistry::instance().registerSuite(
+        std::make_shared<Testament::detail::SuiteInstance>("before all suite")
     );
     beforeAllSuite->setBeforeSuite([] {
         throw std::runtime_error("suite setup failed");

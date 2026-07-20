@@ -1,11 +1,11 @@
 #include "Testament/Testament.hpp"
 
-#include "core/Internal/InternalRegistry.hpp"
+#include "runtime/SuiteRegistry.hpp"
 
 #include <utility>
 
 int main() {
-    auto& registry = Testament::InternalRegistry::instance();
+    auto& registry = Testament::detail::SuiteRegistry::instance();
     const auto initialSuiteCount = registry.suites().size();
 
     bool registeredWhileHandleLives = false;

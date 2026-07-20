@@ -1,6 +1,6 @@
 #include "Testament/Testament.hpp"
 
-#include "core/Internal/InternalRegistry.hpp"
+#include "runtime/SuiteRegistry.hpp"
 
 #include <algorithm>
 #include <ranges>
@@ -29,7 +29,7 @@ inline const auto duplicateSuite = Testament::Suite(
 }
 
 int main() {
-    const auto& registry = Testament::InternalRegistry::instance();
+    const auto& registry = Testament::detail::SuiteRegistry::instance();
     const auto errors = registry.configurationErrors();
     const bool locationsReported = std::ranges::all_of(errors, [](const auto& error) {
         return error.contains("ConfigurationErrorValidation.cpp:");

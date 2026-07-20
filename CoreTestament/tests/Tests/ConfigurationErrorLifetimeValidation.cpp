@@ -1,9 +1,9 @@
 #include "Testament/Testament.hpp"
 
-#include "core/Internal/InternalRegistry.hpp"
+#include "runtime/SuiteRegistry.hpp"
 
 int main() {
-    auto& registry = Testament::InternalRegistry::instance();
+    auto& registry = Testament::detail::SuiteRegistry::instance();
     if (!registry.configurationErrors().empty()) return 1;
 
     bool errorLivesWithInvalidRegistration = false;

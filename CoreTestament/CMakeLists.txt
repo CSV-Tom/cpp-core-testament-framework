@@ -22,29 +22,29 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 target_sources(${PROJECT_NAME}
     PRIVATE
-        src/core/Internal/InternalTest.cpp
-        src/core/Internal/InternalSuite.cpp
-        src/core/Internal/InternalRegistry.cpp
-        src/core/Internal/ConfigurationDiagnostics.cpp
-        src/core/Internal/CommandLineOptions.cpp
-        src/core/Internal/EnvironmentSession.cpp
-        src/core/Internal/SuiteAssembler.cpp
-        src/core/Internal/SuiteScheduler.cpp
-        src/core/Internal/TestCatalog.cpp
-        src/core/Internal/TestExecutor.cpp
-        src/core/Runner.cpp
-        src/core/DefaultRun.cpp
-        src/core/SuiteRegistration.cpp
-        src/core/LifecycleSuite.cpp
-        src/core/TestHandle.cpp
-        src/core/SuiteOptions.cpp
-        src/core/TestOptions.cpp
-        src/core/AssertionFailure.cpp
-        src/core/Asserts.cpp
-        src/core/SkipRequest.cpp
-        src/core/Trace.cpp
-        src/EventHandlers/JUnitTestEventHandler.cpp
-        src/EventHandlers/Reporters.cpp
+        src/runtime/TestInstance.cpp
+        src/runtime/SuiteInstance.cpp
+        src/runtime/SuiteRegistry.cpp
+        src/configuration/ConfigurationErrors.cpp
+        src/configuration/CommandLineOptions.cpp
+        src/runtime/EnvironmentSession.cpp
+        src/runtime/SuiteFactory.cpp
+        src/runtime/SuiteScheduler.cpp
+        src/runtime/TestCatalog.cpp
+        src/runtime/TestExecutor.cpp
+        src/api/Runner.cpp
+        src/api/DefaultRun.cpp
+        src/api/SuiteRegistration.cpp
+        src/api/LifecycleSuite.cpp
+        src/api/TestHandle.cpp
+        src/api/SuiteOptions.cpp
+        src/api/TestOptions.cpp
+        src/api/AssertionFailure.cpp
+        src/api/Asserts.cpp
+        src/api/SkipRequest.cpp
+        src/api/Trace.cpp
+        src/reporting/JUnitTestEventHandler.cpp
+        src/reporting/Reporters.cpp
     PUBLIC FILE_SET HEADERS
         BASE_DIRS include
         FILES
@@ -206,23 +206,23 @@ if(BUILD_TESTING)
     )
 
     add_testament_internal_test(
-        InternalSuiteRepeatRunValidation InternalSuiteRepeatRun
-        tests/Tests/InternalSuiteRepeatRunValidation.cpp
+        SuiteInstanceRepeatRunValidation SuiteInstanceRepeatRun
+        tests/Tests/SuiteInstanceRepeatRunValidation.cpp
     )
 
     add_testament_internal_test(
-        InternalTestTimerValidation InternalTestTimer
-        tests/Tests/InternalTestTimerValidation.cpp
+        TestInstanceTimerValidation TestInstanceTimer
+        tests/Tests/TestInstanceTimerValidation.cpp
     )
 
     add_testament_internal_test(
-        InternalTestContextValidation InternalTestContext
-        tests/Tests/InternalTestContextValidation.cpp
+        TestInstanceContextValidation TestInstanceContext
+        tests/Tests/TestInstanceContextValidation.cpp
     )
 
     add_testament_internal_test(
-        InternalRegistryFilterValidation InternalRegistryFilter
-        tests/Tests/InternalRegistryFilterValidation.cpp
+        SuiteRegistryFilterValidation SuiteRegistryFilter
+        tests/Tests/SuiteRegistryFilterValidation.cpp
     )
 
     add_testament_internal_test(
@@ -347,8 +347,8 @@ if(BUILD_TESTING)
     endif()
 
     add_testament_internal_test(
-        InternalSuiteFilterValidation InternalSuiteFilter
-        tests/Tests/InternalSuiteFilterValidation.cpp
+        SuiteInstanceFilterValidation SuiteInstanceFilter
+        tests/Tests/SuiteInstanceFilterValidation.cpp
     )
 
     add_testament_internal_test(
