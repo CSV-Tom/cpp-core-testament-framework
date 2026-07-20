@@ -73,13 +73,13 @@ SuiteRegistration detail::RuntimeBridge::configurationError(std::string error) {
 }
 
 SuiteRegistration::SuiteRegistration(std::unique_ptr<Impl> implementation)
-    : impl(std::move(implementation)) {}
+    : pImpl(std::move(implementation)) {}
 SuiteRegistration::~SuiteRegistration() = default;
 SuiteRegistration::SuiteRegistration(SuiteRegistration&&) noexcept = default;
 SuiteRegistration& SuiteRegistration::operator=(SuiteRegistration&&) noexcept = default;
 
 SuiteRegistration::operator bool() const noexcept {
-    return impl && static_cast<bool>(impl->suite);
+    return pImpl && static_cast<bool>(pImpl->suite);
 }
 
 }

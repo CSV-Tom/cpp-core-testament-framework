@@ -40,7 +40,7 @@ public:
     std::size_t maxParallelTests{1};
 };
 
-Runner::Runner() : impl(std::make_unique<Impl>()) {}
+Runner::Runner() : pImpl(std::make_unique<Impl>()) {}
 
 Runner::~Runner() = default;
 
@@ -50,53 +50,53 @@ Runner& Runner::operator=(Runner&&) noexcept = default;
 
 Runner& Runner::addHandler(std::unique_ptr<TestEventHandler> handler) {
     if (handler) {
-        if (!impl) impl = std::make_unique<Impl>();
-        impl->handlers.push_back(std::move(handler));
+        if (!pImpl) pImpl = std::make_unique<Impl>();
+        pImpl->handlers.push_back(std::move(handler));
     }
     return *this;
 }
 
 Runner& Runner::addEnvironment(std::unique_ptr<GlobalEnvironment> environment) {
     if (environment) {
-        if (!impl) impl = std::make_unique<Impl>();
-        impl->environments.push_back(std::move(environment));
+        if (!pImpl) pImpl = std::make_unique<Impl>();
+        pImpl->environments.push_back(std::move(environment));
     }
     return *this;
 }
 
 Runner& Runner::filterSuite(std::string_view name) {
     if (name.empty()) throw std::invalid_argument("Suite filter cannot be empty");
-    if (!impl) impl = std::make_unique<Impl>();
-    impl->suiteFilter = name;
+    if (!pImpl) pImpl = std::make_unique<Impl>();
+    pImpl->suiteFilter = name;
     return *this;
 }
 
 Runner& Runner::filterTest(std::string_view name) {
     if (name.empty()) throw std::invalid_argument("Test filter cannot be empty");
-    if (!impl) impl = std::make_unique<Impl>();
-    impl->testFilter = name;
+    if (!pImpl) pImpl = std::make_unique<Impl>();
+    pImpl->testFilter = name;
     return *this;
 }
 
 Runner& Runner::clearFilters() noexcept {
-    if (impl) {
-        impl->suiteFilter.reset();
-        impl->testFilter.reset();
+    if (pImpl) {
+        pImpl->suiteFilter.reset();
+        pImpl->testFilter.reset();
     }
     return *this;
 }
 
 Runner& Runner::maxParallelSuites(std::size_t count) {
     if (count == 0) throw std::invalid_argument("Maximum parallel suites must be greater than zero");
-    if (!impl) impl = std::make_unique<Impl>();
-    impl->maxParallelSuites = count;
+    if (!pImpl) pImpl = std::make_unique<Impl>();
+    pImpl->maxParallelSuites = count;
     return *this;
 }
 
 Runner& Runner::maxParallelTests(std::size_t count) {
     if (count == 0) throw std::invalid_argument("Maximum parallel tests must be greater than zero");
-    if (!impl) impl = std::make_unique<Impl>();
-    impl->maxParallelTests = count;
+    if (!pImpl) pImpl = std::make_unique<Impl>();
+    pImpl->maxParallelTests = count;
     return *this;
 }
 
@@ -108,7 +108,7 @@ int Runner::run(int argc, char** argv) {
     }
 
     const std::scoped_lock runLock(testRunMutex);
-    if (!impl) impl = std::make_unique<Impl>();
+    if (!pImpl) pImpl = std::make_unique<Impl>();
 
     auto& registry = InternalRegistry::instance();
     if (const auto errors = registry.configurationErrors(); !errors.empty()) {
@@ -117,11 +117,11 @@ int Runner::run(int argc, char** argv) {
     }
     const detail::TestCatalog catalog{
         registry.suites(),
-        impl->suiteFilter
-            ? std::optional<std::string_view>{*impl->suiteFilter}
+        pImpl->suiteFilter
+            ? std::optional<std::string_view>{*pImpl->suiteFilter}
             : std::nullopt
     };
-    const std::string testFilter = impl->testFilter.value_or("");
+    const std::string testFilter = pImpl->testFilter.value_or("");
     const std::string cliFilter = commandLine->filter.value_or("");
     if (commandLine->listTests) {
         catalog.list(std::cout, testFilter, cliFilter);
@@ -129,13 +129,13 @@ int Runner::run(int argc, char** argv) {
     }
 
     detail::TestEventHandlerChain chain;
-    for (const auto& handler : impl->handlers) chain.add(handler.get());
+    for (const auto& handler : pImpl->handlers) chain.add(handler.get());
     if (const auto result = chain.configure(commandLine->arguments); !result) {
         std::cerr << result.error() << '\n';
         return 2;
     }
 
-    detail::EnvironmentSession environmentSession{impl->environments, chain};
+    detail::EnvironmentSession environmentSession{pImpl->environments, chain};
     if (!environmentSession.start()) return 1;
 
     std::uint64_t baseSeed{};
@@ -159,8 +159,8 @@ int Runner::run(int argc, char** argv) {
         const auto suites = catalog.forRun(shuffleSeed);
         const auto result = detail::SuiteScheduler::run(
             suites, chain,
-            {testFilter, cliFilter, impl->maxParallelSuites,
-             impl->maxParallelTests, shuffleSeed}
+            {testFilter, cliFilter, pImpl->maxParallelSuites,
+             pImpl->maxParallelTests, shuffleSeed}
         );
         allStatistics += result.statistics;
         allRunsSucceeded = result.succeeded() && allRunsSucceeded;

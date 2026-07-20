@@ -73,8 +73,10 @@ target_sources(${PROJECT_NAME}
             include/Testament/detail/LocatedName.hpp
             include/Testament/detail/NamedTestCase.hpp
             include/Testament/detail/ParameterizedTestDefinition.hpp
+            include/Testament/detail/ParameterizedTestDefinition.tpp
             include/Testament/detail/RuntimeBridge.hpp
             include/Testament/detail/TestDefinition.hpp
+            include/Testament/detail/TestDefinition.tpp
             include/Testament/detail/TestHandle.hpp
 )
 

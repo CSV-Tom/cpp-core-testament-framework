@@ -16,19 +16,19 @@ public:
 };
 
 SkipRequest::SkipRequest(std::string reason)
-    : impl(std::make_shared<Impl>(std::move(reason))) {}
+    : pImpl(std::make_shared<Impl>(std::move(reason))) {}
 
 SkipRequest::~SkipRequest() = default;
 SkipRequest::SkipRequest(const SkipRequest&) noexcept = default;
 SkipRequest& SkipRequest::operator=(const SkipRequest&) noexcept = default;
-SkipRequest::SkipRequest(SkipRequest&& other) noexcept : impl(other.impl) {}
+SkipRequest::SkipRequest(SkipRequest&& other) noexcept : pImpl(other.pImpl) {}
 SkipRequest& SkipRequest::operator=(SkipRequest&& other) noexcept {
-    impl = other.impl;
+    pImpl = other.pImpl;
     return *this;
 }
 
-const char* SkipRequest::what() const noexcept { return impl->description.c_str(); }
-std::string_view SkipRequest::reason() const noexcept { return impl->reason; }
+const char* SkipRequest::what() const noexcept { return pImpl->description.c_str(); }
+std::string_view SkipRequest::reason() const noexcept { return pImpl->reason; }
 
 [[noreturn]] void skip(std::string_view reason) {
     throw SkipRequest{std::string{reason}};

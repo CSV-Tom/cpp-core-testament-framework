@@ -35,23 +35,23 @@ public:
 AssertionFailure::AssertionFailure(std::string assertion, std::string expected,
                                    std::string actual, std::string message,
                                    std::source_location location)
-    : impl(std::make_shared<Impl>(std::move(assertion), std::move(expected),
+    : pImpl(std::make_shared<Impl>(std::move(assertion), std::move(expected),
                                   std::move(actual), std::move(message), location)) {}
 
 AssertionFailure::~AssertionFailure() = default;
 AssertionFailure::AssertionFailure(const AssertionFailure&) noexcept = default;
 AssertionFailure& AssertionFailure::operator=(const AssertionFailure&) noexcept = default;
-AssertionFailure::AssertionFailure(AssertionFailure&& other) noexcept : impl(other.impl) {}
+AssertionFailure::AssertionFailure(AssertionFailure&& other) noexcept : pImpl(other.pImpl) {}
 AssertionFailure& AssertionFailure::operator=(AssertionFailure&& other) noexcept {
-    impl = other.impl;
+    pImpl = other.pImpl;
     return *this;
 }
 
-const char* AssertionFailure::what() const noexcept { return impl->description.c_str(); }
-std::string_view AssertionFailure::assertion() const noexcept { return impl->assertion; }
-std::string_view AssertionFailure::expected() const noexcept { return impl->expected; }
-std::string_view AssertionFailure::actual() const noexcept { return impl->actual; }
-std::string_view AssertionFailure::message() const noexcept { return impl->message; }
-std::source_location AssertionFailure::location() const noexcept { return impl->location; }
+const char* AssertionFailure::what() const noexcept { return pImpl->description.c_str(); }
+std::string_view AssertionFailure::assertion() const noexcept { return pImpl->assertion; }
+std::string_view AssertionFailure::expected() const noexcept { return pImpl->expected; }
+std::string_view AssertionFailure::actual() const noexcept { return pImpl->actual; }
+std::string_view AssertionFailure::message() const noexcept { return pImpl->message; }
+std::source_location AssertionFailure::location() const noexcept { return pImpl->location; }
 
 }

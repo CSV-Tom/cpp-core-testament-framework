@@ -41,14 +41,14 @@ detail::TestHandle detail::RuntimeBridge::makeTest(
 }
 
 std::unique_ptr<InternalTest> detail::TestAccess::release(TestHandle&& test) {
-    if (!test.impl || !test.impl->test) {
+    if (!test.pImpl || !test.pImpl->test) {
         throw std::invalid_argument("Cannot add an empty or moved-from test");
     }
-    return std::move(test.impl->test);
+    return std::move(test.pImpl->test);
 }
 
 detail::TestHandle::TestHandle(std::unique_ptr<Impl> implementation)
-    : impl(std::move(implementation)) {}
+    : pImpl(std::move(implementation)) {}
 detail::TestHandle::~TestHandle() = default;
 detail::TestHandle::TestHandle(TestHandle&&) noexcept = default;
 detail::TestHandle& detail::TestHandle::operator=(TestHandle&&) noexcept = default;

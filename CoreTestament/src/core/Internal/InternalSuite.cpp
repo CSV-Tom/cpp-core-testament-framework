@@ -5,6 +5,7 @@
 #include "FilterPattern.hpp"
 
 #include "Testament/LifecycleSuite.hpp"
+#include "Testament/detail/RuntimeBridge.hpp"
 #include "Testament/detail/TestHandle.hpp"
 #include "Testament/TestEventHandler.hpp"
 
@@ -113,7 +114,7 @@ bool InternalSuite::run(TestEventHandler* handler, RunConfiguration configuratio
     }
 
     Callback beforeAll = [&fixture] {
-        if (fixture) fixture->beforeAll();
+        if (fixture) detail::RuntimeBridge::beforeAll(*fixture);
     };
     if (!hookManager.invokeBeforeSuiteHook()
         || !hookManager.invoke(beforeAll, "beforeAll")) {
@@ -127,7 +128,7 @@ bool InternalSuite::run(TestEventHandler* handler, RunConfiguration configuratio
         : executeLifecycleTests(selectedTests, fixture.get(), handler);
 
     Callback afterAll = [&fixture] {
-        if (fixture) fixture->afterAll();
+        if (fixture) detail::RuntimeBridge::afterAll(*fixture);
     };
     if (!hookManager.invoke(afterAll, "afterAll")
         || !hookManager.invokeAfterSuiteHook()) {
@@ -263,8 +264,12 @@ bool InternalSuite::executeLifecycleTests(
     std::span<InternalTest* const> selectedTests, LifecycleSuite* fixture,
     TestEventHandler* handler
 ) {
-    Callback beforeEach = [fixture] { if (fixture) fixture->beforeEach(); };
-    Callback afterEach = [fixture] { if (fixture) fixture->afterEach(); };
+    Callback beforeEach = [fixture] {
+        if (fixture) detail::RuntimeBridge::beforeEach(*fixture);
+    };
+    Callback afterEach = [fixture] {
+        if (fixture) detail::RuntimeBridge::afterEach(*fixture);
+    };
     detail::TestExecutor executor{testManager, hookManager};
     bool hooksSucceeded = true;
     for (auto* test : selectedTests) {

@@ -3,6 +3,10 @@
 
 namespace Testament {
 
+namespace detail {
+class RuntimeBridge;
+}
+
 class LifecycleSuite {
 public:
     LifecycleSuite();
@@ -21,7 +25,7 @@ protected:
     virtual void afterAll();
 
 private:
-    friend class InternalSuite;
+    friend class detail::RuntimeBridge;
 };
 
 }

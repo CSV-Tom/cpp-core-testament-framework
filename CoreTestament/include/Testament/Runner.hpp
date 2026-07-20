@@ -37,7 +37,7 @@ public:
 
 private:
     class Impl;
-    std::unique_ptr<Impl> impl;
+    std::unique_ptr<Impl> pImpl;
 };
 
 [[nodiscard("propagate the test exit code, e.g. return Testament::run(argc, argv)")]]

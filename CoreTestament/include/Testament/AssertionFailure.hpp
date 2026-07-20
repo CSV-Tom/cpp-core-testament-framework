@@ -29,7 +29,7 @@ public:
 
 private:
     class Impl;
-    std::shared_ptr<const Impl> impl;
+    std::shared_ptr<const Impl> pImpl;
 };
 
 }

@@ -22,6 +22,11 @@ namespace detail {
 
 class RuntimeBridge {
 public:
+    static void beforeAll(LifecycleSuite& suite);
+    static void beforeEach(LifecycleSuite& suite);
+    static void afterEach(LifecycleSuite& suite);
+    static void afterAll(LifecycleSuite& suite);
+
     static TestHandle makeTest(
         std::string_view name, TestOptions options,
         std::move_only_function<void()> function,

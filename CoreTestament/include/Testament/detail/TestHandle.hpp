@@ -23,12 +23,12 @@ public:
 
 private:
     class Impl;
-    explicit TestHandle(std::unique_ptr<Impl> impl);
+    explicit TestHandle(std::unique_ptr<Impl> implementation);
 
     friend class RuntimeBridge;
     friend class TestAccess;
 
-    std::unique_ptr<Impl> impl;
+    std::unique_ptr<Impl> pImpl;
 };
 
 }

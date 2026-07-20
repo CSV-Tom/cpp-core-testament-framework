@@ -23,11 +23,11 @@ public:
 
 private:
     class Impl;
-    explicit SuiteRegistration(std::unique_ptr<Impl> impl);
+    explicit SuiteRegistration(std::unique_ptr<Impl> implementation);
 
     friend class detail::RuntimeBridge;
 
-    std::unique_ptr<Impl> impl;
+    std::unique_ptr<Impl> pImpl;
 };
 
 }
