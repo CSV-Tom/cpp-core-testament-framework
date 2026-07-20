@@ -92,6 +92,12 @@
       "displayName": "Clang 19 with libc++ Debug",
       "inherits": "debug",
       "toolchainFile": "${sourceDir}/toolchains/clang19-libcxx-toolchain.cmake"
+    },
+    {
+      "name": "arm-linux-gnueabihf-debug",
+      "displayName": "ARM Linux hard-float Debug",
+      "inherits": "debug",
+      "toolchainFile": "${sourceDir}/toolchains/arm-linux-gnueabihf-toolchain.cmake"
     }
   ],
   "buildPresets": [
@@ -143,6 +149,11 @@
     {
       "name": "clang19-libcxx-debug",
       "configurePreset": "clang19-libcxx-debug",
+      "jobs": 2
+    },
+    {
+      "name": "arm-linux-gnueabihf-debug",
+      "configurePreset": "arm-linux-gnueabihf-debug",
       "jobs": 2
     }
   ],
@@ -219,6 +230,13 @@
     {
       "name": "clang19-libcxx-debug",
       "configurePreset": "clang19-libcxx-debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "arm-linux-gnueabihf-debug",
+      "configurePreset": "arm-linux-gnueabihf-debug",
       "output": {
         "outputOnFailure": true
       }

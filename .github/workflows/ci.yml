@@ -109,6 +109,32 @@ jobs:
       - name: Test
         run: ctest --preset thread-sanitizer -LE integration
 
+  arm-linux:
+    name: ARM Linux hard-float
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install cross compiler and emulator
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes g++-arm-linux-gnueabihf qemu-user
+
+      - name: Configure
+        env:
+          CXXFLAGS: -Werror
+        run: cmake --preset arm-linux-gnueabihf-debug
+
+      - name: Build
+        run: cmake --build --preset arm-linux-gnueabihf-debug
+
+      - name: Test
+        run: ctest --preset arm-linux-gnueabihf-debug -LE integration
+
+      - name: Install and test consumer
+        run: ctest --preset arm-linux-gnueabihf-debug -L integration
+
   format:
     name: clang-format
     runs-on: ubuntu-24.04

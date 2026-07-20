@@ -33,6 +33,8 @@ released yet.
   regression coverage, including AddressSanitizer, UndefinedBehaviorSanitizer
   and ThreadSanitizer configurations.
 - Documentation entry point and a standalone getting-started tutorial.
+- ARM Linux hard-float cross-compilation and QEMU execution coverage for
+  `arm-linux-gnueabihf`.
 
 ### Changed
 
