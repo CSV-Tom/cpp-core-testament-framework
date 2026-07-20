@@ -1,11 +1,11 @@
 #include "InternalSuite.hpp"
 #include "InternalTest.hpp"
+#include "LifecycleAccess.hpp"
 #include "TestExecutor.hpp"
 #include "TestAccess.hpp"
 #include "FilterPattern.hpp"
 
 #include "Testament/LifecycleSuite.hpp"
-#include "Testament/detail/RuntimeBridge.hpp"
 #include "Testament/detail/TestHandle.hpp"
 #include "Testament/TestEventHandler.hpp"
 
@@ -114,7 +114,7 @@ bool InternalSuite::run(TestEventHandler* handler, RunConfiguration configuratio
     }
 
     Callback beforeAll = [&fixture] {
-        if (fixture) detail::RuntimeBridge::beforeAll(*fixture);
+        if (fixture) detail::LifecycleAccess::beforeAll(*fixture);
     };
     if (!hookManager.invokeBeforeSuiteHook()
         || !hookManager.invoke(beforeAll, "beforeAll")) {
@@ -128,7 +128,7 @@ bool InternalSuite::run(TestEventHandler* handler, RunConfiguration configuratio
         : executeLifecycleTests(selectedTests, fixture.get(), handler);
 
     Callback afterAll = [&fixture] {
-        if (fixture) detail::RuntimeBridge::afterAll(*fixture);
+        if (fixture) detail::LifecycleAccess::afterAll(*fixture);
     };
     if (!hookManager.invoke(afterAll, "afterAll")
         || !hookManager.invokeAfterSuiteHook()) {
@@ -265,10 +265,10 @@ bool InternalSuite::executeLifecycleTests(
     TestEventHandler* handler
 ) {
     Callback beforeEach = [fixture] {
-        if (fixture) detail::RuntimeBridge::beforeEach(*fixture);
+        if (fixture) detail::LifecycleAccess::beforeEach(*fixture);
     };
     Callback afterEach = [fixture] {
-        if (fixture) detail::RuntimeBridge::afterEach(*fixture);
+        if (fixture) detail::LifecycleAccess::afterEach(*fixture);
     };
     detail::TestExecutor executor{testManager, hookManager};
     bool hooksSucceeded = true;

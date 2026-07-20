@@ -4,7 +4,7 @@
 namespace Testament {
 
 namespace detail {
-class RuntimeBridge;
+class LifecycleAccess;
 }
 
 class LifecycleSuite {
@@ -25,7 +25,7 @@ protected:
     virtual void afterAll();
 
 private:
-    friend class detail::RuntimeBridge;
+    friend class detail::LifecycleAccess;
 };
 
 }

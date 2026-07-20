@@ -1,5 +1,6 @@
 #include "Testament/LifecycleSuite.hpp"
-#include "Testament/detail/RuntimeBridge.hpp"
+
+#include "Internal/LifecycleAccess.hpp"
 
 namespace Testament {
 
@@ -8,19 +9,19 @@ void LifecycleSuite::beforeEach() {}
 void LifecycleSuite::afterEach() {}
 void LifecycleSuite::afterAll() {}
 
-void detail::RuntimeBridge::beforeAll(LifecycleSuite& suite) {
+void detail::LifecycleAccess::beforeAll(LifecycleSuite& suite) {
     suite.beforeAll();
 }
 
-void detail::RuntimeBridge::beforeEach(LifecycleSuite& suite) {
+void detail::LifecycleAccess::beforeEach(LifecycleSuite& suite) {
     suite.beforeEach();
 }
 
-void detail::RuntimeBridge::afterEach(LifecycleSuite& suite) {
+void detail::LifecycleAccess::afterEach(LifecycleSuite& suite) {
     suite.afterEach();
 }
 
-void detail::RuntimeBridge::afterAll(LifecycleSuite& suite) {
+void detail::LifecycleAccess::afterAll(LifecycleSuite& suite) {
     suite.afterAll();
 }
 
