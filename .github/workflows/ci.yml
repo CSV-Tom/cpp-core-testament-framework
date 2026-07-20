@@ -22,20 +22,20 @@ jobs:
             toolchain: toolchains/gcc-toolchain.cmake
             packages: ""
             build_type: Release
-          - name: Clang with libstdc++
+          - name: Clang 18 with libstdc++
             os: ubuntu-24.04
-            toolchain: toolchains/clang-toolchain.cmake
-            packages: ""
+            toolchain: toolchains/clang18-toolchain.cmake
+            packages: clang-18
             build_type: Debug
-          - name: Clang with libstdc++
+          - name: Clang 18 with libstdc++
             os: ubuntu-24.04
-            toolchain: toolchains/clang-toolchain.cmake
-            packages: ""
+            toolchain: toolchains/clang18-toolchain.cmake
+            packages: clang-18
             build_type: Release
-          - name: Clang with libc++
+          - name: Clang 18 with libc++
             os: ubuntu-24.04
-            toolchain: toolchains/clang-libcxx-toolchain.cmake
-            packages: libc++-dev libc++abi-dev
+            toolchain: toolchains/clang18-libcxx-toolchain.cmake
+            packages: clang-18 libc++-18-dev libc++abi-18-dev
             build_type: Debug
           - name: AppleClang with libc++
             os: macos-latest
@@ -46,7 +46,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Install standard library
+      - name: Install toolchain packages
         if: matrix.packages != ''
         run: |
           sudo apt-get update

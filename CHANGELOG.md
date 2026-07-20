@@ -76,6 +76,8 @@ released yet.
   operations instead of incrementing its reference count.
 - MSVC compile-failure tests inherit the standard-library include directories
   detected by CMake when invoking the compiler directly.
+- Linux Clang CI uses an explicit Clang 18 toolchain and matching libc++ packages
+  so required C++23 library facilities are not taken from an older runner default.
 
 ### Removed
 
