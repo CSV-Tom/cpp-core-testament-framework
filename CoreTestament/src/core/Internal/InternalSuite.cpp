@@ -1,5 +1,6 @@
 #include "InternalSuite.hpp"
 #include "InternalTest.hpp"
+#include "TestExecutor.hpp"
 #include "TestAccess.hpp"
 #include "FilterPattern.hpp"
 
@@ -95,57 +96,10 @@ bool InternalSuite::run(TestEventHandler* handler, RunConfiguration configuratio
     statistic.reset();
     totalTimer.reset();
     hookManager.resetErrors();
-
-    if (configuration.shuffleSeed) {
-        std::mt19937_64 random{*configuration.shuffleSeed};
-        std::ranges::shuffle(tests, random);
-    }
-    std::ranges::stable_sort(tests, [shuffle = configuration.shuffleSeed.has_value()](
-        const auto& left, const auto& right
-    ) {
-        const auto leftOrder = left->getOptions().order().value_or(0);
-        const auto rightOrder = right->getOptions().order().value_or(0);
-        if (leftOrder != rightOrder) return leftOrder < rightOrder;
-        return !shuffle && left->getName() < right->getName();
-    });
-
+    prepareTests(configuration.shuffleSeed);
     totalTimer.start();
-
-    if (handler) {
-        handler->onSuiteStart({name, location, 0, 0, 0, 0, options});
-    }
-
-    const auto suiteInfo = [this] {
-        return TestEventHandler::SuiteInfo{
-            name,
-            location,
-            statistic.getPassedTests(),
-            statistic.getFailedTests(),
-            statistic.getSkippedTests(),
-            statistic.getErrors(),
-            options
-        };
-    };
-    const auto reportSuiteError = [&handler, &suiteInfo](std::string_view error) {
-        if (handler) handler->onSuiteAbort(suiteInfo(), error);
-    };
-    const auto selected = [this, configuration](const auto& test) {
-        return (configuration.testNameFilter.empty()
-                || detail::matchesNameFilter(test->getName(), configuration.testNameFilter))
-            && (configuration.filterExpression.empty()
-                || detail::matchesTestFilter(
-                    name, options.tags(), test->getName(), test->getOptions().tags(),
-                    configuration.filterExpression
-                ));
-    };
-    const auto skipSelectedTests = [this, &handler, &suiteInfo, &selected] {
-        for (auto& test : tests | std::views::filter(selected)) {
-            testManager.reportResult(
-                suiteInfo(), *test, TestEventHandler::TestResultStatus::Skipped,
-                std::chrono::duration<double>::zero(), {}, handler
-            );
-        }
-    };
+    if (handler) handler->onSuiteStart(suiteInfo());
+    const auto selectedTests = selectTests(configuration);
 
     std::unique_ptr<LifecycleSuite> fixture;
     if (fixtureFactory) {
@@ -154,13 +108,7 @@ bool InternalSuite::run(TestEventHandler* handler, RunConfiguration configuratio
             if (!fixture) throw std::runtime_error("Fixture factory returned null");
         };
         if (!hookManager.invoke(createFixture, "fixture construction")) {
-            const auto error = hookManager.getErrors().back();
-            statistic.incrementErrors();
-            skipSelectedTests();
-            totalTimer.stop();
-            reportSuiteError(error);
-            if (handler) handler->onSuiteEnd(suiteInfo());
-            return false;
+            return abortRun(selectedTests, handler, hookManager.getErrors().back());
         }
     }
 
@@ -169,170 +117,14 @@ bool InternalSuite::run(TestEventHandler* handler, RunConfiguration configuratio
     };
     if (!hookManager.invokeBeforeSuiteHook()
         || !hookManager.invoke(beforeAll, "beforeAll")) {
-        const auto error = hookManager.getErrors().back();
-        statistic.incrementErrors();
-        skipSelectedTests();
-        totalTimer.stop();
-        reportSuiteError(error);
-        if (handler) handler->onSuiteEnd(suiteInfo());
-        return false;
+        return abortRun(selectedTests, handler, hookManager.getErrors().back());
     }
 
-    bool hooksSucceeded = true;
-    if (!fixtureFactory && !hookManager.hasPerTestHooks()
-        && configuration.maxParallelTests > 1) {
-        struct TestResult {
-            TestEventHandler::TestResultStatus status;
-            std::chrono::duration<double> duration;
-            std::exception_ptr exception;
-        };
-        const auto executeTest = [this](InternalTest* test) {
-            if (test->getOptions().isDisabled()) {
-                return TestResult{
-                    TestEventHandler::TestResultStatus::Skipped,
-                    std::chrono::duration<double>::zero(), {}
-                };
-            }
-            auto remainingAttempts = test->getOptions().maxAttempts();
-            auto duration = std::chrono::duration<double>::zero();
-            while (true) {
-                auto result = testManager.executeAttempt(nullptr, *test);
-                duration += test->getExecutionTimer().getDuration();
-                if (test->getStatus().isSkipped()) {
-                    return TestResult{
-                        TestEventHandler::TestResultStatus::Skipped, duration,
-                        test->getException()
-                    };
-                }
-                if (result) {
-                    return TestResult{
-                        TestEventHandler::TestResultStatus::Passed, duration, {}
-                    };
-                }
-                if (remainingAttempts <= 1) {
-                    return TestResult{
-                        TestEventHandler::TestResultStatus::Failed, duration, result.error()
-                    };
-                }
-                --remainingAttempts;
-            }
-        };
-        const auto consume = [this, &handler, &suiteInfo](InternalTest* test, TestResult result) {
-            testManager.reportResult(
-                suiteInfo(), *test, result.status, result.duration,
-                std::move(result.exception), handler
-            );
-        };
-
-        std::vector<InternalTest*> selectedTests;
-        for (auto& test : tests | std::views::filter(selected)) {
-            selectedTests.push_back(test.get());
-        }
-
-        std::size_t index{};
-        while (index < selectedTests.size()) {
-            if (selectedTests[index]->getOptions().execution() == Execution::Serial) {
-                if (!selectedTests[index]->getOptions().isDisabled()) {
-                    testManager.reportStart(suiteInfo(), *selectedTests[index], handler);
-                }
-                consume(selectedTests[index], executeTest(selectedTests[index]));
-                ++index;
-                continue;
-            }
-            const auto concurrentEnd = std::ranges::find_if(
-                selectedTests.begin() + static_cast<std::ptrdiff_t>(index), selectedTests.end(),
-                [](const auto* test) {
-                    return test->getOptions().execution() == Execution::Serial;
-                }
-            );
-            const auto endIndex = static_cast<std::size_t>(concurrentEnd - selectedTests.begin());
-            while (index < endIndex) {
-                const auto count = std::min(configuration.maxParallelTests, endIndex - index);
-                std::vector<std::future<TestResult>> running;
-                running.reserve(count);
-                for (std::size_t offset = 0; offset < count; ++offset) {
-                    if (!selectedTests[index + offset]->getOptions().isDisabled()) {
-                        testManager.reportStart(
-                            suiteInfo(), *selectedTests[index + offset], handler
-                        );
-                    }
-                    running.push_back(std::async(
-                        std::launch::async, executeTest, selectedTests[index + offset]
-                    ));
-                }
-                for (std::size_t offset = 0; offset < count; ++offset) {
-                    consume(selectedTests[index + offset], running[offset].get());
-                }
-                index += count;
-            }
-        }
-    } else {
-    for (auto& test : tests | std::views::filter(selected)) {
-        if (test->getOptions().isDisabled()) {
-            testManager.reportResult(
-                suiteInfo(), *test, TestEventHandler::TestResultStatus::Skipped,
-                std::chrono::duration<double>::zero(), {}, handler
-            );
-            continue;
-        }
-
-        testManager.reportStart(suiteInfo(), *test, handler);
-        auto remainingAttempts = test->getOptions().maxAttempts();
-        auto duration = std::chrono::duration<double>::zero();
-        auto status = TestEventHandler::TestResultStatus::Failed;
-        std::exception_ptr exception;
-
-        while (true) {
-            std::string lifecycleError;
-            Callback beforeEach = [&fixture] {
-                if (fixture) fixture->beforeEach();
-            };
-            const bool beforeEachSucceeded = hookManager.invokeBeforeEachHook()
-                && hookManager.invoke(beforeEach, "beforeEach");
-            if (!beforeEachSucceeded) lifecycleError = hookManager.getErrors().back();
-
-            TestManager::Result result{};
-            if (beforeEachSucceeded) {
-                result = testManager.executeAttempt(fixture.get(), *test);
-                duration += test->getExecutionTimer().getDuration();
-            }
-
-            Callback afterEach = [&fixture] {
-                if (fixture) fixture->afterEach();
-            };
-            if (!hookManager.invoke(afterEach, "afterEach")
-                || !hookManager.invokeAfterEachHook()) {
-                if (!lifecycleError.empty()) lifecycleError += "; ";
-                lifecycleError += hookManager.getErrors().back();
-            }
-
-            if (!lifecycleError.empty()) {
-                status = TestEventHandler::TestResultStatus::LifecycleError;
-                exception = std::make_exception_ptr(std::runtime_error(lifecycleError));
-            } else if (test->getStatus().isSkipped()) {
-                status = TestEventHandler::TestResultStatus::Skipped;
-                exception = test->getException();
-            } else if (!result) {
-                status = TestEventHandler::TestResultStatus::Failed;
-                exception = result.error();
-            } else {
-                status = TestEventHandler::TestResultStatus::Passed;
-                exception = {};
-            }
-
-            if (status == TestEventHandler::TestResultStatus::Passed
-                || status == TestEventHandler::TestResultStatus::Skipped
-                || remainingAttempts <= 1) {
-                break;
-            }
-            --remainingAttempts;
-        }
-
-        hooksSucceeded = status != TestEventHandler::TestResultStatus::LifecycleError
-            && hooksSucceeded;
-        testManager.reportResult(suiteInfo(), *test, status, duration, exception, handler);
-    }
-    }
+    const bool canRunInParallel = !fixtureFactory && !hookManager.hasPerTestHooks()
+        && configuration.maxParallelTests > 1;
+    bool hooksSucceeded = canRunInParallel
+        ? executeFixturelessTests(selectedTests, handler, configuration.maxParallelTests)
+        : executeLifecycleTests(selectedTests, fixture.get(), handler);
 
     Callback afterAll = [&fixture] {
         if (fixture) fixture->afterAll();
@@ -341,13 +133,151 @@ bool InternalSuite::run(TestEventHandler* handler, RunConfiguration configuratio
         || !hookManager.invokeAfterSuiteHook()) {
         hooksSucceeded = false;
         statistic.incrementErrors();
-        reportSuiteError(hookManager.getErrors().back());
+        if (handler) handler->onSuiteAbort(suiteInfo(), hookManager.getErrors().back());
     }
 
     totalTimer.stop();
 
     if (handler) handler->onSuiteEnd(suiteInfo());
 
+    return hooksSucceeded;
+}
+
+void InternalSuite::prepareTests(std::optional<std::uint64_t> shuffleSeed) {
+    if (shuffleSeed) {
+        std::mt19937_64 random{*shuffleSeed};
+        std::ranges::shuffle(tests, random);
+    }
+    std::ranges::stable_sort(tests, [shuffle = shuffleSeed.has_value()](
+        const auto& left, const auto& right
+    ) {
+        const auto leftOrder = left->getOptions().order().value_or(0);
+        const auto rightOrder = right->getOptions().order().value_or(0);
+        if (leftOrder != rightOrder) return leftOrder < rightOrder;
+        return !shuffle && left->getName() < right->getName();
+    });
+}
+
+std::vector<InternalTest*> InternalSuite::selectTests(
+    const RunConfiguration& configuration
+) const {
+    std::vector<InternalTest*> selected;
+    for (const auto& test : tests) {
+        const bool nameMatches = configuration.testNameFilter.empty()
+            || detail::matchesNameFilter(test->getName(), configuration.testNameFilter);
+        const bool expressionMatches = configuration.filterExpression.empty()
+            || detail::matchesTestFilter(
+                name, options.tags(), test->getName(), test->getOptions().tags(),
+                configuration.filterExpression
+            );
+        if (nameMatches && expressionMatches) selected.push_back(test.get());
+    }
+    return selected;
+}
+
+TestEventHandler::SuiteInfo InternalSuite::suiteInfo() const {
+    return {
+        name, location, statistic.getPassedTests(), statistic.getFailedTests(),
+        statistic.getSkippedTests(), statistic.getErrors(), options
+    };
+}
+
+void InternalSuite::skipTests(
+    std::span<InternalTest* const> selectedTests, TestEventHandler* handler
+) {
+    for (auto* test : selectedTests) {
+        testManager.reportResult(
+            suiteInfo(), *test, TestEventHandler::TestResultStatus::Skipped,
+            std::chrono::duration<double>::zero(), {}, handler
+        );
+    }
+}
+
+bool InternalSuite::abortRun(
+    std::span<InternalTest* const> selectedTests, TestEventHandler* handler,
+    std::string_view error
+) {
+    statistic.incrementErrors();
+    skipTests(selectedTests, handler);
+    totalTimer.stop();
+    if (handler) {
+        handler->onSuiteAbort(suiteInfo(), error);
+        handler->onSuiteEnd(suiteInfo());
+    }
+    return false;
+}
+
+bool InternalSuite::executeFixturelessTests(
+    std::span<InternalTest* const> selectedTests, TestEventHandler* handler,
+    std::size_t maxParallelTests
+) {
+    detail::TestExecutor executor{testManager, hookManager};
+    const auto consume = [this, handler](InternalTest* test, detail::TestExecutionResult result) {
+        testManager.reportResult(
+            suiteInfo(), *test, result.status, result.duration,
+            std::move(result.exception), handler
+        );
+    };
+    const auto start = [this, handler](InternalTest* test) {
+        if (!test->getOptions().isDisabled()) {
+            testManager.reportStart(suiteInfo(), *test, handler);
+        }
+    };
+
+    std::size_t index{};
+    while (index < selectedTests.size()) {
+        if (selectedTests[index]->getOptions().execution() == Execution::Serial) {
+            start(selectedTests[index]);
+            consume(selectedTests[index], executor.executeFixtureless(*selectedTests[index]));
+            ++index;
+            continue;
+        }
+        const auto concurrentEnd = std::ranges::find_if(
+            selectedTests.begin() + static_cast<std::ptrdiff_t>(index), selectedTests.end(),
+            [](const auto* test) {
+                return test->getOptions().execution() == Execution::Serial;
+            }
+        );
+        const auto endIndex = static_cast<std::size_t>(concurrentEnd - selectedTests.begin());
+        while (index < endIndex) {
+            const auto count = std::min(maxParallelTests, endIndex - index);
+            std::vector<std::future<detail::TestExecutionResult>> running;
+            running.reserve(count);
+            for (std::size_t offset = 0; offset < count; ++offset) {
+                auto* test = selectedTests[index + offset];
+                start(test);
+                running.push_back(std::async(std::launch::async, [&executor, test] {
+                    return executor.executeFixtureless(*test);
+                }));
+            }
+            for (std::size_t offset = 0; offset < count; ++offset) {
+                consume(selectedTests[index + offset], running[offset].get());
+            }
+            index += count;
+        }
+    }
+    return true;
+}
+
+bool InternalSuite::executeLifecycleTests(
+    std::span<InternalTest* const> selectedTests, LifecycleSuite* fixture,
+    TestEventHandler* handler
+) {
+    Callback beforeEach = [fixture] { if (fixture) fixture->beforeEach(); };
+    Callback afterEach = [fixture] { if (fixture) fixture->afterEach(); };
+    detail::TestExecutor executor{testManager, hookManager};
+    bool hooksSucceeded = true;
+    for (auto* test : selectedTests) {
+        if (!test->getOptions().isDisabled()) {
+            testManager.reportStart(suiteInfo(), *test, handler);
+        }
+        auto result = executor.executeWithLifecycle(*test, fixture, beforeEach, afterEach);
+        hooksSucceeded = result.lifecycleSucceeded() && hooksSucceeded;
+        testManager.reportResult(
+            suiteInfo(), *test, result.status, result.duration,
+            std::move(result.exception), handler
+        );
+    }
     return hooksSucceeded;
 }
 

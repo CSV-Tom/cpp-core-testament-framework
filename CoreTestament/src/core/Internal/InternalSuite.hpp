@@ -2,6 +2,7 @@
 #define TESTFRAMEWORK_TESTAMENT_INTERNALSUITE_HPP
 
 #include "Testament/SuiteOptions.hpp"
+#include "Testament/TestEventHandler.hpp"
 
 #include "utils/ExecutionTimer.hpp"
 #include "utils/HookManager.hpp"
@@ -23,7 +24,6 @@
 namespace Testament {
 
 class LifecycleSuite;
-class TestEventHandler;
 class InternalTest;
 namespace detail {
 class TestHandle;
@@ -65,6 +65,23 @@ public:
     const ExecutionTimer& getTotalTimer() const;
 
 private:
+    void prepareTests(std::optional<std::uint64_t> shuffleSeed);
+    [[nodiscard]] std::vector<InternalTest*> selectTests(
+        const RunConfiguration& configuration
+    ) const;
+    [[nodiscard]] TestEventHandler::SuiteInfo suiteInfo() const;
+    void skipTests(std::span<InternalTest* const> selectedTests, TestEventHandler* handler);
+    [[nodiscard]] bool abortRun(std::span<InternalTest* const> selectedTests,
+                                TestEventHandler* handler, std::string_view error);
+    [[nodiscard]] bool executeFixturelessTests(
+        std::span<InternalTest* const> selectedTests, TestEventHandler* handler,
+        std::size_t maxParallelTests
+    );
+    [[nodiscard]] bool executeLifecycleTests(
+        std::span<InternalTest* const> selectedTests, LifecycleSuite* fixture,
+        TestEventHandler* handler
+    );
+
     TestStatistics<unsigned int> statistic;
 
     std::string name;

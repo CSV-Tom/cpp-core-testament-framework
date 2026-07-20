@@ -31,6 +31,7 @@ target_sources(${PROJECT_NAME}
         src/core/Internal/SuiteAssembler.cpp
         src/core/Internal/SuiteScheduler.cpp
         src/core/Internal/TestCatalog.cpp
+        src/core/Internal/TestExecutor.cpp
         src/core/Runner.cpp
         src/core/DefaultRun.cpp
         src/core/SuiteRegistration.cpp
