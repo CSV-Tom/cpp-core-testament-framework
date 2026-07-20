@@ -149,6 +149,9 @@ install(
 )
 
 if(BUILD_TESTING)
+    string(REPLACE ";" "|" TESTAMENT_CXX_IMPLICIT_INCLUDE_DIRS
+           "${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES}")
+
     function(add_testament_test target test_name)
         add_executable(${target} ${ARGN})
         target_link_libraries(${target} PRIVATE CoreTestament::CoreTestament)
@@ -341,6 +344,7 @@ if(BUILD_TESTING)
                     -DCOMPILER_ID=${CMAKE_CXX_COMPILER_ID}
                     -DINCLUDE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/include
                     -DGENERATED_INCLUDE_DIR=${CMAKE_CURRENT_BINARY_DIR}/generated
+                    -DIMPLICIT_INCLUDE_DIRS=${TESTAMENT_CXX_IMPLICIT_INCLUDE_DIRS}
                     -DSOURCE_FILE=${CMAKE_CURRENT_SOURCE_DIR}/${source}
                     -DEXPECTED_DIAGNOSTIC=${expected_diagnostic}
                     -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/cmake/CompileFailureTest.cmake
@@ -355,6 +359,7 @@ if(BUILD_TESTING)
                 -DCOMPILER_ID=${CMAKE_CXX_COMPILER_ID}
                 -DINCLUDE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/include
                 -DGENERATED_INCLUDE_DIR=${CMAKE_CURRENT_BINARY_DIR}/generated
+                -DIMPLICIT_INCLUDE_DIRS=${TESTAMENT_CXX_IMPLICIT_INCLUDE_DIRS}
                 -DSOURCE_FILE=${CMAKE_CURRENT_SOURCE_DIR}/tests/compile-fail/DiscardedHandles.cpp
                 -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/cmake/DiscardedHandlesTest.cmake
         )

@@ -71,7 +71,7 @@ jobs:
         run: ctest --test-dir build --output-on-failure -L integration
 
   sanitizers:
-    name: GCC ASan and UBSan
+    name: Clang ASan, LSan and UBSan
     runs-on: ubuntu-24.04
 
     steps:

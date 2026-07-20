@@ -74,6 +74,8 @@ released yet.
   installed DSL runtime bridge; implementation and PImpl symbols stay hidden.
 - `AssertionFailure` and `SkipRequest` now transfer their PImpl storage in move
   operations instead of incrementing its reference count.
+- MSVC compile-failure tests inherit the standard-library include directories
+  detected by CMake when invoking the compiler directly.
 
 ### Removed
 
