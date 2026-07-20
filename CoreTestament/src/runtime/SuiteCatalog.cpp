@@ -1,6 +1,6 @@
-#include "TestCatalog.hpp"
+#include "SuiteCatalog.hpp"
 
-#include "configuration/FilterPattern.hpp"
+#include "configuration/FilterMatcher.hpp"
 #include "SuiteInstance.hpp"
 #include "TestInstance.hpp"
 
@@ -25,7 +25,7 @@ void printTags(std::ostream& output, std::span<const std::string> tags) {
 
 }
 
-TestCatalog::TestCatalog(std::vector<std::shared_ptr<SuiteInstance>> suites,
+SuiteCatalog::SuiteCatalog(std::vector<std::shared_ptr<SuiteInstance>> suites,
                          std::optional<std::string_view> suiteFilter)
     : mSuites(std::move(suites)) {
     if (suiteFilter) {
@@ -41,11 +41,11 @@ TestCatalog::TestCatalog(std::vector<std::shared_ptr<SuiteInstance>> suites,
     });
 }
 
-const std::vector<std::shared_ptr<SuiteInstance>>& TestCatalog::suites() const noexcept {
+const std::vector<std::shared_ptr<SuiteInstance>>& SuiteCatalog::suites() const noexcept {
     return mSuites;
 }
 
-std::vector<std::shared_ptr<SuiteInstance>> TestCatalog::forRun(
+std::vector<std::shared_ptr<SuiteInstance>> SuiteCatalog::forRun(
     std::optional<std::uint64_t> shuffleSeed
 ) const {
     auto result = mSuites;
@@ -59,7 +59,7 @@ std::vector<std::shared_ptr<SuiteInstance>> TestCatalog::forRun(
     return result;
 }
 
-void TestCatalog::list(std::ostream& output, std::string_view testFilter,
+void SuiteCatalog::list(std::ostream& output, std::string_view testFilter,
                        std::string_view expression) const {
     for (const auto& suite : mSuites) {
         output << suite->name() << " [";

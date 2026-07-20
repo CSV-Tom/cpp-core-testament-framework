@@ -1,9 +1,9 @@
 #include "SuiteInstance.hpp"
 #include "TestInstance.hpp"
-#include "LifecycleAccess.hpp"
+#include "LifecycleHookAccess.hpp"
 #include "TestExecutor.hpp"
-#include "TestAccess.hpp"
-#include "configuration/FilterPattern.hpp"
+#include "TestHandleAccess.hpp"
+#include "configuration/FilterMatcher.hpp"
 
 #include "Testament/LifecycleSuite.hpp"
 #include "Testament/detail/TestHandle.hpp"
@@ -52,7 +52,7 @@ SuiteInstance::~SuiteInstance() = default;
 
 
 void SuiteInstance::addTest(TestHandle test) {
-    auto internalTest = detail::TestAccess::release(std::move(test));
+    auto internalTest = detail::TestHandleAccess::release(std::move(test));
     if (const auto expectedFixture = internalTest->fixtureType();
         expectedFixture && expectedFixture != mFixtureType) {
         throw std::invalid_argument(
@@ -114,7 +114,7 @@ bool SuiteInstance::run(TestEventHandler* handler, RunConfiguration configuratio
     }
 
     Callback beforeAll = [&fixture] {
-        if (fixture) detail::LifecycleAccess::beforeAll(*fixture);
+        if (fixture) detail::LifecycleHookAccess::beforeAll(*fixture);
     };
     if (!mHookExecutor.invokeBeforeSuiteHook()
         || !mHookExecutor.invoke(beforeAll, "beforeAll")) {
@@ -128,7 +128,7 @@ bool SuiteInstance::run(TestEventHandler* handler, RunConfiguration configuratio
         : executeLifecycleTests(selectedTests, fixture.get(), handler);
 
     Callback afterAll = [&fixture] {
-        if (fixture) detail::LifecycleAccess::afterAll(*fixture);
+        if (fixture) detail::LifecycleHookAccess::afterAll(*fixture);
     };
     if (!mHookExecutor.invoke(afterAll, "afterAll")
         || !mHookExecutor.invokeAfterSuiteHook()) {
@@ -265,10 +265,10 @@ bool SuiteInstance::executeLifecycleTests(
     TestEventHandler* handler
 ) {
     Callback beforeEach = [fixture] {
-        if (fixture) detail::LifecycleAccess::beforeEach(*fixture);
+        if (fixture) detail::LifecycleHookAccess::beforeEach(*fixture);
     };
     Callback afterEach = [fixture] {
-        if (fixture) detail::LifecycleAccess::afterEach(*fixture);
+        if (fixture) detail::LifecycleHookAccess::afterEach(*fixture);
     };
     detail::TestExecutor executor{mHookExecutor};
     bool hooksSucceeded = true;

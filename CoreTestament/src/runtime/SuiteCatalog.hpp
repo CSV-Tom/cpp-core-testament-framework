@@ -11,9 +11,9 @@ namespace Testament::detail {
 
 class SuiteInstance;
 
-class TestCatalog {
+class SuiteCatalog {
 public:
-    TestCatalog(std::vector<std::shared_ptr<SuiteInstance>> suites,
+    SuiteCatalog(std::vector<std::shared_ptr<SuiteInstance>> suites,
                 std::optional<std::string_view> suiteFilter);
 
     [[nodiscard]] const std::vector<std::shared_ptr<SuiteInstance>>& suites() const noexcept;

@@ -16,7 +16,7 @@ class SuiteRegistration::Impl {
 public:
     explicit Impl(std::shared_ptr<detail::SuiteInstance> suiteInstance)
         : suite(std::move(suiteInstance)) {}
-    explicit Impl(detail::ConfigurationErrors::Id configurationDiagnostic)
+    explicit Impl(detail::ConfigurationErrorStore::Id configurationDiagnostic)
         : diagnosticId(configurationDiagnostic) {}
 
     ~Impl() {
@@ -27,7 +27,7 @@ public:
     }
 
     std::shared_ptr<detail::SuiteInstance> suite;
-    std::optional<detail::ConfigurationErrors::Id> diagnosticId;
+    std::optional<detail::ConfigurationErrorStore::Id> diagnosticId;
 };
 
 SuiteRegistration detail::RuntimeBridge::registerSuite(std::string_view name,
@@ -35,9 +35,11 @@ SuiteRegistration detail::RuntimeBridge::registerSuite(std::string_view name,
                                                        SuiteOptions options,
                                                        std::vector<TestHandle> tests) {
     try {
-        auto suite = SuiteFactory::create(
-            std::string{name}, location, std::type_index(typeid(void)), {},
-            std::move(options), std::move(tests)
+        auto suite = SuiteRegistry::instance().registerSuite(
+            SuiteFactory::create(
+                std::string{name}, location, std::type_index(typeid(void)), {},
+                std::move(options), std::move(tests)
+            )
         );
         return SuiteRegistration{std::make_unique<SuiteRegistration::Impl>(std::move(suite))};
     } catch (const std::logic_error& error) {
@@ -54,9 +56,11 @@ SuiteRegistration detail::RuntimeBridge::registerSuite(
     SuiteOptions options, std::vector<TestHandle> tests
 ) {
     try {
-        auto suite = SuiteFactory::create(
-            std::string{name}, location, fixtureType, std::move(fixtureFactory),
-            std::move(options), std::move(tests)
+        auto suite = SuiteRegistry::instance().registerSuite(
+            SuiteFactory::create(
+                std::string{name}, location, fixtureType, std::move(fixtureFactory),
+                std::move(options), std::move(tests)
+            )
         );
         return SuiteRegistration{std::make_unique<SuiteRegistration::Impl>(std::move(suite))};
     } catch (const std::logic_error& error) {

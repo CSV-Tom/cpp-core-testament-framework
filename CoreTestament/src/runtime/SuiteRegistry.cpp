@@ -42,16 +42,16 @@ std::vector<std::shared_ptr<SuiteInstance>> SuiteRegistry::suites() const {
     return mSuites;
 }
 
-ConfigurationErrors::Id SuiteRegistry::recordConfigurationError(std::string error) {
-    return mConfigurationErrors.record(std::move(error));
+ConfigurationErrorStore::Id SuiteRegistry::recordConfigurationError(std::string error) {
+    return mConfigurationErrorStore.record(std::move(error));
 }
 
-void SuiteRegistry::removeConfigurationError(ConfigurationErrors::Id id) {
-    mConfigurationErrors.remove(id);
+void SuiteRegistry::removeConfigurationError(ConfigurationErrorStore::Id id) {
+    mConfigurationErrorStore.remove(id);
 }
 
 std::vector<std::string> SuiteRegistry::configurationErrors() const {
-    return mConfigurationErrors.errors();
+    return mConfigurationErrorStore.errors();
 }
 
 }

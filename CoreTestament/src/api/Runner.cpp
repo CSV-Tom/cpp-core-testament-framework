@@ -8,7 +8,7 @@
 #include "runtime/EnvironmentSession.hpp"
 #include "runtime/SuiteRegistry.hpp"
 #include "runtime/SuiteScheduler.hpp"
-#include "runtime/TestCatalog.hpp"
+#include "runtime/SuiteCatalog.hpp"
 #include "runtime/TestCounts.hpp"
 
 #include <cstdint>
@@ -115,7 +115,7 @@ int Runner::run(int argc, char** argv) {
         for (const auto& error : errors) std::cerr << "Test configuration error: " << error << '\n';
         return 2;
     }
-    const detail::TestCatalog catalog{
+    const detail::SuiteCatalog catalog{
         registry.suites(),
         pImpl->suiteFilter
             ? std::optional<std::string_view>{*pImpl->suiteFilter}

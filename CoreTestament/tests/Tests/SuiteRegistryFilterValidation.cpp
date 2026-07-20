@@ -1,6 +1,6 @@
 #include "runtime/SuiteRegistry.hpp"
 #include "runtime/SuiteInstance.hpp"
-#include "configuration/FilterPattern.hpp"
+#include "configuration/FilterMatcher.hpp"
 
 #include <memory>
 #include <string>

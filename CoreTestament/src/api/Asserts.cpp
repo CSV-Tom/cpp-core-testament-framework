@@ -1,6 +1,6 @@
 #include "Testament/Asserts.hpp"
 
-#include "runtime/AssertionCollection.hpp"
+#include "runtime/AssertionContext.hpp"
 #include "runtime/TraceContext.hpp"
 
 #include <exception>
@@ -38,12 +38,12 @@ std::exception_ptr combinedFailure() {
 
 }
 
-void beginAssertionCollection() {
+void beginAssertionContext() {
     collectedFailures.clear();
     collectionActive = true;
 }
 
-std::exception_ptr finishAssertionCollection(std::exception_ptr terminalFailure) {
+std::exception_ptr finishAssertionContext(std::exception_ptr terminalFailure) {
     collectionActive = false;
     if (terminalFailure) {
         try {

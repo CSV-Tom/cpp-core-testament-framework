@@ -1,6 +1,6 @@
 #include "Testament/LifecycleSuite.hpp"
 
-#include "runtime/LifecycleAccess.hpp"
+#include "runtime/LifecycleHookAccess.hpp"
 
 namespace Testament {
 
@@ -9,19 +9,19 @@ void LifecycleSuite::beforeEach() {}
 void LifecycleSuite::afterEach() {}
 void LifecycleSuite::afterAll() {}
 
-void detail::LifecycleAccess::beforeAll(LifecycleSuite& suite) {
+void detail::LifecycleHookAccess::beforeAll(LifecycleSuite& suite) {
     suite.beforeAll();
 }
 
-void detail::LifecycleAccess::beforeEach(LifecycleSuite& suite) {
+void detail::LifecycleHookAccess::beforeEach(LifecycleSuite& suite) {
     suite.beforeEach();
 }
 
-void detail::LifecycleAccess::afterEach(LifecycleSuite& suite) {
+void detail::LifecycleHookAccess::afterEach(LifecycleSuite& suite) {
     suite.afterEach();
 }
 
-void detail::LifecycleAccess::afterAll(LifecycleSuite& suite) {
+void detail::LifecycleHookAccess::afterAll(LifecycleSuite& suite) {
     suite.afterAll();
 }
 

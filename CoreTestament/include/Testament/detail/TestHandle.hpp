@@ -6,7 +6,7 @@
 namespace Testament::detail {
 
 class TestInstance;
-class TestAccess;
+class TestHandleAccess;
 
 class TestHandle {
 public:
@@ -23,7 +23,7 @@ private:
     explicit TestHandle(std::unique_ptr<Impl> implementation);
 
     friend class RuntimeBridge;
-    friend class TestAccess;
+    friend class TestHandleAccess;
 
     std::unique_ptr<Impl> pImpl;
 };

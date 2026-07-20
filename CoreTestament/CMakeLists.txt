@@ -25,12 +25,12 @@ target_sources(${PROJECT_NAME}
         src/runtime/TestInstance.cpp
         src/runtime/SuiteInstance.cpp
         src/runtime/SuiteRegistry.cpp
-        src/configuration/ConfigurationErrors.cpp
+        src/configuration/ConfigurationErrorStore.cpp
         src/configuration/CommandLineOptions.cpp
         src/runtime/EnvironmentSession.cpp
         src/runtime/SuiteFactory.cpp
         src/runtime/SuiteScheduler.cpp
-        src/runtime/TestCatalog.cpp
+        src/runtime/SuiteCatalog.cpp
         src/runtime/TestExecutor.cpp
         src/api/Runner.cpp
         src/api/DefaultRun.cpp

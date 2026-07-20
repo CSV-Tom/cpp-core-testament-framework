@@ -6,7 +6,7 @@ class LifecycleSuite;
 
 namespace detail {
 
-class LifecycleAccess {
+class LifecycleHookAccess {
 public:
     static void beforeAll(LifecycleSuite& suite);
     static void beforeEach(LifecycleSuite& suite);

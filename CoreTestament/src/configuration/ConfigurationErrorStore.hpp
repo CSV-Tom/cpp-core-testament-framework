@@ -8,7 +8,7 @@
 
 namespace Testament::detail {
 
-class ConfigurationErrors {
+class ConfigurationErrorStore {
 public:
     using Id = std::uint64_t;
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "configuration/ConfigurationErrors.hpp"
+#include "configuration/ConfigurationErrorStore.hpp"
 
 #include <functional>
 #include <memory>
@@ -20,8 +20,8 @@ public:
     void unregisterSuite(const std::shared_ptr<SuiteInstance>& suite);
 
     [[nodiscard]] std::vector<std::shared_ptr<SuiteInstance>> suites() const;
-    [[nodiscard]] ConfigurationErrors::Id recordConfigurationError(std::string error);
-    void removeConfigurationError(ConfigurationErrors::Id id);
+    [[nodiscard]] ConfigurationErrorStore::Id recordConfigurationError(std::string error);
+    void removeConfigurationError(ConfigurationErrorStore::Id id);
     [[nodiscard]] std::vector<std::string> configurationErrors() const;
 
     template <typename Predicate>
@@ -46,7 +46,7 @@ private:
 
     mutable std::shared_mutex mMutex;
     std::vector<std::shared_ptr<SuiteInstance>> mSuites;
-    ConfigurationErrors mConfigurationErrors;
+    ConfigurationErrorStore mConfigurationErrorStore;
 };
 
 }

@@ -1,6 +1,5 @@
 #include "SuiteFactory.hpp"
 
-#include "SuiteRegistry.hpp"
 #include "SuiteInstance.hpp"
 
 #include "Testament/LifecycleSuite.hpp"
@@ -21,7 +20,7 @@ std::shared_ptr<SuiteInstance> SuiteFactory::create(
                                           std::move(fixtureFactory), std::move(options))
         : std::make_shared<SuiteInstance>(std::move(name), location, std::move(options));
     for (auto& test : tests) suite->addTest(std::move(test));
-    return SuiteRegistry::instance().registerSuite(std::move(suite));
+    return suite;
 }
 
 }

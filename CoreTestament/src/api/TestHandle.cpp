@@ -4,7 +4,7 @@
 
 #include "runtime/TestFunction.hpp"
 #include "runtime/TestInstance.hpp"
-#include "runtime/TestAccess.hpp"
+#include "runtime/TestHandleAccess.hpp"
 
 #include <stdexcept>
 #include <string>
@@ -40,7 +40,7 @@ detail::TestHandle detail::RuntimeBridge::makeTest(
     )};
 }
 
-std::unique_ptr<detail::TestInstance> detail::TestAccess::release(TestHandle&& test) {
+std::unique_ptr<detail::TestInstance> detail::TestHandleAccess::release(TestHandle&& test) {
     if (!test.pImpl || !test.pImpl->test) {
         throw std::invalid_argument("Cannot add an empty or moved-from test");
     }

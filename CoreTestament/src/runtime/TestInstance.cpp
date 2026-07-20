@@ -1,5 +1,5 @@
 #include "TestInstance.hpp"
-#include "AssertionCollection.hpp"
+#include "AssertionContext.hpp"
 #include "Testament/SkipRequest.hpp"
 
 #include "TestCounts.hpp"
@@ -45,7 +45,7 @@ std::expected<void, std::exception_ptr> TestInstance::execute(LifecycleSuite* fi
     mException = nullptr;
     mStopwatch.reset();
     mStopwatch.start();
-    Asserts::detail::beginAssertionCollection();
+    Asserts::detail::beginAssertionContext();
 
     try {
         std::visit([fixture](auto&& func) {
@@ -65,15 +65,15 @@ std::expected<void, std::exception_ptr> TestInstance::execute(LifecycleSuite* fi
         }, mFunction);
     } catch (const SkipRequest&) {
         mException = std::current_exception();
-        (void)Asserts::detail::finishAssertionCollection();
+        (void)Asserts::detail::finishAssertionContext();
         mStopwatch.stop();
         mStatus = TestState::Status::Skipped;
         return {};
     } catch (...) {
-        mException = Asserts::detail::finishAssertionCollection(std::current_exception());
+        mException = Asserts::detail::finishAssertionContext(std::current_exception());
     }
 
-    if (!mException) mException = Asserts::detail::finishAssertionCollection();
+    if (!mException) mException = Asserts::detail::finishAssertionContext();
     mStopwatch.stop();
     mStatus = mException ? TestState::Status::Failed : TestState::Status::Passed;
     return mException ? std::expected<void, std::exception_ptr>{std::unexpected(mException)}

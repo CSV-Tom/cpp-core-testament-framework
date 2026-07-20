@@ -4,7 +4,7 @@
 namespace Testament {
 
 namespace detail {
-class LifecycleAccess;
+class LifecycleHookAccess;
 }
 
 class LifecycleSuite {
@@ -25,7 +25,7 @@ protected:
     virtual void afterAll();
 
 private:
-    friend class detail::LifecycleAccess;
+    friend class detail::LifecycleHookAccess;
 };
 
 }

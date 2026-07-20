@@ -4,8 +4,8 @@
 
 namespace Testament::Asserts::detail {
 
-void beginAssertionCollection();
-[[nodiscard]] std::exception_ptr finishAssertionCollection(
+void beginAssertionContext();
+[[nodiscard]] std::exception_ptr finishAssertionContext(
     std::exception_ptr terminalFailure = {}
 );
 
