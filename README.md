@@ -7,9 +7,12 @@ test definitions and automatic static registration before `main()`.
 
 ## Documentation
 
-See the [usage guide](docs/guide.md) for the full DSL walkthrough: minimal
-examples, fixtures and options, the registration model, multiple translation
-units, JUnit reports and how to consume the package from another project.
+- [Documentation overview and API guide](docs/README.md)
+- [Getting-started tutorial](docs/tutorial/README.md)
+
+The tutorial builds a small test executable from scratch. The documentation
+overview covers fixtures, options, registration, multiple translation units,
+reporters and package consumption in more detail.
 
 ## Quickstart
 

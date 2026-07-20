@@ -18,8 +18,21 @@ released yet.
   during static initialization.
 - Public custom reporter API, console and JUnit reporters.
 - Structured assertion failures with source locations and expected/actual values.
+- Runtime skipping with an optional reason and skipped-result reporting.
+- Global test environments with process-wide setup and teardown hooks.
+- Suite/test glob filters, negation and tag expressions, including the
+  `--filter` and `--list-tests` command-line options.
+- Repeated and reproducibly shuffled runs through `--repeat`, `--shuffle` and
+  `--seed`.
+- Thread-local scoped trace contexts attached to assertion failures.
+- Configurable parallel suite and fixture-less test execution with deterministic
+  event delivery and explicit serial overrides.
+- Non-fatal assertions, heterogeneous equality, smart-pointer null checks,
+  range comparisons, floating-point comparisons and exception assertions.
 - Install-and-consume, compile-fail, multi-translation-unit and sanitizer-oriented
-  regression coverage.
+  regression coverage, including AddressSanitizer, UndefinedBehaviorSanitizer
+  and ThreadSanitizer configurations.
+- Documentation entry point and a standalone getting-started tutorial.
 
 ### Changed
 
@@ -29,6 +42,12 @@ released yet.
 - Every retry executes a complete `beforeEach`, body and `afterEach` attempt.
 - Lifecycle failures are explicit test errors and contribute to statistics.
 - Test result events expose current statistics and immutable option snapshots.
+- Public concrete value types hide their implementation behind PImpl; template
+  definitions remain header-defined where required by C++.
+- Reporters receive command-line arguments and structured suite, test and final
+  run information.
+- Runtime implementation sources are organized by API, configuration, reporting
+  and execution responsibilities under `Testament::detail`.
 - CoreTestament's development package version is `0.1.0`.
 
 ### Fixed
@@ -39,6 +58,10 @@ released yet.
 - Registry filtering returns snapshots instead of lazy views crossing lock scope.
 - Repeated suite runs reset statistics, timers and hook errors.
 - Assertion and option PImpl values remain readable after moves.
+- Fixture type mismatches are diagnosed instead of invoking undefined behavior.
+- Lifecycle hooks and reporter failures remain contained and contribute to the
+  final result without bypassing custom handlers.
+- Test and suite definition locations are preserved for diagnostics and reports.
 - Compiler flags, installation paths, exported headers and package targets are
   portable across supported CMake generators.
 

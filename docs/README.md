@@ -1,7 +1,19 @@
-# Usage Guide
+# Core Testament Documentation
 
-Full documentation and examples for Core Testament. For a general project
+This is the main entry point for Core Testament documentation. Start with the
+[step-by-step tutorial](tutorial/README.md) to build a small test executable, or
+use this page as the complete DSL and integration guide. For the project
 overview, see the top-level [README](../README.md).
+
+## Contents
+
+- [Adding Core Testament to your project](#adding-core-testament-to-your-project)
+- [Minimal example](#minimal-example)
+- [Fixtures and options](#fixtures-and-options)
+- [Registration model](#registration-model)
+- [Multiple translation units and linking](#multiple-translation-units-and-linking)
+- [JUnit reports](#junit-reports)
+- [Getting-started tutorial](tutorial/README.md)
 
 ## Adding Core Testament to your project
 
