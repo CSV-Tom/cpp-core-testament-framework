@@ -39,14 +39,14 @@ public:
     std::exception_ptr exception() const;
 
 private:
-    std::string name_;
-    std::source_location location_;
-    TestOptions options_;
+    std::string mName;
+    std::source_location mLocation;
+    TestOptions mOptions;
     FunctionVariant function;
-    std::optional<std::type_index> fixtureType_;
-    TestStatus status_{TestStatus::Status::NotRun};
-    std::exception_ptr exception_;
-    ExecutionTimer executionTimer_;
+    std::optional<std::type_index> mFixtureType;
+    TestStatus mStatus{TestStatus::Status::NotRun};
+    std::exception_ptr mException;
+    ExecutionTimer mExecutionTimer;
 };
 
 }

@@ -11,14 +11,14 @@ template <typename... Args>
 class NamedTestCase {
 public:
     NamedTestCase(std::string name, std::tuple<Args...> values)
-        : name_(std::move(name)), values_(std::move(values)) {}
+        : mName(std::move(name)), mValues(std::move(values)) {}
 
-    [[nodiscard]] const std::string& name() const noexcept { return name_; }
-    std::tuple<Args...> releaseValues() && { return std::move(values_); }
+    [[nodiscard]] const std::string& name() const noexcept { return mName; }
+    std::tuple<Args...> releaseValues() && { return std::move(mValues); }
 
 private:
-    std::string name_;
-    std::tuple<Args...> values_;
+    std::string mName;
+    std::tuple<Args...> mValues;
 };
 
 }

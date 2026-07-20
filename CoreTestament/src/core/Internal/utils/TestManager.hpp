@@ -18,7 +18,8 @@ class TestManager {
 public:
     using Result = std::expected<void, std::exception_ptr>;
 
-    explicit TestManager(TestStatistics<unsigned int>& statistic_) : statistic(statistic_) {}
+    explicit TestManager(TestStatistics<unsigned int>& testStatistics)
+        : statistic(testStatistics) {}
 
     void reportStart(const TestEventHandler::SuiteInfo& suiteInfo,
                      const InternalTest& test,

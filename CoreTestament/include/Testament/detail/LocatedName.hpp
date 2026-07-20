@@ -14,14 +14,14 @@ public:
     template <typename Name>
     requires std::constructible_from<std::string_view, Name&&>
     LocatedName(Name&& name, std::source_location location = std::source_location::current())
-        : value_(std::string_view{std::forward<Name>(name)}), location_(location) {}
+        : mValue(std::string_view{std::forward<Name>(name)}), mLocation(location) {}
 
-    [[nodiscard]] const std::string& value() const noexcept { return value_; }
-    [[nodiscard]] std::source_location location() const noexcept { return location_; }
+    [[nodiscard]] const std::string& value() const noexcept { return mValue; }
+    [[nodiscard]] std::source_location location() const noexcept { return mLocation; }
 
 private:
-    std::string value_;
-    std::source_location location_;
+    std::string mValue;
+    std::source_location mLocation;
 };
 
 }

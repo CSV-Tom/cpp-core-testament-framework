@@ -46,11 +46,11 @@ public:
     }
 
     [[nodiscard]] const std::vector<std::string>& errors() const noexcept {
-        return errors_;
+        return mErrors;
     }
 
     void resetErrors() {
-        errors_.clear();
+        mErrors.clear();
     }
 
     [[nodiscard]] bool hasPerTestHooks() const noexcept {
@@ -58,7 +58,7 @@ public:
     }
 
 private:
-    std::vector<std::string> errors_;
+    std::vector<std::string> mErrors;
 
     Callback beforeSuiteHook;
     Callback beforeEachHook;
@@ -73,12 +73,12 @@ private:
             } catch (const std::exception& e) {
                 std::ostringstream oss;
                 oss << "Error in " << hookName << ": " << e.what();
-                errors_.push_back(oss.str());
+                mErrors.push_back(oss.str());
                 return false;
             } catch (...) {
                 std::ostringstream oss;
                 oss << "Unknown error in " << hookName;
-                errors_.push_back(oss.str());
+                mErrors.push_back(oss.str());
                 return false;
             }
         }

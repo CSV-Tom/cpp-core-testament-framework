@@ -124,8 +124,8 @@ double durationSeconds(const TestEventHandler::TestInfo& test) {
 
 }
 
-JUnitTestEventHandler::JUnitTestEventHandler(std::filesystem::path outputPath_)
-    : outputPath(std::move(outputPath_)), outputPathIsFixed(true) {}
+JUnitTestEventHandler::JUnitTestEventHandler(std::filesystem::path reportPath)
+    : outputPath(std::move(reportPath)), outputPathIsFixed(true) {}
 
 std::expected<void, std::string> JUnitTestEventHandler::configure(Arguments arguments) {
     if (outputPathIsFixed) return {};

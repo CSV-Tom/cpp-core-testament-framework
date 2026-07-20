@@ -9,70 +9,70 @@ public:
     TestStatistics() = default;
 
     [[nodiscard]] CounterType skippedTests() const noexcept {
-        return skippedTests_;
+        return mSkippedTests;
     }
 
     [[nodiscard]] CounterType failedTests() const noexcept {
-        return failedTests_;
+        return mFailedTests;
     }
 
     [[nodiscard]] CounterType passedTests() const noexcept {
-        return successfulTests_;
+        return mSuccessfulTests;
     }
 
     [[nodiscard]] CounterType errors() const noexcept {
-        return errors_;
+        return mErrors;
     }
 
     [[nodiscard]] CounterType totalTests() const noexcept {
-        return skippedTests_ + failedTests_ + successfulTests_ + errors_;
+        return mSkippedTests + mFailedTests + mSuccessfulTests + mErrors;
     }
 
     void incrementSkippedTests() noexcept {
-        ++skippedTests_;
+        ++mSkippedTests;
     }
 
     void incrementFailedTests() noexcept {
-        ++failedTests_;
+        ++mFailedTests;
     }
 
     void incrementPassedTests() noexcept {
-        ++successfulTests_;
+        ++mSuccessfulTests;
     }
 
     void incrementErrors() noexcept {
-        ++errors_;
+        ++mErrors;
     }
 
     void reset() noexcept {
-        skippedTests_ = 0;
-        failedTests_ = 0;
-        successfulTests_ = 0;
-        errors_ = 0;
+        mSkippedTests = 0;
+        mFailedTests = 0;
+        mSuccessfulTests = 0;
+        mErrors = 0;
     }
 
     [[nodiscard]] TestStatistics operator+(const TestStatistics& other) const noexcept {
         TestStatistics result;
-        result.skippedTests_ = skippedTests_ + other.skippedTests_;
-        result.failedTests_ = failedTests_ + other.failedTests_;
-        result.successfulTests_ = successfulTests_ + other.successfulTests_;
-        result.errors_ = errors_ + other.errors_;
+        result.mSkippedTests = mSkippedTests + other.mSkippedTests;
+        result.mFailedTests = mFailedTests + other.mFailedTests;
+        result.mSuccessfulTests = mSuccessfulTests + other.mSuccessfulTests;
+        result.mErrors = mErrors + other.mErrors;
         return result;
     }
 
     TestStatistics& operator+=(const TestStatistics& other) noexcept {
-        skippedTests_ += other.skippedTests_;
-        failedTests_ += other.failedTests_;
-        successfulTests_ += other.successfulTests_;
-        errors_ += other.errors_;
+        mSkippedTests += other.mSkippedTests;
+        mFailedTests += other.mFailedTests;
+        mSuccessfulTests += other.mSuccessfulTests;
+        mErrors += other.mErrors;
         return *this;
     }
 
 private:
-    CounterType skippedTests_{};
-    CounterType failedTests_{};
-    CounterType successfulTests_{};
-    CounterType errors_{};
+    CounterType mSkippedTests{};
+    CounterType mFailedTests{};
+    CounterType mSuccessfulTests{};
+    CounterType mErrors{};
 };
 
 }

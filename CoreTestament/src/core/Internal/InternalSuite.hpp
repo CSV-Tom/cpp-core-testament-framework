@@ -84,17 +84,17 @@ private:
 
     TestStatistics<unsigned int> statistic;
 
-    std::string name_;
-    std::source_location location_;
-    SuiteOptions options_;
-    std::vector<std::unique_ptr<InternalTest>> tests_;
+    std::string mName;
+    std::source_location mLocation;
+    SuiteOptions mOptions;
+    std::vector<std::unique_ptr<InternalTest>> mTests;
 
-    ExecutionTimer totalTimer_;
+    ExecutionTimer mTotalTimer;
 
     HookManager hookManager;
     TestManager testManager;
     FixtureFactory fixtureFactory;
-    std::optional<std::type_index> fixtureType_;
+    std::optional<std::type_index> mFixtureType;
 };
 
 }

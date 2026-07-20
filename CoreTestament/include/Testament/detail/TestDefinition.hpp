@@ -21,8 +21,8 @@ class [[nodiscard("the test definition must be passed to Suite")]] TestDefinitio
 public:
     TestDefinition(std::string name, std::source_location location, TestOptions options,
                    Callable callable)
-        : name_(std::move(name)), location_(location), options_(std::move(options)),
-          callable_(std::move(callable)) {}
+        : mName(std::move(name)), mLocation(location), mOptions(std::move(options)),
+          mCallable(std::move(callable)) {}
 
     template <FixtureSelection Fixture>
     requires TestBodyCompatible<Fixture, Callable>::value
@@ -31,29 +31,29 @@ public:
         tests.reserve(1);
         if constexpr (std::same_as<Fixture, void>) {
             tests.push_back(RuntimeBridge::makeTest(
-                name_, std::move(options_),
-                std::move_only_function<void()>{std::move(callable_)}, location_
+                mName, std::move(mOptions),
+                std::move_only_function<void()>{std::move(mCallable)}, mLocation
             ));
         } else {
             tests.push_back(RuntimeBridge::makeTest(
-                name_, std::move(options_), std::type_index(typeid(Fixture)),
+                mName, std::move(mOptions), std::type_index(typeid(Fixture)),
                 std::move_only_function<void(LifecycleSuite&)>{
-                    [callable = std::move(callable_)](LifecycleSuite& fixture) mutable {
+                    [callable = std::move(mCallable)](LifecycleSuite& fixture) mutable {
                         auto* typedFixture = dynamic_cast<Fixture*>(&fixture);
                         if (!typedFixture) throw std::logic_error("Internal fixture type mismatch");
                         std::invoke(callable, *typedFixture);
                     }
-                }, location_
+                }, mLocation
             ));
         }
         return tests;
     }
 
 private:
-    std::string name_;
-    std::source_location location_;
-    TestOptions options_;
-    Callable callable_;
+    std::string mName;
+    std::source_location mLocation;
+    TestOptions mOptions;
+    Callable mCallable;
 };
 
 }

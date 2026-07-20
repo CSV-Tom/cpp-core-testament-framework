@@ -7,10 +7,11 @@ namespace Testament {
 
 class AssertionFailure::Impl {
 public:
-    Impl(std::string assertion_, std::string expected_, std::string actual_,
-         std::string message_, std::source_location location_)
-        : assertion(std::move(assertion_)), expected(std::move(expected_)),
-          actual(std::move(actual_)), message(std::move(message_)), location(location_) {
+    Impl(std::string assertionName, std::string expectedValue, std::string actualValue,
+         std::string failureMessage, std::source_location definition)
+        : assertion(std::move(assertionName)), expected(std::move(expectedValue)),
+          actual(std::move(actualValue)), message(std::move(failureMessage)),
+          location(definition) {
         std::ostringstream output;
         output << assertion << " failed";
         if (!message.empty()) {

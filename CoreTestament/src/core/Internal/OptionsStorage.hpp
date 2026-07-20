@@ -17,13 +17,13 @@ namespace Testament::detail {
 template <typename Attribute>
 class OptionsStorage {
 public:
-    void setOrder(int value) noexcept { order_ = value; }
-    void addTag(std::string value) { tags_.push_back(std::move(value)); }
+    void setOrder(int value) noexcept { mOrder = value; }
+    void addTag(std::string value) { mTags.push_back(std::move(value)); }
 
     void setAttribute(std::string key, std::string value) {
-        const auto existing = std::ranges::find(attributes_, key, &Attribute::first);
-        if (existing == attributes_.end()) {
-            attributes_.emplace_back(std::move(key), std::move(value));
+        const auto existing = std::ranges::find(mAttributes, key, &Attribute::first);
+        if (existing == mAttributes.end()) {
+            mAttributes.emplace_back(std::move(key), std::move(value));
         } else {
             existing->second = std::move(value);
         }
@@ -32,25 +32,25 @@ public:
     [[nodiscard]] std::optional<std::string_view> findAttribute(
         std::string_view key
     ) const noexcept {
-        const auto existing = std::ranges::find(attributes_, key, &Attribute::first);
-        if (existing == attributes_.end()) return std::nullopt;
+        const auto existing = std::ranges::find(mAttributes, key, &Attribute::first);
+        if (existing == mAttributes.end()) return std::nullopt;
         return existing->second;
     }
 
-    void setExecution(Execution value) noexcept { execution_ = value; }
+    void setExecution(Execution value) noexcept { mExecution = value; }
 
-    [[nodiscard]] std::optional<int> order() const noexcept { return order_; }
-    [[nodiscard]] std::span<const std::string> tags() const noexcept { return tags_; }
+    [[nodiscard]] std::optional<int> order() const noexcept { return mOrder; }
+    [[nodiscard]] std::span<const std::string> tags() const noexcept { return mTags; }
     [[nodiscard]] std::span<const Attribute> attributes() const noexcept {
-        return attributes_;
+        return mAttributes;
     }
-    [[nodiscard]] Execution execution() const noexcept { return execution_; }
+    [[nodiscard]] Execution execution() const noexcept { return mExecution; }
 
 private:
-    std::optional<int> order_;
-    std::vector<std::string> tags_;
-    std::vector<Attribute> attributes_;
-    Execution execution_{Execution::Inherit};
+    std::optional<int> mOrder;
+    std::vector<std::string> mTags;
+    std::vector<Attribute> mAttributes;
+    Execution mExecution{Execution::Inherit};
 };
 
 template <typename Storage>

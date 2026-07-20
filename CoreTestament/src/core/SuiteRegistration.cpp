@@ -14,8 +14,10 @@ namespace Testament {
 
 class SuiteRegistration::Impl {
 public:
-    explicit Impl(std::shared_ptr<InternalSuite> suite_) : suite(std::move(suite_)) {}
-    explicit Impl(ConfigurationDiagnostics::Id diagnosticId_) : diagnosticId(diagnosticId_) {}
+    explicit Impl(std::shared_ptr<InternalSuite> internalSuite)
+        : suite(std::move(internalSuite)) {}
+    explicit Impl(ConfigurationDiagnostics::Id configurationDiagnostic)
+        : diagnosticId(configurationDiagnostic) {}
 
     ~Impl() {
         if (suite) InternalRegistry::instance().unregisterSuite(suite);
@@ -70,7 +72,8 @@ SuiteRegistration detail::RuntimeBridge::configurationError(std::string error) {
     return SuiteRegistration{std::make_unique<SuiteRegistration::Impl>(id)};
 }
 
-SuiteRegistration::SuiteRegistration(std::unique_ptr<Impl> impl_) : impl(std::move(impl_)) {}
+SuiteRegistration::SuiteRegistration(std::unique_ptr<Impl> implementation)
+    : impl(std::move(implementation)) {}
 SuiteRegistration::~SuiteRegistration() = default;
 SuiteRegistration::SuiteRegistration(SuiteRegistration&&) noexcept = default;
 SuiteRegistration& SuiteRegistration::operator=(SuiteRegistration&&) noexcept = default;

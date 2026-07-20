@@ -7,8 +7,8 @@ namespace Testament {
 
 class SkipRequest::Impl {
 public:
-    explicit Impl(std::string reason_)
-        : reason(std::move(reason_)),
+    explicit Impl(std::string skipReason)
+        : reason(std::move(skipReason)),
           description(reason.empty() ? "test skipped" : "test skipped: " + reason) {}
 
     std::string reason;

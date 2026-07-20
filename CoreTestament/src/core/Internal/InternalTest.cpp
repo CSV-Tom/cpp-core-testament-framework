@@ -25,26 +25,26 @@ InternalTest::InternalTest(std::string testName, FunctionVariant testFunction)
 InternalTest::InternalTest(std::string testName, std::source_location definition,
                            TestOptions testOptions, FunctionVariant testFunction,
                            std::optional<std::type_index> expectedFixture)
-    : name_(std::move(testName)), location_(definition), options_(std::move(testOptions)),
-      function(std::move(testFunction)), fixtureType_(expectedFixture) {
-    if (name_.empty()) {
-        throw std::invalid_argument("Test name cannot be empty" + definitionLocation(location_));
+    : mName(std::move(testName)), mLocation(definition), mOptions(std::move(testOptions)),
+      function(std::move(testFunction)), mFixtureType(expectedFixture) {
+    if (mName.empty()) {
+        throw std::invalid_argument("Test name cannot be empty" + definitionLocation(mLocation));
     }
-    if (options_.isDisabled()) {
-        status_ = TestStatus::Status::Skipped;
+    if (mOptions.isDisabled()) {
+        mStatus = TestStatus::Status::Skipped;
     }
 }
 
 InternalTest::~InternalTest() = default;
 
 std::expected<void, std::exception_ptr> InternalTest::execute(LifecycleSuite* fixture) {
-    if (options_.isDisabled()) {
+    if (mOptions.isDisabled()) {
         return {};
     }
 
-    exception_ = nullptr;
-    executionTimer_.reset();
-    executionTimer_.start();
+    mException = nullptr;
+    mExecutionTimer.reset();
+    mExecutionTimer.start();
     Asserts::detail::beginAssertionCollection();
 
     try {
@@ -64,48 +64,48 @@ std::expected<void, std::exception_ptr> InternalTest::execute(LifecycleSuite* fi
             }
         }, function);
     } catch (const SkipRequest&) {
-        exception_ = std::current_exception();
+        mException = std::current_exception();
         (void)Asserts::detail::finishAssertionCollection();
-        executionTimer_.stop();
-        status_ = TestStatus::Status::Skipped;
+        mExecutionTimer.stop();
+        mStatus = TestStatus::Status::Skipped;
         return {};
     } catch (...) {
-        exception_ = Asserts::detail::finishAssertionCollection(std::current_exception());
+        mException = Asserts::detail::finishAssertionCollection(std::current_exception());
     }
 
-    if (!exception_) exception_ = Asserts::detail::finishAssertionCollection();
-    executionTimer_.stop();
-    status_ = exception_ ? TestStatus::Status::Failed : TestStatus::Status::Passed;
-    return exception_ ? std::expected<void, std::exception_ptr>{std::unexpected(exception_)}
+    if (!mException) mException = Asserts::detail::finishAssertionCollection();
+    mExecutionTimer.stop();
+    mStatus = mException ? TestStatus::Status::Failed : TestStatus::Status::Passed;
+    return mException ? std::expected<void, std::exception_ptr>{std::unexpected(mException)}
                      : std::expected<void, std::exception_ptr>{};
 }
 
 const std::string& InternalTest::name() const {
-    return name_;
+    return mName;
 }
 
 const TestOptions& InternalTest::options() const {
-    return options_;
+    return mOptions;
 }
 
 std::source_location InternalTest::location() const noexcept {
-    return location_;
+    return mLocation;
 }
 
 std::optional<std::type_index> InternalTest::fixtureType() const noexcept {
-    return fixtureType_;
+    return mFixtureType;
 }
 
 const ExecutionTimer& InternalTest::executionTimer() const {
-    return executionTimer_;
+    return mExecutionTimer;
 }
 
 const TestStatus& InternalTest::status() const {
-    return status_;
+    return mStatus;
 }
 
 std::exception_ptr InternalTest::exception() const {
-    return exception_;
+    return mException;
 }
 
 }

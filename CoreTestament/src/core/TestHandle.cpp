@@ -14,7 +14,8 @@ namespace Testament {
 
 class detail::TestHandle::Impl {
 public:
-    explicit Impl(std::unique_ptr<InternalTest> test_) : test(std::move(test_)) {}
+    explicit Impl(std::unique_ptr<InternalTest> internalTest)
+        : test(std::move(internalTest)) {}
 
     std::unique_ptr<InternalTest> test;
 };
@@ -46,7 +47,8 @@ std::unique_ptr<InternalTest> detail::TestAccess::release(TestHandle&& test) {
     return std::move(test.impl->test);
 }
 
-detail::TestHandle::TestHandle(std::unique_ptr<Impl> impl_) : impl(std::move(impl_)) {}
+detail::TestHandle::TestHandle(std::unique_ptr<Impl> implementation)
+    : impl(std::move(implementation)) {}
 detail::TestHandle::~TestHandle() = default;
 detail::TestHandle::TestHandle(TestHandle&&) noexcept = default;
 detail::TestHandle& detail::TestHandle::operator=(TestHandle&&) noexcept = default;

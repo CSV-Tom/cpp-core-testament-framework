@@ -31,9 +31,9 @@ std::string definitionLocation(std::source_location definition) {
 
 InternalSuite::InternalSuite(std::string suiteName, std::source_location definition,
                              SuiteOptions suiteOptions)
-    : name_(std::move(suiteName)), location_(definition), options_(std::move(suiteOptions)),
+    : mName(std::move(suiteName)), mLocation(definition), mOptions(std::move(suiteOptions)),
       testManager(statistic) {
-    if (name_.empty()) {
+    if (mName.empty()) {
         throw std::logic_error("Suite name cannot be empty!");
     }
 }
@@ -44,7 +44,7 @@ InternalSuite::InternalSuite(std::string suiteName, std::source_location definit
     : InternalSuite(std::move(suiteName), definition, std::move(suiteOptions)) {
     if (!factory) throw std::invalid_argument("Lifecycle suite fixture factory cannot be empty");
     fixtureFactory = std::move(factory);
-    fixtureType_ = expectedFixture;
+    mFixtureType = expectedFixture;
 }
 
 InternalSuite::~InternalSuite() = default;
@@ -53,7 +53,7 @@ InternalSuite::~InternalSuite() = default;
 void InternalSuite::addTest(detail::TestHandle test) {
     auto internalTest = detail::TestAccess::release(std::move(test));
     if (const auto expectedFixture = internalTest->fixtureType();
-        expectedFixture && expectedFixture != fixtureType_) {
+        expectedFixture && expectedFixture != mFixtureType) {
         throw std::invalid_argument(
             "Test fixture type does not match suite fixture type"
             + definitionLocation(internalTest->location())
@@ -65,14 +65,14 @@ void InternalSuite::addTest(detail::TestHandle test) {
             + definitionLocation(internalTest->location())
         );
     }
-    if (std::ranges::any_of(tests_, [&internalTest](const auto& registered) {
+    if (std::ranges::any_of(mTests, [&internalTest](const auto& registered) {
         return registered->name() == internalTest->name();
     })) {
         throw std::logic_error("Test name must be unique within a suite: "
                                + internalTest->name()
                                + definitionLocation(internalTest->location()));
     }
-    tests_.push_back(std::move(internalTest));
+    mTests.push_back(std::move(internalTest));
 }
 
 void InternalSuite::setBeforeSuite(Callback callback) {
@@ -94,10 +94,10 @@ bool InternalSuite::run(TestEventHandler* handler) {
 
 bool InternalSuite::run(TestEventHandler* handler, RunConfiguration configuration) {
     statistic.reset();
-    totalTimer_.reset();
+    mTotalTimer.reset();
     hookManager.resetErrors();
     prepareTests(configuration.shuffleSeed);
-    totalTimer_.start();
+    mTotalTimer.start();
     if (handler) handler->onSuiteStart(suiteInfo());
     const auto selectedTests = selectTests(configuration);
 
@@ -136,7 +136,7 @@ bool InternalSuite::run(TestEventHandler* handler, RunConfiguration configuratio
         if (handler) handler->onSuiteAbort(suiteInfo(), hookManager.errors().back());
     }
 
-    totalTimer_.stop();
+    mTotalTimer.stop();
 
     if (handler) handler->onSuiteEnd(suiteInfo());
 
@@ -146,9 +146,9 @@ bool InternalSuite::run(TestEventHandler* handler, RunConfiguration configuratio
 void InternalSuite::prepareTests(std::optional<std::uint64_t> shuffleSeed) {
     if (shuffleSeed) {
         std::mt19937_64 random{*shuffleSeed};
-        std::ranges::shuffle(tests_, random);
+        std::ranges::shuffle(mTests, random);
     }
-    std::ranges::stable_sort(tests_, [shuffle = shuffleSeed.has_value()](
+    std::ranges::stable_sort(mTests, [shuffle = shuffleSeed.has_value()](
         const auto& left, const auto& right
     ) {
         const auto leftOrder = left->options().order().value_or(0);
@@ -162,12 +162,12 @@ std::vector<InternalTest*> InternalSuite::selectTests(
     const RunConfiguration& configuration
 ) const {
     std::vector<InternalTest*> selected;
-    for (const auto& test : tests_) {
+    for (const auto& test : mTests) {
         const bool nameMatches = configuration.testNameFilter.empty()
             || detail::matchesNameFilter(test->name(), configuration.testNameFilter);
         const bool expressionMatches = configuration.filterExpression.empty()
             || detail::matchesTestFilter(
-                name_, options_.tags(), test->name(), test->options().tags(),
+                mName, mOptions.tags(), test->name(), test->options().tags(),
                 configuration.filterExpression
             );
         if (nameMatches && expressionMatches) selected.push_back(test.get());
@@ -177,8 +177,8 @@ std::vector<InternalTest*> InternalSuite::selectTests(
 
 TestEventHandler::SuiteInfo InternalSuite::suiteInfo() const {
     return {
-        name_, location_, statistic.passedTests(), statistic.failedTests(),
-        statistic.skippedTests(), statistic.errors(), options_
+        mName, mLocation, statistic.passedTests(), statistic.failedTests(),
+        statistic.skippedTests(), statistic.errors(), mOptions
     };
 }
 
@@ -199,7 +199,7 @@ bool InternalSuite::abortRun(
 ) {
     statistic.incrementErrors();
     skipTests(selectedTests, handler);
-    totalTimer_.stop();
+    mTotalTimer.stop();
     if (handler) {
         handler->onSuiteAbort(suiteInfo(), error);
         handler->onSuiteEnd(suiteInfo());
@@ -282,19 +282,19 @@ bool InternalSuite::executeLifecycleTests(
 }
 
 const std::string& InternalSuite::name() const {
-    return name_;
+    return mName;
 }
 
 const SuiteOptions& InternalSuite::options() const {
-    return options_;
+    return mOptions;
 }
 
 std::span<const std::unique_ptr<InternalTest>> InternalSuite::tests() const noexcept {
-    return tests_;
+    return mTests;
 }
 
 std::source_location InternalSuite::location() const noexcept {
-    return location_;
+    return mLocation;
 }
 
 const TestStatistics<unsigned int>& InternalSuite::statistics() const {
@@ -302,7 +302,7 @@ const TestStatistics<unsigned int>& InternalSuite::statistics() const {
 }
 
 const ExecutionTimer& InternalSuite::totalTimer() const {
-    return totalTimer_;
+    return mTotalTimer;
 }
 
 }
