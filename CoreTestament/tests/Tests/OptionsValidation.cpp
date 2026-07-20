@@ -43,9 +43,18 @@ int main() {
         .attribute("component", "database")
         .execution(Testament::Execution::Parallel);
     auto copiedSuiteOptions = reusableSuiteOptions;
-    copiedSuiteOptions.tag("copy-only");
+    copiedSuiteOptions.tag("copy-only")
+        .order(42)
+        .attribute("component", "cache")
+        .execution(Testament::Execution::Serial);
     const bool optionsAreIndependent = reusableSuiteOptions.tags().size() == 1
-        && copiedSuiteOptions.tags().size() == 2;
+        && copiedSuiteOptions.tags().size() == 2
+        && !reusableSuiteOptions.order()
+        && copiedSuiteOptions.order() == 42
+        && reusableSuiteOptions.attribute("component") == "database"
+        && copiedSuiteOptions.attribute("component") == "cache"
+        && reusableSuiteOptions.execution() == Testament::Execution::Parallel
+        && copiedSuiteOptions.execution() == Testament::Execution::Serial;
 
     auto movedSuiteOptions = std::move(copiedSuiteOptions);
     movedSuiteOptions.tag("moved-only");
@@ -54,12 +63,17 @@ int main() {
         .maxAttempts(2)
         .execution(Testament::Execution::Serial);
     auto movedTestOptions = std::move(originalTestOptions);
+    auto copiedTestOptions = movedTestOptions;
+    copiedTestOptions.disabled(false).maxAttempts(7);
     movedTestOptions.maxAttempts(3);
     const bool movedOptionsRemainValid = copiedSuiteOptions.tags().empty()
         && movedSuiteOptions.tags().size() == 3
         && !originalTestOptions.isDisabled()
         && originalTestOptions.maxAttempts() == 1
-        && movedTestOptions.maxAttempts() == 3;
+        && movedTestOptions.isDisabled()
+        && movedTestOptions.maxAttempts() == 3
+        && !copiedTestOptions.isDisabled()
+        && copiedTestOptions.maxAttempts() == 7;
     const bool executionOptionsPreserved = reusableSuiteOptions.execution()
         == Testament::Execution::Parallel
         && movedTestOptions.execution() == Testament::Execution::Serial;

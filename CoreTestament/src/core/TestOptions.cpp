@@ -6,7 +6,7 @@
 
 namespace Testament {
 
-class TestOptions::Impl : public OptionsStorage<Attribute> {
+class TestOptions::Impl : public detail::OptionsStorage<Attribute> {
 public:
     bool disabled{};
     unsigned int maxAttempts{1};
@@ -19,65 +19,54 @@ TestOptions& TestOptions::operator=(const TestOptions& other) = default;
 TestOptions::TestOptions(TestOptions&& other) noexcept = default;
 TestOptions& TestOptions::operator=(TestOptions&& other) noexcept = default;
 
-void TestOptions::detach() {
-    if (!impl) {
-        impl = std::make_shared<Impl>();
-    } else if (impl.use_count() != 1) {
-        impl = std::make_shared<Impl>(*impl);
-    }
-}
-
-const TestOptions::Impl& TestOptions::read() const noexcept {
-    static const Impl empty;
-    return impl ? *impl : empty;
-}
-
 TestOptions& TestOptions::order(int value) {
-    detach();
-    impl->order = value;
+    detail::writeOptions(impl).setOrder(value);
     return *this;
 }
 
 TestOptions& TestOptions::tag(std::string value) {
-    detach();
-    impl->tags.push_back(std::move(value));
+    detail::writeOptions(impl).addTag(std::move(value));
     return *this;
 }
 
 TestOptions& TestOptions::attribute(std::string key, std::string value) {
-    detach();
-    impl->setAttribute(std::move(key), std::move(value));
+    detail::writeOptions(impl).setAttribute(std::move(key), std::move(value));
     return *this;
 }
 
 TestOptions& TestOptions::disabled(bool value) {
-    detach();
-    impl->disabled = value;
+    detail::writeOptions(impl).disabled = value;
     return *this;
 }
 
 TestOptions& TestOptions::maxAttempts(unsigned int value) {
-    detach();
-    impl->maxAttempts = value;
+    detail::writeOptions(impl).maxAttempts = value;
     return *this;
 }
 
 TestOptions& TestOptions::execution(Execution value) {
-    detach();
-    impl->execution = value;
+    detail::writeOptions(impl).setExecution(value);
     return *this;
 }
 
-std::optional<int> TestOptions::order() const noexcept { return read().order; }
-std::span<const std::string> TestOptions::tags() const noexcept { return read().tags; }
+std::optional<int> TestOptions::order() const noexcept {
+    return detail::readOptions(impl).order();
+}
+std::span<const std::string> TestOptions::tags() const noexcept {
+    return detail::readOptions(impl).tags();
+}
 std::span<const TestOptions::Attribute> TestOptions::attributes() const noexcept {
-    return read().attributes;
+    return detail::readOptions(impl).attributes();
 }
 std::optional<std::string_view> TestOptions::attribute(std::string_view key) const noexcept {
-    return read().findAttribute(key);
+    return detail::readOptions(impl).findAttribute(key);
 }
-bool TestOptions::isDisabled() const noexcept { return read().disabled; }
-unsigned int TestOptions::maxAttempts() const noexcept { return read().maxAttempts; }
-Execution TestOptions::execution() const noexcept { return read().execution; }
+bool TestOptions::isDisabled() const noexcept { return detail::readOptions(impl).disabled; }
+unsigned int TestOptions::maxAttempts() const noexcept {
+    return detail::readOptions(impl).maxAttempts;
+}
+Execution TestOptions::execution() const noexcept {
+    return detail::readOptions(impl).execution();
+}
 
 }
