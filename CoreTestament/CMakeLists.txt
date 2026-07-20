@@ -11,6 +11,9 @@ include(GenerateExportHeader)
 include(GNUInstallDirs)
 find_package(Threads REQUIRED)
 
+# Allow user to build as SHARED or STATIC
+option(BUILD_SHARED_LIBS "Build CoreTestament as a shared library" OFF)
+
 add_library(${PROJECT_NAME})
 add_library(CoreTestament::CoreTestament ALIAS ${PROJECT_NAME})
 target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads)
@@ -147,6 +150,8 @@ install(
         ${CMAKE_CURRENT_BINARY_DIR}/CoreTestamentConfigVersion.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/CoreTestament
 )
+
+add_subdirectory(examples)
 
 if(BUILD_TESTING)
     string(REPLACE ";" "|" TESTAMENT_CXX_IMPLICIT_INCLUDE_DIRS
