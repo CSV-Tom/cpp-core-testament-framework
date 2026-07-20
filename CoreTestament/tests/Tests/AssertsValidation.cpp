@@ -194,7 +194,7 @@ int main() {
             && failure.message() == "structured failure"
             && failure.location().line() != 0
             && std::string_view{copiedFailure.what()} == failure.what()
-            && std::string_view{moveSource.what()} == movedFailure.what();
+            && std::string_view{movedFailure.what()} == failure.what();
     }
 
     const bool containerFormatting = Testament::Asserts::detail::formatValue(

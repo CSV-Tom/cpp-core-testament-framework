@@ -7,17 +7,28 @@ if(PROJECT_IS_TOP_LEVEL)
 endif()
 
 include(CMakePackageConfigHelpers)
+include(GenerateExportHeader)
 include(GNUInstallDirs)
 find_package(Threads REQUIRED)
 
-add_library(${PROJECT_NAME} STATIC)
+add_library(${PROJECT_NAME})
 add_library(CoreTestament::CoreTestament ALIAS ${PROJECT_NAME})
 target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads)
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_23)
 set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_EXTENSIONS OFF
+    CXX_VISIBILITY_PRESET hidden
     EXPORT_NAME CoreTestament
+    VISIBILITY_INLINES_HIDDEN ON
+)
+
+generate_export_header(${PROJECT_NAME}
+    BASE_NAME TESTAMENT
+    EXPORT_FILE_NAME ${CMAKE_CURRENT_BINARY_DIR}/generated/Testament/Export.hpp
+)
+target_compile_definitions(${PROJECT_NAME} PUBLIC
+    $<$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>:TESTAMENT_STATIC_DEFINE>
 )
 
 target_sources(${PROJECT_NAME}
@@ -82,7 +93,10 @@ target_sources(${PROJECT_NAME}
 
 
 target_include_directories(
-    ${PROJECT_NAME} PRIVATE src
+    ${PROJECT_NAME}
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated>
+    PRIVATE src
 )
 target_compile_options(${PROJECT_NAME} PRIVATE
     $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:
@@ -92,6 +106,11 @@ target_compile_options(${PROJECT_NAME} PRIVATE
         -Wshadow
     >
     $<$<CXX_COMPILER_ID:MSVC>:/W4>
+)
+
+install(
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/generated/Testament/Export.hpp
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Testament
 )
 
 install(
@@ -147,6 +166,9 @@ if(BUILD_TESTING)
     endfunction()
 
     function(add_testament_internal_test target test_name source)
+        if(BUILD_SHARED_LIBS)
+            return()
+        endif()
         add_testament_test(${target} ${test_name} ${source})
         target_include_directories(${target} PRIVATE src)
     endfunction()
@@ -318,6 +340,7 @@ if(BUILD_TESTING)
                     -DCXX_COMPILER=${CMAKE_CXX_COMPILER}
                     -DCOMPILER_ID=${CMAKE_CXX_COMPILER_ID}
                     -DINCLUDE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/include
+                    -DGENERATED_INCLUDE_DIR=${CMAKE_CURRENT_BINARY_DIR}/generated
                     -DSOURCE_FILE=${CMAKE_CURRENT_SOURCE_DIR}/${source}
                     -DEXPECTED_DIAGNOSTIC=${expected_diagnostic}
                     -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/cmake/CompileFailureTest.cmake
@@ -331,6 +354,7 @@ if(BUILD_TESTING)
                 -DCXX_COMPILER=${CMAKE_CXX_COMPILER}
                 -DCOMPILER_ID=${CMAKE_CXX_COMPILER_ID}
                 -DINCLUDE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/include
+                -DGENERATED_INCLUDE_DIR=${CMAKE_CURRENT_BINARY_DIR}/generated
                 -DSOURCE_FILE=${CMAKE_CURRENT_SOURCE_DIR}/tests/compile-fail/DiscardedHandles.cpp
                 -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/cmake/DiscardedHandlesTest.cmake
         )

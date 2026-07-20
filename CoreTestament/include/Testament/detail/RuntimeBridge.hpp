@@ -1,6 +1,7 @@
 #ifndef TESTAMENT_DETAIL_RUNTIMEBRIDGE_HPP
 #define TESTAMENT_DETAIL_RUNTIMEBRIDGE_HPP
 
+#include "Testament/Export.hpp"
 #include "Testament/SuiteRegistration.hpp"
 #include "Testament/detail/TestHandle.hpp"
 
@@ -20,7 +21,7 @@ class TestOptions;
 
 namespace detail {
 
-class RuntimeBridge {
+class TESTAMENT_EXPORT RuntimeBridge {
 public:
     static TestHandle makeTest(
         std::string_view name, TestOptions options,

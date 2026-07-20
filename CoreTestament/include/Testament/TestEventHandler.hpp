@@ -1,6 +1,8 @@
 #ifndef TESTAMENT_TESTEVENTHANDLER_HPP
 #define TESTAMENT_TESTEVENTHANDLER_HPP
 
+#include "Testament/Export.hpp"
+
 #include <chrono>
 #include <exception>
 #include <expected>
@@ -15,7 +17,7 @@
 
 namespace Testament {
 
-class TestEventHandler {
+class TESTAMENT_EXPORT TestEventHandler {
 public:
     // Argument views remain valid for the duration of Runner::run.
     using Arguments = std::span<const std::string_view>;

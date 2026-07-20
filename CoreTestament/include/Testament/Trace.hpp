@@ -1,12 +1,14 @@
 #ifndef TESTAMENT_TRACE_HPP
 #define TESTAMENT_TRACE_HPP
 
+#include "Testament/Export.hpp"
+
 #include <source_location>
 #include <string_view>
 
 namespace Testament {
 
-class Trace final {
+class TESTAMENT_EXPORT Trace final {
 public:
     explicit Trace(std::string_view message,
                    std::source_location location = std::source_location::current());

@@ -1,6 +1,8 @@
 #ifndef TESTFRAMEWORK_TESTAMENT_RUNNER_HPP
 #define TESTFRAMEWORK_TESTAMENT_RUNNER_HPP
 
+#include "Testament/Export.hpp"
+
 #include <memory>
 #include <cstddef>
 #include <string_view>
@@ -10,7 +12,7 @@ namespace Testament {
 class TestEventHandler;
 class GlobalEnvironment;
 
-class Runner {
+class TESTAMENT_EXPORT Runner {
 public:
     Runner();
     ~Runner();
@@ -36,12 +38,12 @@ public:
     int run(int argc, char** argv);
 
 private:
-    class Impl;
+    class TESTAMENT_NO_EXPORT Impl;
     std::unique_ptr<Impl> pImpl;
 };
 
 [[nodiscard("propagate the test exit code, e.g. return Testament::run(argc, argv)")]]
-int run(int argc, char** argv);
+TESTAMENT_EXPORT int run(int argc, char** argv);
 
 }
 

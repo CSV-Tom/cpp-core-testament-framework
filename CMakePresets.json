@@ -43,9 +43,9 @@
     },
     {
       "name": "sanitizers",
-      "displayName": "GCC address and undefined behavior sanitizers",
+      "displayName": "Clang address, leak and undefined behavior sanitizers",
       "inherits": "debug",
-      "toolchainFile": "${sourceDir}/toolchains/gcc-toolchain.cmake",
+      "toolchainFile": "${sourceDir}/toolchains/clang-toolchain.cmake",
       "cacheVariables": {
         "CMAKE_CXX_FLAGS": "-fsanitize=address,undefined -fno-omit-frame-pointer",
         "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address,undefined",
@@ -186,7 +186,7 @@
         "outputOnFailure": true
       },
       "environment": {
-        "ASAN_OPTIONS": "detect_leaks=0"
+        "ASAN_OPTIONS": "detect_leaks=1"
       }
     },
     {

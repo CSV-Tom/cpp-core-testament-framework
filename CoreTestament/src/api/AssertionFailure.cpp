@@ -41,9 +41,10 @@ AssertionFailure::AssertionFailure(std::string assertion, std::string expected,
 AssertionFailure::~AssertionFailure() = default;
 AssertionFailure::AssertionFailure(const AssertionFailure&) noexcept = default;
 AssertionFailure& AssertionFailure::operator=(const AssertionFailure&) noexcept = default;
-AssertionFailure::AssertionFailure(AssertionFailure&& other) noexcept : pImpl(other.pImpl) {}
+AssertionFailure::AssertionFailure(AssertionFailure&& other) noexcept
+    : pImpl(std::move(other.pImpl)) {}
 AssertionFailure& AssertionFailure::operator=(AssertionFailure&& other) noexcept {
-    pImpl = other.pImpl;
+    pImpl = std::move(other.pImpl);
     return *this;
 }
 

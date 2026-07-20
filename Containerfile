@@ -16,10 +16,13 @@ RUN apt-get update && \
         build-essential \
         ninja-build \
         g++-16 \
+        clang \
+        libclang-rt-dev \
         clang-format \
         clang-tidy \
         cppcheck \
         valgrind \
+        gcovr \
         git \
         vim \
         tree \

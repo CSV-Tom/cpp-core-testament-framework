@@ -7,6 +7,7 @@ if(COMPILER_ID STREQUAL "MSVC")
             /Zs
             /we4834
             "/I${INCLUDE_DIR}"
+            "/I${GENERATED_INCLUDE_DIR}"
             "${SOURCE_FILE}"
         RESULT_VARIABLE compile_result
         OUTPUT_VARIABLE compiler_output
@@ -20,6 +21,7 @@ else()
             -fsyntax-only
             -Werror=unused-result
             "-I${INCLUDE_DIR}"
+            "-I${GENERATED_INCLUDE_DIR}"
             "${SOURCE_FILE}"
         RESULT_VARIABLE compile_result
         OUTPUT_VARIABLE compiler_output

@@ -1,13 +1,15 @@
 #ifndef TESTFRAMEWORK_TESTAMENT_LIFECYCLESUITE_HPP
 #define TESTFRAMEWORK_TESTAMENT_LIFECYCLESUITE_HPP
 
+#include "Testament/Export.hpp"
+
 namespace Testament {
 
 namespace detail {
 class LifecycleHookAccess;
 }
 
-class LifecycleSuite {
+class TESTAMENT_EXPORT LifecycleSuite {
 public:
     LifecycleSuite();
     virtual ~LifecycleSuite();

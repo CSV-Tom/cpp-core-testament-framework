@@ -1,6 +1,8 @@
 #ifndef TESTAMENT_ASSERTIONFAILURE_HPP
 #define TESTAMENT_ASSERTIONFAILURE_HPP
 
+#include "Testament/Export.hpp"
+
 #include <exception>
 #include <memory>
 #include <source_location>
@@ -9,7 +11,7 @@
 
 namespace Testament {
 
-class AssertionFailure final : public std::exception {
+class TESTAMENT_EXPORT AssertionFailure final : public std::exception {
 public:
     AssertionFailure(std::string assertion, std::string expected, std::string actual,
                      std::string message, std::source_location location);
@@ -28,7 +30,7 @@ public:
     [[nodiscard]] std::source_location location() const noexcept;
 
 private:
-    class Impl;
+    class TESTAMENT_NO_EXPORT Impl;
     std::shared_ptr<const Impl> pImpl;
 };
 

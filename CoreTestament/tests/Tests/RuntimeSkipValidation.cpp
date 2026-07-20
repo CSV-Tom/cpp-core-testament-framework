@@ -32,6 +32,14 @@ public:
 }
 
 int main() {
+    const Testament::SkipRequest original{"copy and move"};
+    const auto copied = original;
+    auto copyAssigned = Testament::SkipRequest{"temporary"};
+    copyAssigned = copied;
+    auto moved = Testament::SkipRequest{copied};
+    auto moveAssigned = Testament::SkipRequest{"temporary"};
+    moveAssigned = std::move(moved);
+
     unsigned int attempts{};
     unsigned int fixtureAttempts{};
     auto suite = Testament::Suite(
@@ -63,7 +71,11 @@ int main() {
     Testament::Runner runner;
     runner.addHandler(std::move(handler)).maxParallelTests(2);
 
-    return suite && fixtureSuite
+    return copied.reason() == "copy and move"
+        && std::string_view{copied.what()} == "test skipped: copy and move"
+        && copyAssigned.reason() == "copy and move"
+        && moveAssigned.reason() == "copy and move"
+        && suite && fixtureSuite
         && runner.run(0, nullptr) == 0
         && attempts == 1
         && fixtureAttempts == 1

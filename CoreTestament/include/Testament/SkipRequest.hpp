@@ -1,6 +1,8 @@
 #ifndef TESTAMENT_SKIPREQUEST_HPP
 #define TESTAMENT_SKIPREQUEST_HPP
 
+#include "Testament/Export.hpp"
+
 #include <exception>
 #include <memory>
 #include <string>
@@ -8,7 +10,7 @@
 
 namespace Testament {
 
-class SkipRequest final : public std::exception {
+class TESTAMENT_EXPORT SkipRequest final : public std::exception {
 public:
     explicit SkipRequest(std::string reason);
     ~SkipRequest() override;
@@ -22,7 +24,7 @@ public:
     [[nodiscard]] std::string_view reason() const noexcept;
 
 private:
-    class Impl;
+    class TESTAMENT_NO_EXPORT Impl;
     std::shared_ptr<const Impl> pImpl;
 };
 

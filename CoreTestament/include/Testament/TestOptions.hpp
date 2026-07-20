@@ -2,6 +2,7 @@
 #define TESTAMENT_TESTOPTIONS_HPP
 
 #include "Testament/Execution.hpp"
+#include "Testament/Export.hpp"
 
 #include <memory>
 #include <optional>
@@ -12,7 +13,7 @@
 
 namespace Testament {
 
-class TestOptions {
+class TESTAMENT_EXPORT TestOptions {
 public:
     using Attribute = std::pair<std::string, std::string>;
 
@@ -40,7 +41,7 @@ public:
     [[nodiscard]] Execution execution() const noexcept;
 
 private:
-    class Impl;
+    class TESTAMENT_NO_EXPORT Impl;
     std::shared_ptr<Impl> pImpl;
 };
 

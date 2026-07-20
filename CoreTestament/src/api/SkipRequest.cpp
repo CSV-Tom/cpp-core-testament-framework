@@ -21,9 +21,9 @@ SkipRequest::SkipRequest(std::string reason)
 SkipRequest::~SkipRequest() = default;
 SkipRequest::SkipRequest(const SkipRequest&) noexcept = default;
 SkipRequest& SkipRequest::operator=(const SkipRequest&) noexcept = default;
-SkipRequest::SkipRequest(SkipRequest&& other) noexcept : pImpl(other.pImpl) {}
+SkipRequest::SkipRequest(SkipRequest&& other) noexcept : pImpl(std::move(other.pImpl)) {}
 SkipRequest& SkipRequest::operator=(SkipRequest&& other) noexcept {
-    pImpl = other.pImpl;
+    pImpl = std::move(other.pImpl);
     return *this;
 }
 

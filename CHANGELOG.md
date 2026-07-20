@@ -35,6 +35,8 @@ released yet.
 - Documentation entry point and a standalone getting-started tutorial.
 - ARM Linux hard-float cross-compilation and QEMU execution coverage for
   `arm-linux-gnueabihf`.
+- Clang-based AddressSanitizer, LeakSanitizer and UndefinedBehaviorSanitizer
+  tooling, plus `gcovr` coverage support in the development container.
 
 ### Changed
 
@@ -51,6 +53,8 @@ released yet.
 - Runtime implementation sources are organized by API, configuration, reporting
   and execution responsibilities under `Testament::detail`.
 - CoreTestament's development package version is `0.1.0`.
+- CoreTestament can be built as either a static or shared library through
+  `BUILD_SHARED_LIBS`.
 
 ### Fixed
 
@@ -66,6 +70,10 @@ released yet.
 - Test and suite definition locations are preserved for diagnostics and reports.
 - Compiler flags, installation paths, exported headers and package targets are
   portable across supported CMake generators.
+- Shared-library exports are limited to the supported public API and the
+  installed DSL runtime bridge; implementation and PImpl symbols stay hidden.
+- `AssertionFailure` and `SkipRequest` now transfer their PImpl storage in move
+  operations instead of incrementing its reference count.
 
 ### Removed
 

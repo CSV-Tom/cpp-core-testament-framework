@@ -2,6 +2,7 @@
 #define TESTFRAMEWORK_TESTAMENT_ASSERTS_HPP
 
 #include "Testament/AssertionFailure.hpp"
+#include "Testament/Export.hpp"
 
 #include <cmath>
 #include <algorithm>
@@ -96,23 +97,23 @@ std::string formatValue(const T& value) {
     }
 }
 
-[[nodiscard]] bool recordNonFatalFailure(const AssertionFailure& failure);
+[[nodiscard]] TESTAMENT_EXPORT bool recordNonFatalFailure(const AssertionFailure& failure);
 
-[[noreturn]] void failAssertion(std::string assertion, std::string expected,
+[[noreturn]] TESTAMENT_EXPORT void failAssertion(std::string assertion, std::string expected,
                                 std::string actual, std::string_view message,
                                 std::source_location location);
 
-[[noreturn]] void failUnexpectedException(std::string assertion, std::string expected,
+[[noreturn]] TESTAMENT_EXPORT void failUnexpectedException(std::string assertion, std::string expected,
                                           std::exception_ptr exception,
                                           std::string_view message,
                                           std::source_location location);
 
 }
 
-void assertTrue(bool condition, std::string_view message = {},
+TESTAMENT_EXPORT void assertTrue(bool condition, std::string_view message = {},
                 std::source_location location = std::source_location::current());
 
-void assertFalse(bool condition, std::string_view message = {},
+TESTAMENT_EXPORT void assertFalse(bool condition, std::string_view message = {},
                  std::source_location location = std::source_location::current());
 
 template <typename Unexpected, typename Actual>
