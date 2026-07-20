@@ -3,6 +3,7 @@
 
 #include "Testament/Export.hpp"
 #include "Testament/SuiteRegistration.hpp"
+#include "Testament/detail/MoveOnlyFunction.hpp"
 #include "Testament/detail/TestHandle.hpp"
 
 #include <functional>
@@ -25,12 +26,12 @@ class TESTAMENT_EXPORT RuntimeBridge {
 public:
     static TestHandle makeTest(
         std::string_view name, TestOptions options,
-        std::move_only_function<void()> function,
+        MoveOnlyFunction<void()> function,
         std::source_location location = std::source_location::current()
     );
     static TestHandle makeTest(std::string_view name, TestOptions options,
                                std::type_index fixtureType,
-                               std::move_only_function<void(LifecycleSuite&)> function,
+                               MoveOnlyFunction<void(LifecycleSuite&)> function,
                                std::source_location location = std::source_location::current());
 
     static SuiteRegistration registerSuite(std::string_view name,
@@ -40,7 +41,7 @@ public:
     static SuiteRegistration registerSuite(std::string_view name,
                                            std::source_location location,
                                            std::type_index fixtureType,
-                                           std::move_only_function<
+                                           MoveOnlyFunction<
                                                std::unique_ptr<LifecycleSuite>()
                                            > fixtureFactory,
                                            SuiteOptions options,

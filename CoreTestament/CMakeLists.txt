@@ -85,6 +85,7 @@ target_sources(${PROJECT_NAME}
             include/Testament/detail/CaseSet.hpp
             include/Testament/detail/Concepts.hpp
             include/Testament/detail/LocatedName.hpp
+            include/Testament/detail/MoveOnlyFunction.hpp
             include/Testament/detail/NamedTestCase.hpp
             include/Testament/detail/ParameterizedTestDefinition.hpp
             include/Testament/detail/ParameterizedTestDefinition.tpp

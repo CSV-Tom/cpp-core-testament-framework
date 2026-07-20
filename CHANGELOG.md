@@ -78,6 +78,8 @@ released yet.
   detected by CMake when invoking the compiler directly.
 - Linux Clang CI uses an explicit Clang 18 toolchain and matching libc++ packages
   so required C++23 library facilities are not taken from an older runner default.
+- Move-only callbacks use the standard C++23 implementation when available and
+  a compatible internal type erasure on Apple libc++ versions that omit it.
 
 ### Removed
 

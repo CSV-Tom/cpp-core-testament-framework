@@ -52,7 +52,7 @@ SuiteRegistration detail::RuntimeBridge::registerSuite(std::string_view name,
 
 SuiteRegistration detail::RuntimeBridge::registerSuite(
     std::string_view name, std::source_location location, std::type_index fixtureType,
-    std::move_only_function<std::unique_ptr<LifecycleSuite>()> fixtureFactory,
+    detail::MoveOnlyFunction<std::unique_ptr<LifecycleSuite>()> fixtureFactory,
     SuiteOptions options, std::vector<TestHandle> tests
 ) {
     try {

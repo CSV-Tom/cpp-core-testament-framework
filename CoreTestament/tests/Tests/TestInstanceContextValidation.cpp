@@ -10,7 +10,7 @@ int main() {
     bool testBodyEntered = false;
     Testament::detail::TestInstance test(
         "missing suite context",
-        Testament::detail::TestFunction{std::move_only_function<void(Testament::LifecycleSuite&)>(
+        Testament::detail::TestFunction{Testament::detail::MoveOnlyFunction<void(Testament::LifecycleSuite&)>(
             [&testBodyEntered](Testament::LifecycleSuite&) {
                 testBodyEntered = true;
             }

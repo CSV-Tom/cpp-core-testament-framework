@@ -50,10 +50,10 @@ std::expected<void, std::exception_ptr> TestInstance::execute(LifecycleSuite* fi
     try {
         std::visit([fixture](auto&& func) {
             using T = std::decay_t<decltype(func)>;
-            if constexpr (std::is_same_v<T, std::move_only_function<void()>>) {
+            if constexpr (std::is_same_v<T, MoveOnlyFunction<void()>>) {
                 func();
             } else if constexpr (
-                std::is_same_v<T, std::move_only_function<void(LifecycleSuite&)>>
+                std::is_same_v<T, MoveOnlyFunction<void(LifecycleSuite&)>>
             ) {
                 if (!fixture) {
                     throw std::logic_error("Suite context is required for this test");

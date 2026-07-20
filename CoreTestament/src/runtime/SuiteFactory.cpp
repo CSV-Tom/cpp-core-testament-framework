@@ -12,7 +12,7 @@ namespace Testament::detail {
 
 std::shared_ptr<SuiteInstance> SuiteFactory::create(
     std::string name, std::source_location location, std::type_index fixtureType,
-    std::move_only_function<std::unique_ptr<LifecycleSuite>()> fixtureFactory,
+    MoveOnlyFunction<std::unique_ptr<LifecycleSuite>()> fixtureFactory,
     SuiteOptions options, std::vector<TestHandle> tests
 ) {
     auto suite = fixtureFactory

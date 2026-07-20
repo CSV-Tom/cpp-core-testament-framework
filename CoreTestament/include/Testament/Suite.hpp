@@ -51,7 +51,7 @@ requires detail::FixtureSelection<Fixture>
         } else {
             return detail::RuntimeBridge::registerSuite(
                 name.value(), name.location(), std::type_index(typeid(Fixture)),
-                std::move_only_function<std::unique_ptr<LifecycleSuite>()>{[] {
+                detail::MoveOnlyFunction<std::unique_ptr<LifecycleSuite>()>{[] {
                     return std::make_unique<Fixture>();
                 }},
                 std::move(options), std::move(tests)
