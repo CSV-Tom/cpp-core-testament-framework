@@ -17,7 +17,7 @@ int main() {
     std::filesystem::remove(reportPath, removeError);
 
     auto suiteName = std::string{"suite <&>"} + '\x01';
-    auto suite = Testament::InternalRegistry::getInstance().registerSuite(
+    auto suite = Testament::InternalRegistry::instance().registerSuite(
         std::make_shared<Testament::InternalSuite>(suiteName)
     );
     const auto passingTestLine = __LINE__ + 1;
@@ -26,7 +26,7 @@ int main() {
         throw std::runtime_error(std::string{"failure <reason> & details"} + '\x01' + "\xc3\x28");
     }));
 
-    auto lifecycleSuite = Testament::InternalRegistry::getInstance().registerSuite(
+    auto lifecycleSuite = Testament::InternalRegistry::instance().registerSuite(
         std::make_shared<Testament::InternalSuite>("lifecycle suite")
     );
     lifecycleSuite->setBeforeEach([] {
@@ -34,7 +34,7 @@ int main() {
     });
     lifecycleSuite->addTest(Testament::detail::RuntimeBridge::makeTest("lifecycle test", {}, [] {}));
 
-    auto beforeAllSuite = Testament::InternalRegistry::getInstance().registerSuite(
+    auto beforeAllSuite = Testament::InternalRegistry::instance().registerSuite(
         std::make_shared<Testament::InternalSuite>("before all suite")
     );
     beforeAllSuite->setBeforeSuite([] {

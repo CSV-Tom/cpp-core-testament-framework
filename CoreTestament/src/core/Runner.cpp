@@ -110,13 +110,13 @@ int Runner::run(int argc, char** argv) {
     const std::scoped_lock runLock(testRunMutex);
     if (!impl) impl = std::make_unique<Impl>();
 
-    auto& registry = InternalRegistry::getInstance();
-    if (const auto errors = registry.getConfigurationErrors(); !errors.empty()) {
+    auto& registry = InternalRegistry::instance();
+    if (const auto errors = registry.configurationErrors(); !errors.empty()) {
         for (const auto& error : errors) std::cerr << "Test configuration error: " << error << '\n';
         return 2;
     }
     const detail::TestCatalog catalog{
-        registry.getAllSuites(),
+        registry.suites(),
         impl->suiteFilter
             ? std::optional<std::string_view>{*impl->suiteFilter}
             : std::nullopt
@@ -170,10 +170,10 @@ int Runner::run(int argc, char** argv) {
 
     chain.onFinalReport(RunSummary{
         static_cast<unsigned int>(catalog.suites().size() * commandLine->repeat),
-        allStatistics.getPassedTests(),
-        allStatistics.getFailedTests(),
-        allStatistics.getSkippedTests(),
-        allStatistics.getErrors(),
+        allStatistics.passedTests(),
+        allStatistics.failedTests(),
+        allStatistics.skippedTests(),
+        allStatistics.errors(),
         environmentsSucceeded ? 0U : 1U,
         static_cast<unsigned int>(commandLine->repeat)
     });

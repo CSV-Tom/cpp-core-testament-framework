@@ -5,8 +5,8 @@
 #include <utility>
 
 int main() {
-    auto& registry = Testament::InternalRegistry::getInstance();
-    const auto initialSuiteCount = registry.getAllSuites().size();
+    auto& registry = Testament::InternalRegistry::instance();
+    const auto initialSuiteCount = registry.suites().size();
 
     bool registeredWhileHandleLives = false;
     {
@@ -15,11 +15,11 @@ int main() {
             Testament::Test("lifetime test", [] {})
         );
         registeredWhileHandleLives = static_cast<bool>(suite)
-            && registry.getAllSuites().size() == initialSuiteCount + 1;
+            && registry.suites().size() == initialSuiteCount + 1;
     }
 
     return registeredWhileHandleLives
-        && registry.getAllSuites().size() == initialSuiteCount
+        && registry.suites().size() == initialSuiteCount
         ? 0
         : 1;
 }

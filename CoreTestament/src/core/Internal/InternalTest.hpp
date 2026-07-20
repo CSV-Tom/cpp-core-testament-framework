@@ -29,24 +29,24 @@ public:
         LifecycleSuite* fixture = nullptr
     );
 
-    const std::string& getName() const;
-    const TestOptions& getOptions() const;
-    [[nodiscard]] std::source_location getLocation() const noexcept;
-    [[nodiscard]] std::optional<std::type_index> getFixtureType() const noexcept;
+    const std::string& name() const;
+    const TestOptions& options() const;
+    [[nodiscard]] std::source_location location() const noexcept;
+    [[nodiscard]] std::optional<std::type_index> fixtureType() const noexcept;
 
-    const ExecutionTimer& getExecutionTimer() const;
-    const TestStatus& getStatus() const;
-    std::exception_ptr getException() const;
+    const ExecutionTimer& executionTimer() const;
+    const TestStatus& status() const;
+    std::exception_ptr exception() const;
 
 private:
-    std::string name;
-    std::source_location location;
-    TestOptions options;
+    std::string name_;
+    std::source_location location_;
+    TestOptions options_;
     FunctionVariant function;
-    std::optional<std::type_index> fixtureType;
-    TestStatus status{TestStatus::Status::NotRun};
-    std::exception_ptr exception;
-    ExecutionTimer executionTimer;
+    std::optional<std::type_index> fixtureType_;
+    TestStatus status_{TestStatus::Status::NotRun};
+    std::exception_ptr exception_;
+    ExecutionTimer executionTimer_;
 };
 
 }

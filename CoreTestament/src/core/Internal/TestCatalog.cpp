@@ -30,14 +30,14 @@ TestCatalog::TestCatalog(std::vector<std::shared_ptr<InternalSuite>> suites,
     : registeredSuites(std::move(suites)) {
     if (suiteFilter) {
         std::erase_if(registeredSuites, [suiteFilter](const auto& suite) {
-            return !matchesNameFilter(suite->getName(), *suiteFilter);
+            return !matchesNameFilter(suite->name(), *suiteFilter);
         });
     }
     std::ranges::sort(registeredSuites, [](const auto& left, const auto& right) {
-        const auto leftOrder = left->getOptions().order().value_or(0);
-        const auto rightOrder = right->getOptions().order().value_or(0);
+        const auto leftOrder = left->options().order().value_or(0);
+        const auto rightOrder = right->options().order().value_or(0);
         if (leftOrder != rightOrder) return leftOrder < rightOrder;
-        return left->getName() < right->getName();
+        return left->name() < right->name();
     });
 }
 
@@ -53,8 +53,8 @@ std::vector<std::shared_ptr<InternalSuite>> TestCatalog::forRun(
     std::mt19937_64 random{*shuffleSeed};
     std::ranges::shuffle(result, random);
     std::ranges::stable_sort(result, [](const auto& left, const auto& right) {
-        return left->getOptions().order().value_or(0)
-            < right->getOptions().order().value_or(0);
+        return left->options().order().value_or(0)
+            < right->options().order().value_or(0);
     });
     return result;
 }
@@ -62,20 +62,20 @@ std::vector<std::shared_ptr<InternalSuite>> TestCatalog::forRun(
 void TestCatalog::list(std::ostream& output, std::string_view testFilter,
                        std::string_view expression) const {
     for (const auto& suite : registeredSuites) {
-        output << suite->getName() << " [";
-        printTags(output, suite->getOptions().tags());
+        output << suite->name() << " [";
+        printTags(output, suite->options().tags());
         output << "]\n";
-        for (const auto& test : suite->getTests()) {
-            if ((!testFilter.empty() && !matchesNameFilter(test->getName(), testFilter))
+        for (const auto& test : suite->tests()) {
+            if ((!testFilter.empty() && !matchesNameFilter(test->name(), testFilter))
                 || (!expression.empty() && !matchesTestFilter(
-                    suite->getName(), suite->getOptions().tags(), test->getName(),
-                    test->getOptions().tags(), expression
+                    suite->name(), suite->options().tags(), test->name(),
+                    test->options().tags(), expression
                 ))) {
                 continue;
             }
-            output << "  " << test->getName() << " [";
-            printTags(output, test->getOptions().tags());
-            output << ", " << (test->getOptions().isDisabled() ? "disabled" : "enabled")
+            output << "  " << test->name() << " [";
+            printTags(output, test->options().tags());
+            output << ", " << (test->options().isDisabled() ? "disabled" : "enabled")
                    << "]\n";
         }
     }

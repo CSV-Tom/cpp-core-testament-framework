@@ -11,7 +11,7 @@
 
 namespace Testament {
 
-InternalRegistry& InternalRegistry::getInstance() {
+InternalRegistry& InternalRegistry::instance() {
     static InternalRegistry instance;
     return instance;
 }
@@ -28,16 +28,16 @@ std::shared_ptr<InternalSuite> InternalRegistry::registerSuite(std::shared_ptr<I
 
     std::unique_lock lock(registryMutex);  // Schreibzugriff
     if (std::ranges::any_of(registeredSuites, [&suite](const auto& registered) {
-        return registered->getName() == suite->getName();
+        return registered->name() == suite->name();
     })) {
-        throw std::logic_error("Suite name must be unique: " + suite->getName());
+        throw std::logic_error("Suite name must be unique: " + suite->name());
     }
     registeredSuites.push_back(std::move(suite));
 
     return registeredSuites.back();
 }
 
-std::vector<std::shared_ptr<InternalSuite>> InternalRegistry::getAllSuites() const {
+std::vector<std::shared_ptr<InternalSuite>> InternalRegistry::suites() const {
     std::shared_lock lock(registryMutex);  // **Lesender Zugriff**
     return registeredSuites;
 }
@@ -50,7 +50,7 @@ void InternalRegistry::removeConfigurationError(ConfigurationDiagnostics::Id id)
     configurationDiagnostics.remove(id);
 }
 
-std::vector<std::string> InternalRegistry::getConfigurationErrors() const {
+std::vector<std::string> InternalRegistry::configurationErrors() const {
     return configurationDiagnostics.errors();
 }
 

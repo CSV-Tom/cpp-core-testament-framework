@@ -29,17 +29,17 @@ int main() {
     const bool exactFilterMatched = alphaRuns == 1
         && betaOneRuns == 0
         && betaTwoRuns == 0
-        && suite.getStatistics().getPassedTests() == 1;
+        && suite.statistics().passedTests() == 1;
 
     const bool globRunSucceeded = suite.run(nullptr, {"beta-*", {}, 1, {}});
     const bool regexFilterMatched = alphaRuns == 1
         && betaOneRuns == 1
         && betaTwoRuns == 1
-        && suite.getStatistics().getPassedTests() == 2;
+        && suite.statistics().passedTests() == 2;
 
     const bool parameterFilterSucceeded = suite.run(nullptr, {"values / two", {}, 1, {}});
     const bool parameterFilterMatched = betaTwoRuns == 3
-        && suite.getStatistics().getPassedTests() == 1;
+        && suite.statistics().passedTests() == 1;
 
     return exactRunSucceeded && exactFilterMatched
         && globRunSucceeded && regexFilterMatched

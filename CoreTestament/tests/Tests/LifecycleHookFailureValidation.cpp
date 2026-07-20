@@ -45,7 +45,7 @@ public:
 }
 
 int main() {
-    auto suite = Testament::InternalRegistry::getInstance().registerSuite(
+    auto suite = Testament::InternalRegistry::instance().registerSuite(
         std::make_shared<Testament::InternalSuite>("failing lifecycle hook")
     );
     bool testExecuted = false;
@@ -77,11 +77,11 @@ int main() {
         && exitCode == 1
         && !testExecuted
         && !beforeEachTestExecuted
-        && suite->getStatistics().getFailedTests() == 0
-        && suite->getStatistics().getSkippedTests() == 1
-        && suite->getStatistics().getErrors() == 1
-        && beforeEachSuite.getStatistics().getFailedTests() == 0
-        && beforeEachSuite.getStatistics().getErrors() == 1
+        && suite->statistics().failedTests() == 0
+        && suite->statistics().skippedTests() == 1
+        && suite->statistics().errors() == 1
+        && beforeEachSuite.statistics().failedTests() == 0
+        && beforeEachSuite.statistics().errors() == 1
         && handler.suiteName == "failing lifecycle hook"
         && handler.error == "Error in beforeSuite: expected hook failure"
         && handler.failedTests == 0

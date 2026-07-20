@@ -9,7 +9,7 @@
 namespace Testament::detail {
 
 bool SuiteScheduler::Result::succeeded() const noexcept {
-    return hooksSucceeded && statistics.getFailedTests() == 0 && statistics.getErrors() == 0;
+    return hooksSucceeded && statistics.failedTests() == 0 && statistics.errors() == 0;
 }
 
 SuiteScheduler::Result SuiteScheduler::run(
@@ -29,7 +29,7 @@ SuiteScheduler::Result SuiteScheduler::run(
                 configuration.maxParallelTests, configuration.shuffleSeed
             }
         );
-        result.statistics = suite->getStatistics();
+        result.statistics = suite->statistics();
         return result;
     };
 
@@ -41,7 +41,7 @@ SuiteScheduler::Result SuiteScheduler::run(
 
     std::size_t index{};
     while (index < suites.size()) {
-        if (suites[index]->getOptions().execution() == Execution::Serial) {
+        if (suites[index]->options().execution() == Execution::Serial) {
             consume(executeSuite(suites[index++]));
             continue;
         }
@@ -49,7 +49,7 @@ SuiteScheduler::Result SuiteScheduler::run(
         const auto concurrentEnd = std::ranges::find_if(
             suites.begin() + static_cast<std::ptrdiff_t>(index), suites.end(),
             [](const auto& suite) {
-                return suite->getOptions().execution() == Execution::Serial;
+                return suite->options().execution() == Execution::Serial;
             }
         );
         const auto endIndex = static_cast<std::size_t>(concurrentEnd - suites.begin());

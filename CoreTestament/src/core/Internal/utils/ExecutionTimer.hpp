@@ -24,7 +24,7 @@ public:
         accumulatedDuration += (endTime - startTime);
     }
 
-    [[nodiscard]] std::chrono::duration<double> getDuration() const {
+    [[nodiscard]] std::chrono::duration<double> duration() const {
         if (startTime == Clock::time_point{}) {
             throw std::logic_error("Timer was not started before querying elapsed time!");
         }

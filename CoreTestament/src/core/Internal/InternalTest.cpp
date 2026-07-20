@@ -12,39 +12,39 @@ namespace Testament {
 
 namespace {
 
-std::string definitionLocation(std::source_location location) {
-    return std::string{" at "} + location.file_name() + ':' + std::to_string(location.line());
+std::string definitionLocation(std::source_location definition) {
+    return std::string{" at "} + definition.file_name() + ':' + std::to_string(definition.line());
 }
 
 }
 
-InternalTest::InternalTest(std::string name_, FunctionVariant function_)
-    : InternalTest(std::move(name_), std::source_location::current(), TestOptions{},
-                   std::move(function_)) {}
+InternalTest::InternalTest(std::string testName, FunctionVariant testFunction)
+    : InternalTest(std::move(testName), std::source_location::current(), TestOptions{},
+                   std::move(testFunction)) {}
 
-InternalTest::InternalTest(std::string name_, std::source_location location_,
-                           TestOptions options_, FunctionVariant function_,
-                           std::optional<std::type_index> fixtureType_)
-    : name(std::move(name_)), location(location_), options(std::move(options_)),
-      function(std::move(function_)), fixtureType(fixtureType_) {
-    if (name.empty()) {
-        throw std::invalid_argument("Test name cannot be empty" + definitionLocation(location));
+InternalTest::InternalTest(std::string testName, std::source_location definition,
+                           TestOptions testOptions, FunctionVariant testFunction,
+                           std::optional<std::type_index> expectedFixture)
+    : name_(std::move(testName)), location_(definition), options_(std::move(testOptions)),
+      function(std::move(testFunction)), fixtureType_(expectedFixture) {
+    if (name_.empty()) {
+        throw std::invalid_argument("Test name cannot be empty" + definitionLocation(location_));
     }
-    if (options.isDisabled()) {
-        status = TestStatus::Status::Skipped;
+    if (options_.isDisabled()) {
+        status_ = TestStatus::Status::Skipped;
     }
 }
 
 InternalTest::~InternalTest() = default;
 
 std::expected<void, std::exception_ptr> InternalTest::execute(LifecycleSuite* fixture) {
-    if (options.isDisabled()) {
+    if (options_.isDisabled()) {
         return {};
     }
 
-    exception = nullptr;
-    executionTimer.reset();
-    executionTimer.start();
+    exception_ = nullptr;
+    executionTimer_.reset();
+    executionTimer_.start();
     Asserts::detail::beginAssertionCollection();
 
     try {
@@ -64,48 +64,48 @@ std::expected<void, std::exception_ptr> InternalTest::execute(LifecycleSuite* fi
             }
         }, function);
     } catch (const SkipRequest&) {
-        exception = std::current_exception();
+        exception_ = std::current_exception();
         (void)Asserts::detail::finishAssertionCollection();
-        executionTimer.stop();
-        status = TestStatus::Status::Skipped;
+        executionTimer_.stop();
+        status_ = TestStatus::Status::Skipped;
         return {};
     } catch (...) {
-        exception = Asserts::detail::finishAssertionCollection(std::current_exception());
+        exception_ = Asserts::detail::finishAssertionCollection(std::current_exception());
     }
 
-    if (!exception) exception = Asserts::detail::finishAssertionCollection();
-    executionTimer.stop();
-    status = exception ? TestStatus::Status::Failed : TestStatus::Status::Passed;
-    return exception ? std::expected<void, std::exception_ptr>{std::unexpected(exception)}
+    if (!exception_) exception_ = Asserts::detail::finishAssertionCollection();
+    executionTimer_.stop();
+    status_ = exception_ ? TestStatus::Status::Failed : TestStatus::Status::Passed;
+    return exception_ ? std::expected<void, std::exception_ptr>{std::unexpected(exception_)}
                      : std::expected<void, std::exception_ptr>{};
 }
 
-const std::string& InternalTest::getName() const {
-    return name;
+const std::string& InternalTest::name() const {
+    return name_;
 }
 
-const TestOptions& InternalTest::getOptions() const {
-    return options;
+const TestOptions& InternalTest::options() const {
+    return options_;
 }
 
-std::source_location InternalTest::getLocation() const noexcept {
-    return location;
+std::source_location InternalTest::location() const noexcept {
+    return location_;
 }
 
-std::optional<std::type_index> InternalTest::getFixtureType() const noexcept {
-    return fixtureType;
+std::optional<std::type_index> InternalTest::fixtureType() const noexcept {
+    return fixtureType_;
 }
 
-const ExecutionTimer& InternalTest::getExecutionTimer() const {
-    return executionTimer;
+const ExecutionTimer& InternalTest::executionTimer() const {
+    return executionTimer_;
 }
 
-const TestStatus& InternalTest::getStatus() const {
-    return status;
+const TestStatus& InternalTest::status() const {
+    return status_;
 }
 
-std::exception_ptr InternalTest::getException() const {
-    return exception;
+std::exception_ptr InternalTest::exception() const {
+    return exception_;
 }
 
 }

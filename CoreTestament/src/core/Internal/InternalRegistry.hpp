@@ -15,18 +15,18 @@ class InternalSuite;
 
 class InternalRegistry {
 public:
-    static InternalRegistry& getInstance();
+    static InternalRegistry& instance();
 
     std::shared_ptr<InternalSuite> registerSuite(std::shared_ptr<InternalSuite> suite);
     void unregisterSuite(const std::shared_ptr<InternalSuite>& suite);
 
-    [[nodiscard]] std::vector<std::shared_ptr<InternalSuite>> getAllSuites() const;
+    [[nodiscard]] std::vector<std::shared_ptr<InternalSuite>> suites() const;
     [[nodiscard]] ConfigurationDiagnostics::Id recordConfigurationError(std::string error);
     void removeConfigurationError(ConfigurationDiagnostics::Id id);
-    [[nodiscard]] std::vector<std::string> getConfigurationErrors() const;
+    [[nodiscard]] std::vector<std::string> configurationErrors() const;
 
     template <typename Predicate>
-    [[nodiscard]] std::vector<std::shared_ptr<InternalSuite>> getSuitesByFilter(
+    [[nodiscard]] std::vector<std::shared_ptr<InternalSuite>> suitesBy(
         Predicate&& filter
     ) const {
         std::shared_lock lock(registryMutex);

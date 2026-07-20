@@ -23,28 +23,28 @@ namespace Testament {
 
 namespace {
 
-std::string definitionLocation(std::source_location location) {
-    return std::string{" at "} + location.file_name() + ':' + std::to_string(location.line());
+std::string definitionLocation(std::source_location definition) {
+    return std::string{" at "} + definition.file_name() + ':' + std::to_string(definition.line());
 }
 
 }
 
-InternalSuite::InternalSuite(std::string name_, std::source_location location_,
-                             SuiteOptions options_)
-    : name(std::move(name_)), location(location_), options(std::move(options_)),
+InternalSuite::InternalSuite(std::string suiteName, std::source_location definition,
+                             SuiteOptions suiteOptions)
+    : name_(std::move(suiteName)), location_(definition), options_(std::move(suiteOptions)),
       testManager(statistic) {
-    if (name.empty()) {
+    if (name_.empty()) {
         throw std::logic_error("Suite name cannot be empty!");
     }
 }
 
-InternalSuite::InternalSuite(std::string name_, std::source_location location_,
-                             std::type_index fixtureType_,
-                             FixtureFactory fixtureFactory_, SuiteOptions options_)
-    : InternalSuite(std::move(name_), location_, std::move(options_)) {
-    if (!fixtureFactory_) throw std::invalid_argument("Lifecycle suite fixture factory cannot be empty");
-    fixtureFactory = std::move(fixtureFactory_);
-    fixtureType = fixtureType_;
+InternalSuite::InternalSuite(std::string suiteName, std::source_location definition,
+                             std::type_index expectedFixture,
+                             FixtureFactory factory, SuiteOptions suiteOptions)
+    : InternalSuite(std::move(suiteName), definition, std::move(suiteOptions)) {
+    if (!factory) throw std::invalid_argument("Lifecycle suite fixture factory cannot be empty");
+    fixtureFactory = std::move(factory);
+    fixtureType_ = expectedFixture;
 }
 
 InternalSuite::~InternalSuite() = default;
@@ -52,27 +52,27 @@ InternalSuite::~InternalSuite() = default;
 
 void InternalSuite::addTest(detail::TestHandle test) {
     auto internalTest = detail::TestAccess::release(std::move(test));
-    if (const auto expectedFixture = internalTest->getFixtureType();
-        expectedFixture && expectedFixture != fixtureType) {
+    if (const auto expectedFixture = internalTest->fixtureType();
+        expectedFixture && expectedFixture != fixtureType_) {
         throw std::invalid_argument(
             "Test fixture type does not match suite fixture type"
-            + definitionLocation(internalTest->getLocation())
+            + definitionLocation(internalTest->location())
         );
     }
-    if (internalTest->getOptions().maxAttempts() == 0) {
+    if (internalTest->options().maxAttempts() == 0) {
         throw std::invalid_argument(
             "Test maxAttempts must be greater than zero"
-            + definitionLocation(internalTest->getLocation())
+            + definitionLocation(internalTest->location())
         );
     }
-    if (std::ranges::any_of(tests, [&internalTest](const auto& registered) {
-        return registered->getName() == internalTest->getName();
+    if (std::ranges::any_of(tests_, [&internalTest](const auto& registered) {
+        return registered->name() == internalTest->name();
     })) {
         throw std::logic_error("Test name must be unique within a suite: "
-                               + internalTest->getName()
-                               + definitionLocation(internalTest->getLocation()));
+                               + internalTest->name()
+                               + definitionLocation(internalTest->location()));
     }
-    tests.push_back(std::move(internalTest));
+    tests_.push_back(std::move(internalTest));
 }
 
 void InternalSuite::setBeforeSuite(Callback callback) {
@@ -94,10 +94,10 @@ bool InternalSuite::run(TestEventHandler* handler) {
 
 bool InternalSuite::run(TestEventHandler* handler, RunConfiguration configuration) {
     statistic.reset();
-    totalTimer.reset();
+    totalTimer_.reset();
     hookManager.resetErrors();
     prepareTests(configuration.shuffleSeed);
-    totalTimer.start();
+    totalTimer_.start();
     if (handler) handler->onSuiteStart(suiteInfo());
     const auto selectedTests = selectTests(configuration);
 
@@ -108,7 +108,7 @@ bool InternalSuite::run(TestEventHandler* handler, RunConfiguration configuratio
             if (!fixture) throw std::runtime_error("Fixture factory returned null");
         };
         if (!hookManager.invoke(createFixture, "fixture construction")) {
-            return abortRun(selectedTests, handler, hookManager.getErrors().back());
+            return abortRun(selectedTests, handler, hookManager.errors().back());
         }
     }
 
@@ -117,7 +117,7 @@ bool InternalSuite::run(TestEventHandler* handler, RunConfiguration configuratio
     };
     if (!hookManager.invokeBeforeSuiteHook()
         || !hookManager.invoke(beforeAll, "beforeAll")) {
-        return abortRun(selectedTests, handler, hookManager.getErrors().back());
+        return abortRun(selectedTests, handler, hookManager.errors().back());
     }
 
     const bool canRunInParallel = !fixtureFactory && !hookManager.hasPerTestHooks()
@@ -133,10 +133,10 @@ bool InternalSuite::run(TestEventHandler* handler, RunConfiguration configuratio
         || !hookManager.invokeAfterSuiteHook()) {
         hooksSucceeded = false;
         statistic.incrementErrors();
-        if (handler) handler->onSuiteAbort(suiteInfo(), hookManager.getErrors().back());
+        if (handler) handler->onSuiteAbort(suiteInfo(), hookManager.errors().back());
     }
 
-    totalTimer.stop();
+    totalTimer_.stop();
 
     if (handler) handler->onSuiteEnd(suiteInfo());
 
@@ -146,15 +146,15 @@ bool InternalSuite::run(TestEventHandler* handler, RunConfiguration configuratio
 void InternalSuite::prepareTests(std::optional<std::uint64_t> shuffleSeed) {
     if (shuffleSeed) {
         std::mt19937_64 random{*shuffleSeed};
-        std::ranges::shuffle(tests, random);
+        std::ranges::shuffle(tests_, random);
     }
-    std::ranges::stable_sort(tests, [shuffle = shuffleSeed.has_value()](
+    std::ranges::stable_sort(tests_, [shuffle = shuffleSeed.has_value()](
         const auto& left, const auto& right
     ) {
-        const auto leftOrder = left->getOptions().order().value_or(0);
-        const auto rightOrder = right->getOptions().order().value_or(0);
+        const auto leftOrder = left->options().order().value_or(0);
+        const auto rightOrder = right->options().order().value_or(0);
         if (leftOrder != rightOrder) return leftOrder < rightOrder;
-        return !shuffle && left->getName() < right->getName();
+        return !shuffle && left->name() < right->name();
     });
 }
 
@@ -162,12 +162,12 @@ std::vector<InternalTest*> InternalSuite::selectTests(
     const RunConfiguration& configuration
 ) const {
     std::vector<InternalTest*> selected;
-    for (const auto& test : tests) {
+    for (const auto& test : tests_) {
         const bool nameMatches = configuration.testNameFilter.empty()
-            || detail::matchesNameFilter(test->getName(), configuration.testNameFilter);
+            || detail::matchesNameFilter(test->name(), configuration.testNameFilter);
         const bool expressionMatches = configuration.filterExpression.empty()
             || detail::matchesTestFilter(
-                name, options.tags(), test->getName(), test->getOptions().tags(),
+                name_, options_.tags(), test->name(), test->options().tags(),
                 configuration.filterExpression
             );
         if (nameMatches && expressionMatches) selected.push_back(test.get());
@@ -177,8 +177,8 @@ std::vector<InternalTest*> InternalSuite::selectTests(
 
 TestEventHandler::SuiteInfo InternalSuite::suiteInfo() const {
     return {
-        name, location, statistic.getPassedTests(), statistic.getFailedTests(),
-        statistic.getSkippedTests(), statistic.getErrors(), options
+        name_, location_, statistic.passedTests(), statistic.failedTests(),
+        statistic.skippedTests(), statistic.errors(), options_
     };
 }
 
@@ -199,7 +199,7 @@ bool InternalSuite::abortRun(
 ) {
     statistic.incrementErrors();
     skipTests(selectedTests, handler);
-    totalTimer.stop();
+    totalTimer_.stop();
     if (handler) {
         handler->onSuiteAbort(suiteInfo(), error);
         handler->onSuiteEnd(suiteInfo());
@@ -219,14 +219,14 @@ bool InternalSuite::executeFixturelessTests(
         );
     };
     const auto start = [this, handler](InternalTest* test) {
-        if (!test->getOptions().isDisabled()) {
+        if (!test->options().isDisabled()) {
             testManager.reportStart(suiteInfo(), *test, handler);
         }
     };
 
     std::size_t index{};
     while (index < selectedTests.size()) {
-        if (selectedTests[index]->getOptions().execution() == Execution::Serial) {
+        if (selectedTests[index]->options().execution() == Execution::Serial) {
             start(selectedTests[index]);
             consume(selectedTests[index], executor.executeFixtureless(*selectedTests[index]));
             ++index;
@@ -235,7 +235,7 @@ bool InternalSuite::executeFixturelessTests(
         const auto concurrentEnd = std::ranges::find_if(
             selectedTests.begin() + static_cast<std::ptrdiff_t>(index), selectedTests.end(),
             [](const auto* test) {
-                return test->getOptions().execution() == Execution::Serial;
+                return test->options().execution() == Execution::Serial;
             }
         );
         const auto endIndex = static_cast<std::size_t>(concurrentEnd - selectedTests.begin());
@@ -268,7 +268,7 @@ bool InternalSuite::executeLifecycleTests(
     detail::TestExecutor executor{testManager, hookManager};
     bool hooksSucceeded = true;
     for (auto* test : selectedTests) {
-        if (!test->getOptions().isDisabled()) {
+        if (!test->options().isDisabled()) {
             testManager.reportStart(suiteInfo(), *test, handler);
         }
         auto result = executor.executeWithLifecycle(*test, fixture, beforeEach, afterEach);
@@ -281,28 +281,28 @@ bool InternalSuite::executeLifecycleTests(
     return hooksSucceeded;
 }
 
-const std::string& InternalSuite::getName() const {
-    return name;
+const std::string& InternalSuite::name() const {
+    return name_;
 }
 
-const SuiteOptions& InternalSuite::getOptions() const {
-    return options;
+const SuiteOptions& InternalSuite::options() const {
+    return options_;
 }
 
-std::span<const std::unique_ptr<InternalTest>> InternalSuite::getTests() const noexcept {
-    return tests;
+std::span<const std::unique_ptr<InternalTest>> InternalSuite::tests() const noexcept {
+    return tests_;
 }
 
-std::source_location InternalSuite::getLocation() const noexcept {
-    return location;
+std::source_location InternalSuite::location() const noexcept {
+    return location_;
 }
 
-const TestStatistics<unsigned int>& InternalSuite::getStatistics() const {
+const TestStatistics<unsigned int>& InternalSuite::statistics() const {
     return statistic;
 }
 
-const ExecutionTimer& InternalSuite::getTotalTimer() const {
-    return totalTimer;
+const ExecutionTimer& InternalSuite::totalTimer() const {
+    return totalTimer_;
 }
 
 }

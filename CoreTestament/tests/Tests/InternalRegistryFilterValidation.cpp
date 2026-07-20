@@ -7,12 +7,12 @@
 #include <vector>
 
 int main() {
-    auto& registry = Testament::InternalRegistry::getInstance();
+    auto& registry = Testament::InternalRegistry::instance();
     registry.registerSuite(std::make_shared<Testament::InternalSuite>("selected first"));
     registry.registerSuite(std::make_shared<Testament::InternalSuite>("ignored"));
 
-    const auto selectedSuites = registry.getSuitesByFilter([](const auto& suite) {
-        return suite->getName().starts_with("selected");
+    const auto selectedSuites = registry.suitesBy([](const auto& suite) {
+        return suite->name().starts_with("selected");
     });
 
     registry.registerSuite(std::make_shared<Testament::InternalSuite>("selected later"));
@@ -30,8 +30,8 @@ int main() {
         );
 
     return selectedSuites.size() == 1
-        && selectedSuites.front()->getName() == "selected first"
-        && registry.getAllSuites().size() == 3
+        && selectedSuites.front()->name() == "selected first"
+        && registry.suites().size() == 3
         && patternsWork
         ? 0
         : 1;

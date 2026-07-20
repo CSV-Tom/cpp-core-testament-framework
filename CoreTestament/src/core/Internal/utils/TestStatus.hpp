@@ -15,7 +15,7 @@ public:
     TestStatus() = default;
     explicit TestStatus(Status initialStatus) : currentStatus(initialStatus) {}
 
-    [[nodiscard]] Status getStatus() const noexcept {
+    [[nodiscard]] Status status() const noexcept {
         return currentStatus;
     }
 

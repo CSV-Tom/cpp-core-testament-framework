@@ -25,7 +25,7 @@ int main() {
     try {
         std::rethrow_exception(result.error());
     } catch (const std::logic_error&) {
-        return !testBodyEntered && test.getStatus().isFailed() ? 0 : 1;
+        return !testBodyEntered && test.status().isFailed() ? 0 : 1;
     } catch (...) {
         return 1;
     }

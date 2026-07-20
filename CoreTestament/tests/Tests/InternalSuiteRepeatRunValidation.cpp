@@ -9,9 +9,9 @@ int main() {
     const bool firstRunSucceeded = suite.run();
     const bool secondRunSucceeded = suite.run();
 
-    const auto& statistics = suite.getStatistics();
+    const auto& statistics = suite.statistics();
     return firstRunSucceeded && secondRunSucceeded
-        && statistics.getTotalTests() == 1 && statistics.getPassedTests() == 1
+        && statistics.totalTests() == 1 && statistics.passedTests() == 1
         ? 0
         : 1;
 }

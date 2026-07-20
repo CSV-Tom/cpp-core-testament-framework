@@ -29,15 +29,15 @@ inline const auto duplicateSuite = Testament::Suite(
 }
 
 int main() {
-    const auto& registry = Testament::InternalRegistry::getInstance();
-    const auto errors = registry.getConfigurationErrors();
+    const auto& registry = Testament::InternalRegistry::instance();
+    const auto errors = registry.configurationErrors();
     const bool locationsReported = std::ranges::all_of(errors, [](const auto& error) {
         return error.contains("ConfigurationErrorValidation.cpp:");
     });
     return !invalidSuite
         && validSuite
         && !duplicateSuite
-        && registry.getAllSuites().size() == 1
+        && registry.suites().size() == 1
         && !errors.empty()
         && locationsReported
         && Testament::run(0, nullptr) == 2

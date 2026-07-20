@@ -57,12 +57,12 @@ public:
     [[nodiscard]] bool run(TestEventHandler* handler = nullptr);
     [[nodiscard]] bool run(TestEventHandler* handler, RunConfiguration configuration);
 
-    const std::string& getName() const;
-    const SuiteOptions& getOptions() const;
-    [[nodiscard]] std::span<const std::unique_ptr<InternalTest>> getTests() const noexcept;
-    [[nodiscard]] std::source_location getLocation() const noexcept;
-    const TestStatistics<unsigned int>& getStatistics() const;
-    const ExecutionTimer& getTotalTimer() const;
+    const std::string& name() const;
+    const SuiteOptions& options() const;
+    [[nodiscard]] std::span<const std::unique_ptr<InternalTest>> tests() const noexcept;
+    [[nodiscard]] std::source_location location() const noexcept;
+    const TestStatistics<unsigned int>& statistics() const;
+    const ExecutionTimer& totalTimer() const;
 
 private:
     void prepareTests(std::optional<std::uint64_t> shuffleSeed);
@@ -84,17 +84,17 @@ private:
 
     TestStatistics<unsigned int> statistic;
 
-    std::string name;
-    std::source_location location;
-    SuiteOptions options;
-    std::vector<std::unique_ptr<InternalTest>> tests;
+    std::string name_;
+    std::source_location location_;
+    SuiteOptions options_;
+    std::vector<std::unique_ptr<InternalTest>> tests_;
 
-    ExecutionTimer totalTimer;
+    ExecutionTimer totalTimer_;
 
     HookManager hookManager;
     TestManager testManager;
     FixtureFactory fixtureFactory;
-    std::optional<std::type_index> fixtureType;
+    std::optional<std::type_index> fixtureType_;
 };
 
 }

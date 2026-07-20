@@ -3,8 +3,8 @@
 #include "core/Internal/InternalRegistry.hpp"
 
 int main() {
-    auto& registry = Testament::InternalRegistry::getInstance();
-    if (!registry.getConfigurationErrors().empty()) return 1;
+    auto& registry = Testament::InternalRegistry::instance();
+    if (!registry.configurationErrors().empty()) return 1;
 
     bool errorLivesWithInvalidRegistration = false;
     {
@@ -15,16 +15,16 @@ int main() {
             );
             errorLivesWithInvalidRegistration = first
                 && !duplicate
-                && registry.getConfigurationErrors().size() == 1;
+                && registry.configurationErrors().size() == 1;
         }
-        if (!registry.getConfigurationErrors().empty()) return 1;
+        if (!registry.configurationErrors().empty()) return 1;
     }
 
     auto valid = Testament::Suite("valid after error", Testament::Test("passes", [] {}));
     Testament::Runner runner;
     return errorLivesWithInvalidRegistration
         && valid
-        && registry.getConfigurationErrors().empty()
+        && registry.configurationErrors().empty()
         && runner.run(0, nullptr) == 0
         ? 0
         : 1;

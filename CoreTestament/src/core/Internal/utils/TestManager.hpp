@@ -25,8 +25,8 @@ public:
                      TestEventHandler* handler) const {
         if (handler) {
             handler->onTestStart(suiteInfo, {
-                test.getName(), test.getLocation(), std::chrono::duration<double>::zero(),
-                {}, test.getOptions(),
+                test.name(), test.location(), std::chrono::duration<double>::zero(),
+                {}, test.options(),
                 TestEventHandler::TestResultStatus::NotRun
             });
         }
@@ -43,29 +43,29 @@ public:
                       std::exception_ptr exception,
                       TestEventHandler* handler) {
         TestEventHandler::TestInfo testInfo{
-            test.getName(), test.getLocation(), duration, std::move(exception),
-            test.getOptions(), status
+            test.name(), test.location(), duration, std::move(exception),
+            test.options(), status
         };
 
         switch (status) {
         case TestEventHandler::TestResultStatus::Passed:
             statistic.incrementPassedTests();
-            suiteInfo.passed = statistic.getPassedTests();
+            suiteInfo.passed = statistic.passedTests();
             if (handler) handler->onTestPassed(suiteInfo, testInfo);
             break;
         case TestEventHandler::TestResultStatus::Skipped:
             statistic.incrementSkippedTests();
-            suiteInfo.skipped = statistic.getSkippedTests();
+            suiteInfo.skipped = statistic.skippedTests();
             if (handler) handler->onTestSkipped(suiteInfo, testInfo);
             break;
         case TestEventHandler::TestResultStatus::Failed:
             statistic.incrementFailedTests();
-            suiteInfo.failed = statistic.getFailedTests();
+            suiteInfo.failed = statistic.failedTests();
             if (handler) handler->onTestFailed(suiteInfo, testInfo);
             break;
         case TestEventHandler::TestResultStatus::LifecycleError:
             statistic.incrementErrors();
-            suiteInfo.errors = statistic.getErrors();
+            suiteInfo.errors = statistic.errors();
             if (handler) handler->onTestFailed(suiteInfo, testInfo);
             break;
         case TestEventHandler::TestResultStatus::NotRun:

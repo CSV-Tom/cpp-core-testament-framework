@@ -18,9 +18,9 @@ public:
     explicit Impl(ConfigurationDiagnostics::Id diagnosticId_) : diagnosticId(diagnosticId_) {}
 
     ~Impl() {
-        if (suite) InternalRegistry::getInstance().unregisterSuite(suite);
+        if (suite) InternalRegistry::instance().unregisterSuite(suite);
         if (diagnosticId) {
-            InternalRegistry::getInstance().removeConfigurationError(*diagnosticId);
+            InternalRegistry::instance().removeConfigurationError(*diagnosticId);
         }
     }
 
@@ -66,7 +66,7 @@ SuiteRegistration detail::RuntimeBridge::registerSuite(
 }
 
 SuiteRegistration detail::RuntimeBridge::configurationError(std::string error) {
-    const auto id = InternalRegistry::getInstance().recordConfigurationError(std::move(error));
+    const auto id = InternalRegistry::instance().recordConfigurationError(std::move(error));
     return SuiteRegistration{std::make_unique<SuiteRegistration::Impl>(id)};
 }
 

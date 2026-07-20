@@ -21,7 +21,7 @@ std::shared_ptr<InternalSuite> SuiteAssembler::assemble(
                                           std::move(fixtureFactory), std::move(options))
         : std::make_shared<InternalSuite>(std::move(name), location, std::move(options));
     for (auto& test : tests) suite->addTest(std::move(test));
-    return InternalRegistry::getInstance().registerSuite(std::move(suite));
+    return InternalRegistry::instance().registerSuite(std::move(suite));
 }
 
 }

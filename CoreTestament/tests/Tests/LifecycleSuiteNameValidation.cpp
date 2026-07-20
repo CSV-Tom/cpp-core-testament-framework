@@ -15,7 +15,7 @@ inline const auto invalidSuite = Testament::Suite<EmptyNameLifecycleSuite>(
 
 int main() {
     return !invalidSuite
-        && Testament::InternalRegistry::getInstance().getAllSuites().empty()
+        && Testament::InternalRegistry::instance().suites().empty()
         && Testament::run(0, nullptr) == 2
         ? 0
         : 1;

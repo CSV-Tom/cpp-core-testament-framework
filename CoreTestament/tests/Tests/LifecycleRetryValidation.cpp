@@ -44,7 +44,7 @@ int main() {
         && attempts == 3
         && beforeEachCalls == 3
         && afterEachCalls == 3
-        && suite.getStatistics().getPassedTests() == 1
+        && suite.statistics().passedTests() == 1
         && handler.passed == 1
         && handler.reportedPassed == 1
         && handler.status == Testament::TestEventHandler::TestResultStatus::Passed

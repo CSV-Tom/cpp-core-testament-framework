@@ -18,14 +18,14 @@ int main() {
     );
 
     const auto firstResult = test.execute();
-    const auto durationAfterExecution = test.getExecutionTimer().getDuration();
+    const auto durationAfterExecution = test.executionTimer().duration();
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    const auto durationAfterWaiting = test.getExecutionTimer().getDuration();
+    const auto durationAfterWaiting = test.executionTimer().duration();
     const auto secondResult = test.execute();
 
     const bool firstRunFailed = !firstResult;
     const bool secondRunPassed = secondResult
-        && test.getStatus().isPassed() && !test.getException();
+        && test.status().isPassed() && !test.exception();
     const bool failedTimerStopped = durationAfterExecution == durationAfterWaiting;
 
     return firstRunFailed && secondRunPassed && failedTimerStopped ? 0 : 1;

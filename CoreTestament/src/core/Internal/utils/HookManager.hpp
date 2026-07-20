@@ -45,12 +45,12 @@ public:
         return invokeHook(hook, hookName);
     }
 
-    [[nodiscard]] const std::vector<std::string>& getErrors() const noexcept {
-        return errors;
+    [[nodiscard]] const std::vector<std::string>& errors() const noexcept {
+        return errors_;
     }
 
     void resetErrors() {
-        errors.clear();
+        errors_.clear();
     }
 
     [[nodiscard]] bool hasPerTestHooks() const noexcept {
@@ -58,7 +58,7 @@ public:
     }
 
 private:
-    std::vector<std::string> errors;
+    std::vector<std::string> errors_;
 
     Callback beforeSuiteHook;
     Callback beforeEachHook;
@@ -73,12 +73,12 @@ private:
             } catch (const std::exception& e) {
                 std::ostringstream oss;
                 oss << "Error in " << hookName << ": " << e.what();
-                errors.push_back(oss.str());
+                errors_.push_back(oss.str());
                 return false;
             } catch (...) {
                 std::ostringstream oss;
                 oss << "Unknown error in " << hookName;
-                errors.push_back(oss.str());
+                errors_.push_back(oss.str());
                 return false;
             }
         }
